@@ -266,11 +266,11 @@ const CURRICULUM = {
       {
         id: 'cl-1',
         noteName: 'E',
-        octave: 4,
-        concertNote: 'D4',
-        staffStep: 0,
+        octave: 5,
+        concertNote: 'D5',
+        staffStep: 7,
         accidental: null,
-        freq: 293.66,
+        freq: 587.33,
         fingeringState: [true, true, false, false, false, false, false, false, false],
         description: 'E (written) — first note above the break! Register key plus A key.',
         prompt: 'Left thumb presses the register key (back of the clarinet). Left index finger presses the A key. Everything else stays open. Blow a warm, steady stream through the mouthpiece.'
@@ -278,11 +278,11 @@ const CURRICULUM = {
       {
         id: 'cl-2',
         noteName: 'F',
-        octave: 4,
-        concertNote: 'E\u266d4',
-        staffStep: 1,
+        octave: 5,
+        concertNote: 'E\u266d5',
+        staffStep: 8,
         accidental: null,
-        freq: 311.13,
+        freq: 622.25,
         fingeringState: [true, true, false, false, true, false, false, false, false],
         description: 'F — add the E/B key with your right index finger.',
         prompt: 'Register key + A key (left index) + E/B key (right index). All other keys open. Keep the embouchure firm and the air supported.'
@@ -290,11 +290,11 @@ const CURRICULUM = {
       {
         id: 'cl-3',
         noteName: 'G',
-        octave: 4,
-        concertNote: 'F4',
-        staffStep: 2,
+        octave: 5,
+        concertNote: 'F5',
+        staffStep: 9,
         accidental: null,
-        freq: 349.23,
+        freq: 698.46,
         fingeringState: [true, true, true, false, false, false, false, false, false],
         description: 'G — add left middle finger. Three keys down now.',
         prompt: 'Register key + A key + G key (left middle). All other keys open. This note sits nicely in the clarion register.'
@@ -310,11 +310,11 @@ const CURRICULUM = {
       {
         id: 'cl-4',
         noteName: 'A',
-        octave: 4,
-        concertNote: 'G4',
-        staffStep: 3,
+        octave: 5,
+        concertNote: 'G5',
+        staffStep: 10,
         accidental: null,
-        freq: 392.00,
+        freq: 783.99,
         fingeringState: [true, true, true, true, false, false, false, false, false],
         description: 'A — add left ring finger. All three left-hand fingers down.',
         prompt: 'Register key + all three left hand fingers (A, G, E keys). Right hand stays open. Listen for a round, woody clarinet tone.'
@@ -322,11 +322,11 @@ const CURRICULUM = {
       {
         id: 'cl-5',
         noteName: 'B',
-        octave: 4,
-        concertNote: 'A4',
-        staffStep: 4,
+        octave: 5,
+        concertNote: 'A5',
+        staffStep: 11,
         accidental: null,
-        freq: 440.00,
+        freq: 880.00,
         fingeringState: [true, true, true, true, true, false, false, false, false],
         description: 'B — add right index finger. Climbing the clarion register!',
         prompt: 'Register key + all three left fingers + right index (E/B key). This is the highest of your first five clarinet notes. Keep the air fast and steady.'
@@ -585,7 +585,7 @@ const CURRICULUM = {
   },
   'trombone': {
     id: 'trombone', name: 'Trombone', shortName: 'Trombone',
-    clef: 'bass', fingeringType: 'trombone', available: true, accentColor: '#C0A020',
+    clef: 'bass', fingeringType: 'trombone', isTransposing: false, available: true, accentColor: '#C0A020',
     lessons: [
       {
         id: 'tb-1',
@@ -744,7 +744,7 @@ const CURRICULUM = {
   },
   'euphonium': {
     id: 'euphonium', name: 'Euphonium', shortName: 'Euph.',
-    clef: 'bass', fingeringType: 'euphonium', available: true, accentColor: '#A09000',
+    clef: 'bass', fingeringType: 'euphonium', isTransposing: false, available: true, accentColor: '#A09000',
     lessons: [
       {
         id: 'eu-1',
@@ -821,7 +821,7 @@ const CURRICULUM = {
   },
   'tuba': {
     id: 'tuba', name: 'Tuba', shortName: 'Tuba',
-    clef: 'bass', fingeringType: 'tuba', available: true, accentColor: '#B08030',
+    clef: 'bass', fingeringType: 'tuba', isTransposing: false, available: true, accentColor: '#B08030',
     lessons: [
       {
         id: 'tu-1',
