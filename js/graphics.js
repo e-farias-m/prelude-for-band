@@ -42,9 +42,9 @@ const Graphics = (() => {
 
     // Clef glyph (G clef for treble; simplified bass clef dots+curve otherwise)
     if (clef === 'treble') {
-      svg += `<text x="${STAFF_LEFT_X - 8}" y="${STAFF_BOTTOM_Y + 8}" font-size="95" font-family="Georgia, 'Apple Symbols', serif" fill="${lineColor}">&#119070;</text>`;
+      svg += `<text x="${STAFF_LEFT_X - 8}" y="${STAFF_BOTTOM_Y + 8}" font-size="110" font-family="Georgia, 'Apple Symbols', serif" fill="${lineColor}">&#119070;</text>`;
     } else {
-      svg += `<text x="${STAFF_LEFT_X - 6}" y="${yForPos(6) + 6}" font-size="46" font-family="Georgia, 'Apple Symbols', serif" fill="${lineColor}">&#119073;</text>`;
+      svg += `<text x="${STAFF_LEFT_X - 6}" y="${yForPos(6) + 8}" font-size="55" font-family="Georgia, 'Apple Symbols', serif" fill="${lineColor}">&#119073;</text>`;
     }
 
     // Ledger lines

@@ -423,7 +423,7 @@ function renderSongPresentPhase(inst, lesson) {
         </div>
       </div>
       <div class="note-name-block">
-        <span class="note-name-big">${note.noteName}<span class="note-octave-sup">${note.octave}</span></span>
+        <span class="note-name-big">${note.noteName}</span>
       </div>
       <div class="note-description">${lesson.description}</div>
       <div class="gap-md"></div>
