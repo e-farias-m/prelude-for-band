@@ -39,7 +39,7 @@ const CURRICULUM = {
         freq: 233.08,
         fingeringState: [false, false, false],
         description: 'Your first note — no valves! Also known as concert Bb, the fundamental resonance of the trumpet.',
-        prompt: 'Fingers rest gently on the valves but press nothing. Form your embouchure and blow a steady, supported stream of air. This is the 4th partial of the trumpet\'s Bb bugle.'
+        prompt: 'No valves. C is the 4th partial of the Bb bugle. Buzz a firm middle-register pitch.'
       },
       {
         id: 'tr-2',
@@ -51,7 +51,7 @@ const CURRICULUM = {
         freq: 261.63,
         fingeringState: [true, false, true],
         description: 'Valves 1 and 3 together — your first valve combination.',
-        prompt: 'Press valves 1 and 3 with your index and ring fingers. Keep your embouchure relaxed and air warm. This D is just a step above your first C.'
+        prompt: 'Valves 1 and 3. Keep the buzz centred and the air fast.'
       },
       {
         id: 'tr-3',
@@ -63,7 +63,7 @@ const CURRICULUM = {
         freq: 293.66,
         fingeringState: [true, true, false],
         description: 'Valves 1 and 2 together — index and middle finger.',
-        prompt: 'Press valves 1 and 2 simultaneously. Even finger pressure, quick and clean valve movement. This is the bottom line of the staff.'
+        prompt: 'Valves 1 and 2. Clean, simultaneous valve motion.'
       },
       {
         id: 'tr-4',
@@ -75,7 +75,7 @@ const CURRICULUM = {
         freq: 311.13,
         fingeringState: [true, false, false],
         description: 'Press valve 1 with your index finger.',
-        prompt: 'Index finger presses valve 1 down. Relax your embouchure slightly compared to E — this is a lower harmonic with the same 1-valve feel.'
+        prompt: 'Valve 1. Relax the embouchure slightly — this is a half-step lower than E.'
       },
       {
         id: 'tr-5',
@@ -87,7 +87,7 @@ const CURRICULUM = {
         freq: 349.23,
         fingeringState: [false, false, false],
         description: 'No valves again — the 6th partial of the open tube.',
-        prompt: 'No valves! G is a higher open note above C. Tighten your lips slightly and blow faster. Same pipe, higher buzz.'
+        prompt: 'No valves. Same open fingering as C. Faster air.'
       },
       {
         id: 'tr-6',
@@ -99,7 +99,7 @@ const CURRICULUM = {
         freq: 392.00,
         fingeringState: [true, true, false],
         description: 'Valves 1 and 2 from the 8th partial.',
-        prompt: 'Valves 1+2 from the C5 harmonic. Make the air faster than G and feel the valve combination lock in. A bright, centred sound.'
+        prompt: 'Valves 1 and 2. Faster air than G.'
       },
       {
         id: 'tr-7',
@@ -111,7 +111,7 @@ const CURRICULUM = {
         freq: 440.00,
         fingeringState: [false, true, false],
         description: 'Valve 2 alone — just the middle finger.',
-        prompt: 'Press only valve 2 (middle finger). B is a half-step below C — listen for the valve to lower the pitch by one semitone.'
+        prompt: 'Valve 2 only. Half-step below C.'
       },
       {
         id: 'tr-8',
@@ -123,7 +123,7 @@ const CURRICULUM = {
         freq: 466.16,
         fingeringState: [false, false, false],
         description: 'Open again — C above the staff completes the octave.',
-        prompt: 'No valves! Tighten your embouchure and blow fast, supported air. C5 crowns your first octave on the trumpet.'
+        prompt: 'No valves. Tighten the embouchure. Fast, supported air.'
       },
       {
         id: 'tr-song-1', type: 'song',
@@ -192,7 +192,7 @@ const CURRICULUM = {
         freq: 293.66,
         fingeringState: [true, true, true, true, true, true, true, false, false],
         description: 'D — all main keys covered. Left thumb and all three left-hand fingers, plus all three right hand fingers.',
-        prompt: 'Left thumb on the key. Left index, middle, and ring all cover their keys. Right index, middle, and ring too. Your right pinky stays up. Blow across the embouchure hole with a focused, steady stream.'
+        prompt: 'Left thumb + all three left fingers + all three right fingers. Right pinky up. Blow across the embouchure hole.'
       },
       {
         id: 'fl-2',
@@ -203,7 +203,7 @@ const CURRICULUM = {
         freq: 329.63,
         fingeringState: [true, true, true, true, true, true, false, true, false],
         description: 'E — lift your right ring finger and press the Eb key with your pinky.',
-        prompt: 'Same as D4 but lift right ring finger and add the Eb key with your pinky. Keep the air stream steady.'
+        prompt: 'Same as D4 but lift right ring finger and add the Eb key with right pinky.'
       },
       {
         id: 'fl-3',
@@ -214,7 +214,7 @@ const CURRICULUM = {
         freq: 349.23,
         fingeringState: [true, true, true, true, false, false, true, true, false],
         description: 'Forked F — right ring finger and pinky only in the right hand.',
-        prompt: 'Left thumb + all three left fingers down. Right ring finger and pinky only. This forked pattern needs careful air support.'
+        prompt: 'Left thumb + all three left fingers. Right ring finger and pinky only.'
       },
       {
         id: 'fl-song-1', type: 'song',
@@ -233,7 +233,7 @@ const CURRICULUM = {
         freq: 392.00,
         fingeringState: [true, true, true, true, false, false, false, true, false],
         description: 'G — left hand only plus the Eb key with your right pinky.',
-        prompt: 'Left thumb + all three left fingers down. Right pinky on the Eb key. Right index, middle, and ring stay up. A warm, open flute note.'
+        prompt: 'Left thumb + all three left fingers. Right pinky on the Eb key. Right index, middle, ring up.'
       },
       {
         id: 'fl-5',
@@ -244,7 +244,7 @@ const CURRICULUM = {
         freq: 440.00,
         fingeringState: [true, true, true, false, false, false, false, true, false],
         description: 'A — lift your left ring finger. Just thumb and first two left fingers plus Eb key.',
-        prompt: 'Left thumb + left index + left middle. Left ring finger lifts. Right pinky on the Eb key. A beautifully resonant flute note.'
+        prompt: 'Left thumb + left index + left middle. Left ring up. Right pinky on Eb key.'
       },
       {
         id: 'fl-song-2', type: 'song',
@@ -272,7 +272,7 @@ const CURRICULUM = {
         freq: 493.88,
         fingeringState: [true, true, false, false, false, false, false, false, false],
         description: 'B — just left thumb and left index. A light, focused note.',
-        prompt: 'Left thumb plus left index only. All other fingers up. B4 sits on the middle line — a pure, singing tone with steady air.'
+        prompt: 'Left thumb + left index only. All other fingers up.'
       },
       {
         id: 'fl-7',
@@ -283,7 +283,7 @@ const CURRICULUM = {
         freq: 523.25,
         fingeringState: [true, false, false, false, false, false, false, false, false],
         description: 'C — just the left thumb. Your first note in the second octave.',
-        prompt: 'Left thumb only, all other fingers up. C5 is light and bright. Aim the air slightly higher across the embouchure hole.'
+        prompt: 'Left thumb only. All other fingers up.'
       },
       {
         id: 'fl-8',
@@ -294,7 +294,7 @@ const CURRICULUM = {
         freq: 587.33,
         fingeringState: [true, true, true, true, true, true, true, false, false],
         description: 'D — all main keys again, one octave higher. Faster air!',
-        prompt: 'Same fingering as low D4 but blow faster, more focused air. This D5 completes your first octave on the flute.'
+        prompt: 'Same fingering as D4. Faster, more focused air to overblow the octave.'
       },
       {
         id: 'fl-song-3', type: 'song',
@@ -339,7 +339,7 @@ const CURRICULUM = {
         freq: 587.33,
         fingeringState: [true, true, false, false, false, false, false, false, false],
         description: 'E (written) — first note above the break! Register key plus A key.',
-        prompt: 'Left thumb presses the register key (back of the clarinet). Left index finger presses the A key. Everything else stays open. Blow a warm, steady stream through the mouthpiece.'
+        prompt: 'Register key + A key. All other keys open. Steady air stream through the mouthpiece.'
       },
       {
         id: 'cl-2',
@@ -351,7 +351,7 @@ const CURRICULUM = {
         freq: 622.25,
         fingeringState: [true, true, false, false, true, false, false, false, false],
         description: 'F — add the E/B key with your right index finger.',
-        prompt: 'Register key + A key (left index) + E/B key (right index). All other keys open. Keep the embouchure firm and the air supported.'
+        prompt: 'Register key + A key + E/B key (right index).'
       },
       {
         id: 'cl-3',
@@ -363,7 +363,7 @@ const CURRICULUM = {
         freq: 698.46,
         fingeringState: [true, true, true, false, false, false, false, false, false],
         description: 'G — add left middle finger. Three keys down now.',
-        prompt: 'Register key + A key + G key (left middle). All other keys open. This note sits nicely in the clarion register.'
+        prompt: 'Register key + A key + G key (left middle).'
       },
       {
         id: 'cl-song-1', type: 'song',
@@ -383,7 +383,7 @@ const CURRICULUM = {
         freq: 783.99,
         fingeringState: [true, true, true, true, false, false, false, false, false],
         description: 'A — add left ring finger. All three left-hand fingers down.',
-        prompt: 'Register key + all three left hand fingers (A, G, E keys). Right hand stays open. Listen for a round, woody clarinet tone.'
+        prompt: 'Register key + all three left-hand fingers. Right hand open.'
       },
       {
         id: 'cl-5',
@@ -395,7 +395,7 @@ const CURRICULUM = {
         freq: 880.00,
         fingeringState: [true, true, true, true, true, false, false, false, false],
         description: 'B — add right index finger. Climbing the clarion register!',
-        prompt: 'Register key + all three left fingers + right index (E/B key). Keep the air fast and steady.'
+        prompt: 'Register key + all three left fingers + right index (E/B key).'
       },
       {
         id: 'cl-song-2', type: 'song',
@@ -424,7 +424,7 @@ const CURRICULUM = {
         freq: 932.33,
         fingeringState: [true, true, true, true, true, true, false, false, false],
         description: 'C — add the F/C key with your right middle finger.',
-        prompt: 'Register key + all three left fingers + right index + right middle. This C6 pushes into the upper clarion. Fast, steady air.'
+        prompt: 'Register key + all three left fingers + right index + right middle (F/C key).'
       },
       {
         id: 'cl-7',
@@ -436,7 +436,7 @@ const CURRICULUM = {
         freq: 1046.50,
         fingeringState: [true, true, true, true, true, false, true, false, false],
         description: 'D — use the first trill key with your right hand.',
-        prompt: 'Register key + all three left fingers + right index + right ring (side trill key). D6 needs focused, fast air and a firm embouchure.'
+        prompt: 'Register key + all three left fingers + right index + right ring (side trill key).'
       },
       {
         id: 'cl-8',
@@ -448,7 +448,7 @@ const CURRICULUM = {
         freq: 1318.51,
         fingeringState: [true, true, false, false, false, false, false, false, false],
         description: 'E — same as your first note, an octave higher!',
-        prompt: 'Same fingering as E5 (register key + A key) but tighter embouchure and faster air. E6 completes your first clarinet octave.'
+        prompt: 'Register key + A key. Same fingering as E5. Tighter embouchure, faster air.'
       },
       {
         id: 'cl-song-3', type: 'song',
@@ -493,7 +493,7 @@ const CURRICULUM = {
         freq: 155.56,
         fingeringState: [false, true, true, true, true, true, true, true, false],
         description: 'Low C (written) — all fingers down including the low C key.',
-        prompt: 'Left thumb stays off (no octave key in the low register). All three left-hand fingers and all four right-hand fingers down. Blow a warm, steady stream through the mouthpiece.'
+        prompt: 'No octave key. All three left-hand and all three right-hand fingers down. Right pinky on low C key.'
       },
       {
         id: 'as-2',
@@ -505,7 +505,7 @@ const CURRICULUM = {
         freq: 174.61,
         fingeringState: [false, true, true, true, true, true, true, false, false],
         description: 'D — lift your right pinky. One step up from low C.',
-        prompt: 'Same as C but lift your right pinky off the low C key. Left thumb stays off. Keep the air supported.'
+        prompt: 'No octave key. Same as C but right pinky off the low C key.'
       },
       {
         id: 'as-3',
@@ -517,7 +517,7 @@ const CURRICULUM = {
         freq: 196.00,
         fingeringState: [false, true, true, true, true, true, false, false, false],
         description: 'E — right ring and pinky lift.',
-        prompt: 'Left thumb off. All three left-hand fingers down. Right index and middle down. Ring and pinky up. Keep the embouchure firm.'
+        prompt: 'No octave key. All three left fingers down. Right index and middle down. Right ring and pinky up.'
       },
       {
         id: 'as-song-1', type: 'song',
@@ -537,7 +537,7 @@ const CURRICULUM = {
         freq: 207.65,
         fingeringState: [false, true, true, true, false, true, false, false, false],
         description: 'F — right middle finger only. A forked feel.',
-        prompt: 'Left thumb off. All three left-hand fingers down. Only right middle finger presses its key. Index, ring, and pinky stay up. A core saxophone pattern.'
+        prompt: 'No octave key. All three left fingers down. Right middle finger only.'
       },
       {
         id: 'as-5',
@@ -549,7 +549,7 @@ const CURRICULUM = {
         freq: 233.08,
         fingeringState: [false, true, true, true, false, false, false, false, false],
         description: 'G — left hand only. A wide-open, resonant note.',
-        prompt: 'Left thumb off. All three left-hand fingers down. Right hand completely open. Blow with a confident, supported stream of air.'
+        prompt: 'No octave key. All three left fingers down. Right hand completely open.'
       },
       {
         id: 'as-song-2', type: 'song',
@@ -578,7 +578,7 @@ const CURRICULUM = {
         freq: 261.63,
         fingeringState: [true, true, true, false, false, false, false, false, false],
         description: 'A — octave key on, just left index and middle. Your first note with the octave key.',
-        prompt: 'Left thumb presses the octave key (under your thumb). Left index and middle down. Left ring presses nothing. Right hand completely open. The octave key opens the upper register.'
+        prompt: 'Octave key on. Left index + left middle. Right hand open.'
       },
       {
         id: 'as-7',
@@ -590,7 +590,7 @@ const CURRICULUM = {
         freq: 293.66,
         fingeringState: [true, true, true, true, false, false, false, false, false],
         description: 'B — add left ring finger. All three left fingers plus octave key.',
-        prompt: 'Octave key on. All three left-hand fingers down. Right hand completely open. This is the first note on the middle line of the treble staff.'
+        prompt: 'Octave key on. All three left fingers down. Right hand open.'
       },
       {
         id: 'as-8',
@@ -602,7 +602,7 @@ const CURRICULUM = {
         freq: 311.13,
         fingeringState: [true, true, true, true, true, false, false, false, false],
         description: 'C — add right index finger. The top of your first octave!',
-        prompt: 'Octave key on. All three left fingers + right index (C key). All other right fingers open. C5 completes your first octave on the alto sax.'
+        prompt: 'Octave key on. All three left fingers + right index (C key).'
       },
       {
         id: 'as-song-3', type: 'song',
@@ -646,7 +646,7 @@ const CURRICULUM = {
         freq: 293.66,
         fingeringState: [false, true, true, true, true, true, true, false, false],
         description: 'D — first oboe note. All main keys covered, no octave key needed.',
-        prompt: 'Left thumb off (no octave key in low register). All three left-hand fingers down. All three right-hand fingers down. Shape your embouchure with firm corners and blow a thin, focused air stream through the reed.'
+        prompt: 'No octave key. All three left-hand and all three right-hand fingers down. Firm embouchure corners, focused air through the reed.'
       },
       {
         id: 'ob-2',
@@ -657,7 +657,7 @@ const CURRICULUM = {
         freq: 329.63,
         fingeringState: [false, true, true, true, true, true, false, false, false],
         description: 'E — lift your right ring finger.',
-        prompt: 'Same as D4 but lift your right ring finger. Support the air from the diaphragm and keep the embouchure steady. Listen for a clear, singing E.'
+        prompt: 'No octave key. Same as D4 but lift right ring finger.'
       },
       {
         id: 'ob-3',
@@ -668,7 +668,7 @@ const CURRICULUM = {
         freq: 349.23,
         fingeringState: [false, true, true, true, true, false, false, false, false],
         description: 'F — just left hand plus right index. An open, centered note.',
-        prompt: 'Left thumb off. All three left-hand fingers down. Only right index finger down. Ring and middle stay up. This F speaks easily with good air support.'
+        prompt: 'No octave key. All three left fingers down. Right index only.'
       },
       {
         id: 'ob-song-1', type: 'song',
@@ -687,7 +687,7 @@ const CURRICULUM = {
         freq: 392.00,
         fingeringState: [false, true, true, true, false, false, false, false, false],
         description: 'G — left hand only! A warm, open oboe note.',
-        prompt: 'Left thumb off. All three left-hand fingers down. Right hand completely open. Support the air well and listen for a clear, singing tone.'
+        prompt: 'No octave key. All three left fingers down. Right hand open.'
       },
       {
         id: 'ob-5',
@@ -698,7 +698,7 @@ const CURRICULUM = {
         freq: 440.00,
         fingeringState: [false, true, true, false, false, false, false, false, false],
         description: 'A — lift your left ring finger. Just first two fingers.',
-        prompt: 'Left thumb off. Left index and middle down. Left ring finger lifts. Right hand completely open. Keep the air moving forward and the reed vibrating freely.'
+        prompt: 'No octave key. Left index + left middle only. Left ring up. Right hand open.'
       },
       {
         id: 'ob-song-2', type: 'song',
@@ -726,7 +726,7 @@ const CURRICULUM = {
         freq: 493.88,
         fingeringState: [true, true, true, true, false, false, false, false, false],
         description: 'B — add the octave key. Left hand all down, right open.',
-        prompt: 'Left thumb presses the first octave key. All three left-hand fingers down. Right hand open. B4 is on the middle line — a clear, focused pitch.'
+        prompt: 'Octave key on. All three left fingers down. Right hand open.'
       },
       {
         id: 'ob-7',
@@ -737,7 +737,7 @@ const CURRICULUM = {
         freq: 523.25,
         fingeringState: [true, true, true, true, true, false, false, false, false],
         description: 'C — add right index finger. Your first note in the second octave.',
-        prompt: 'Octave key on. All three left fingers plus right index. C5 sits in the third space. Keep the reed firmly between your lips and the air fast.'
+        prompt: 'Octave key on. All three left fingers + right index.'
       },
       {
         id: 'ob-8',
@@ -748,7 +748,7 @@ const CURRICULUM = {
         freq: 587.33,
         fingeringState: [true, true, true, true, true, true, false, false, false],
         description: 'D — add right middle finger. The top of your first octave!',
-        prompt: 'Octave key on. All three left fingers plus right index + right middle. D5 completes your first octave on the oboe.'
+        prompt: 'Octave key on. All three left fingers + right index + right middle.'
       },
       {
         id: 'ob-song-3', type: 'song',
@@ -792,7 +792,7 @@ const CURRICULUM = {
         freq: 146.83,
         fingeringState: [true, true, true, true, true, true, true, false, false],
         description: 'Low D — whisper key on, all main fingers down.',
-        prompt: 'Left thumb presses the whisper key. All three left-hand and all three right-hand fingers down. Right pinky stays up. Blow a slow, wide stream of air and feel the reed vibrate freely.'
+        prompt: 'Whisper key on. All three left-hand and all three right-hand fingers down. Right pinky up. Slow, wide air stream.'
       },
       {
         id: 'bn-2',
@@ -803,7 +803,7 @@ const CURRICULUM = {
         freq: 164.81,
         fingeringState: [true, true, true, false, true, true, true, false, false],
         description: 'E — lift your left ring finger to open the E tone hole.',
-        prompt: 'Same as D3 but lift your left ring finger. The whisper key stays on. This opens the E hole on the wing joint. Keep the air warm and steady.'
+        prompt: 'Whisper key on. Same as D3 but lift left ring finger.'
       },
       {
         id: 'bn-3',
@@ -814,7 +814,7 @@ const CURRICULUM = {
         freq: 174.61,
         fingeringState: [true, true, true, true, false, true, false, false, false],
         description: 'F — a forked pattern. Right middle down, ring up.',
-        prompt: 'Whisper key on. All three left-hand fingers down. Right middle finger down. Right index and ring stay up. This forked fingering is characteristic of the bassoon. Blow steadily.'
+        prompt: 'Whisper key on. All three left fingers down. Right middle down. Right index and ring up.'
       },
       {
         id: 'bn-song-1', type: 'song',
@@ -833,7 +833,7 @@ const CURRICULUM = {
         freq: 196.00,
         fingeringState: [true, true, true, false, false, false, false, false, false],
         description: 'G — left hand only, whisper key on.',
-        prompt: 'Whisper key on. All three left-hand fingers down. Right hand completely open. Blow a warm, supported stream of air.'
+        prompt: 'Whisper key on. All three left fingers down. Right hand open.'
       },
       {
         id: 'bn-5',
@@ -844,7 +844,7 @@ const CURRICULUM = {
         freq: 220.00,
         fingeringState: [true, true, false, false, false, false, false, false, false],
         description: 'A — just your first two left-hand fingers and the whisper key.',
-        prompt: 'Whisper key on. Left index and middle down. Left ring finger lifts. Right hand stays open. A3 has a clear, singing quality at the top line of the bass staff.'
+        prompt: 'Whisper key on. Left index + left middle only. Left ring up. Right hand open.'
       },
       {
         id: 'bn-song-2', type: 'song',
@@ -872,7 +872,7 @@ const CURRICULUM = {
         freq: 246.94,
         fingeringState: [false, true, true, true, false, false, false, false, false],
         description: 'B — whisper key off, left hand down, right hand open.',
-        prompt: 'Left thumb lifts off the whisper key. All three left-hand fingers down. Right hand open. B3 sits on the first ledger line above the bass staff.'
+        prompt: 'Whisper key off. All three left fingers down. Right hand open.'
       },
       {
         id: 'bn-7',
@@ -883,7 +883,7 @@ const CURRICULUM = {
         freq: 261.63,
         fingeringState: [false, true, true, true, true, false, false, false, false],
         description: 'C — add right index finger. Above the staff now.',
-        prompt: 'Whisper key off. All three left fingers plus right index. C4 is your first note above the bass staff. Keep the reed firmly supported.'
+        prompt: 'Whisper key off. All three left fingers + right index.'
       },
       {
         id: 'bn-8',
@@ -894,7 +894,7 @@ const CURRICULUM = {
         freq: 293.66,
         fingeringState: [false, true, true, true, true, true, true, false, false],
         description: 'D — all main fingers like your first note, but whisper key off!',
-        prompt: 'Whisper key off. Same fingering as low D3 but without the whisper key and with faster, more focused air. D4 completes your first bassoon octave.'
+        prompt: 'Whisper key off. Same fingering as D3. Faster, more focused air.'
       },
       {
         id: 'bn-song-3', type: 'song',
@@ -936,7 +936,7 @@ const CURRICULUM = {
         freq: 116.54,
         fingeringState: 1,
         description: '1st position — slide all the way in!',
-        prompt: 'Slide all the way in to 1st position. Buzz a firm, centered note. Bb is the most resonant tone on the trombone — it is the fundamental harmonic.'
+        prompt: '1st position (slide all the way in). Buzz a firm, centred pitch.'
       },
       {
         id: 'tb-2',
@@ -947,7 +947,7 @@ const CURRICULUM = {
         freq: 130.81,
         fingeringState: 3,
         description: 'C in 3rd position — the next step up.',
-        prompt: 'Move the slide to 3rd position (between the bell and the stocking). Keep the slide arm straight and buzz firmly.'
+        prompt: '3rd position (between the bell and the stocking).'
       },
       {
         id: 'tb-3',
@@ -958,7 +958,7 @@ const CURRICULUM = {
         freq: 146.83,
         fingeringState: 4,
         description: 'D in 4th position — right in the middle.',
-        prompt: 'Slide to 4th position (the slide handle should line up with your bell). Warm, centred air.'
+        prompt: '4th position (slide handle lines up with the bell).'
       },
       {
         id: 'tb-4',
@@ -969,7 +969,7 @@ const CURRICULUM = {
         freq: 155.56,
         fingeringState: 5,
         description: 'Eb in 5th position — reaching out.',
-        prompt: 'Extend to 5th position. The slide crosses your bell rim. Keep the buzz steady and the air supported.'
+        prompt: '5th position (slide crosses the bell rim).'
       },
       {
         id: 'tb-5',
@@ -980,7 +980,7 @@ const CURRICULUM = {
         freq: 174.61,
         fingeringState: 1,
         description: 'F in 1st position — back to the top!',
-        prompt: 'Back to 1st position. F is the 3rd harmonic of the open tube. Faster air than the notes below, same slide position.'
+        prompt: '1st position. F is the 3rd harmonic. Faster air than the lower notes.'
       },
       {
         id: 'tb-6',
@@ -991,7 +991,7 @@ const CURRICULUM = {
         freq: 196.00,
         fingeringState: 4,
         description: 'G in 4th position — a higher harmonic.',
-        prompt: 'Slide to 4th position. G is the 4th partial of the G series. Keep the air focused and the buzz centred.'
+        prompt: '4th position. G is the 4th partial.'
       },
       {
         id: 'tb-7',
@@ -1002,7 +1002,7 @@ const CURRICULUM = {
         freq: 220.00,
         fingeringState: 2,
         description: 'A in 2nd position — just past 1st.',
-        prompt: 'Slide just past 1st to 2nd position. This is a small, precise movement. Listen for the clear A.'
+        prompt: '2nd position (just past 1st). Small, precise slide movement.'
       },
       {
         id: 'tb-8',
@@ -1013,7 +1013,7 @@ const CURRICULUM = {
         freq: 233.08,
         fingeringState: 1,
         description: 'Bb in 1st position — an octave above your first note!',
-        prompt: '1st position again. This Bb is the 4th partial of the open tube — one octave above where you started. Faster air, firmer lips.'
+        prompt: '1st position. Bb is the 4th partial — one octave above the first note. Faster air, firmer buzz.'
       },
       {
         id: 'tb-song-1', type: 'song',
@@ -1081,7 +1081,7 @@ const CURRICULUM = {
         freq: 174.61,
         fingeringState: [false, false, false],
         description: 'Open — no valves! The horn\'s natural note.',
-        prompt: 'No valves pressed. Buzz with firm lips into the mouthpiece. The hand in the bell stays cupped and relaxed. Middle C on the horn is a great starting sound.'
+        prompt: 'No valves. Buzz firm lips into the mouthpiece. Hand in the bell stays cupped.'
       },
       {
         id: 'fh-2',
@@ -1093,7 +1093,7 @@ const CURRICULUM = {
         freq: 261.63,
         fingeringState: [false, false, false],
         description: 'Same open fingering, higher harmonic.',
-        prompt: 'Still no valves. Tighten the embouchure slightly and blow faster air. This is the 3rd harmonic above your C.'
+        prompt: 'No valves. Tighter embouchure, faster air. 3rd harmonic above C.'
       },
       {
         id: 'fh-3',
@@ -1105,7 +1105,7 @@ const CURRICULUM = {
         freq: 349.23,
         fingeringState: [false, false, false],
         description: 'Another open note — the octave above your first C.',
-        prompt: 'Open again! More air speed, firmer lips. This C5 is the 4th harmonic. Listen for a clear, ringing tone.'
+        prompt: 'No valves. More air speed, firmer lips. 4th harmonic.'
       },
       {
         id: 'fh-song-1', type: 'song',
@@ -1125,7 +1125,7 @@ const CURRICULUM = {
         freq: 220.00,
         fingeringState: [true, true, false],
         description: 'Valves 1 and 2 together.',
-        prompt: 'Press valves 1 and 2. The air feels similar to open C but the pitch drops. Relax the embouchure slightly.'
+        prompt: 'Valves 1 and 2. Relax the embouchure slightly.'
       },
       {
         id: 'fh-5',
@@ -1137,7 +1137,7 @@ const CURRICULUM = {
         freq: 233.08,
         fingeringState: [true, false, false],
         description: 'Valve 1 alone — whole step down from G.',
-        prompt: 'Press only valve 1 (index finger). Keep the hand position steady and the air warm.'
+        prompt: 'Valve 1 only (index finger). Whole step down from G.'
       },
       {
         id: 'fh-song-2', type: 'song',
@@ -1162,7 +1162,7 @@ const CURRICULUM = {
         freq: 116.54,
         fingeringState: [false, false, false],
         description: 'Open — no valves. Let the horn ring.',
-        prompt: 'No valves pressed. Breathe deep from the diaphragm and blow a steady, warm stream of air. Bb is the most resonant note on the euphonium.'
+        prompt: 'No valves. Bb is the 2nd partial of the Bb bugle. Deep breath, steady air.'
       },
       {
         id: 'eu-2',
@@ -1173,7 +1173,7 @@ const CURRICULUM = {
         freq: 130.81,
         fingeringState: [true, false, true],
         description: 'Valves 1 and 3 — a half-step above Bb.',
-        prompt: 'Press valves 1 and 3 together. C is the next step up from Bb. Keep the air warm and the tone centred.'
+        prompt: 'Valves 1 and 3. Half-step above Bb.'
       },
       {
         id: 'eu-3',
@@ -1184,7 +1184,7 @@ const CURRICULUM = {
         freq: 146.83,
         fingeringState: [true, true, false],
         description: 'Valves 1 and 2 — up another step.',
-        prompt: 'Press valves 1 and 2. Move the fingers together smoothly. This D sits on the third line of the staff.'
+        prompt: 'Valves 1 and 2. D sits on the third line of the bass staff.'
       },
       {
         id: 'eu-4',
@@ -1195,7 +1195,7 @@ const CURRICULUM = {
         freq: 155.56,
         fingeringState: [true, false, false],
         description: 'Valve 1 alone — a whole step above D.',
-        prompt: 'Press only valve 1 (index finger). This Eb is the 4th note of the Bb major scale. Steady, supported air.'
+        prompt: 'Valve 1 only (index finger). Eb is the 4th note of the Bb major scale.'
       },
       {
         id: 'eu-5',
@@ -1206,7 +1206,7 @@ const CURRICULUM = {
         freq: 174.61,
         fingeringState: [false, false, false],
         description: 'Open again — the 3rd harmonic.',
-        prompt: 'No valves. F is the 3rd harmonic of the Bb bugle. Faster air, same open feel as your first note.'
+        prompt: 'No valves. F is the 3rd harmonic. Faster air.'
       },
       {
         id: 'eu-6',
@@ -1217,7 +1217,7 @@ const CURRICULUM = {
         freq: 196.00,
         fingeringState: [true, true, false],
         description: 'Valves 1 and 2 — stepping up from F.',
-        prompt: 'Press valves 1 and 2. G is a whole step above F. Listen for a clear, singing tone.'
+        prompt: 'Valves 1 and 2. Whole step above F.'
       },
       {
         id: 'eu-7',
@@ -1228,7 +1228,7 @@ const CURRICULUM = {
         freq: 220.00,
         fingeringState: [false, true, false],
         description: 'Valve 2 alone — just the middle finger.',
-        prompt: 'Press only valve 2 (middle finger). A is a half-step below Bb in the staff space above G.'
+        prompt: 'Valve 2 only (middle finger). Half-step below Bb.'
       },
       {
         id: 'eu-8',
@@ -1239,7 +1239,7 @@ const CURRICULUM = {
         freq: 233.08,
         fingeringState: [false, false, false],
         description: 'Open again — an octave above your first note!',
-        prompt: 'No valves! Bb3 is the 4th harmonic and completes your first octave. Tighten the embouchure and let the horn ring.'
+        prompt: 'No valves. Bb is the 4th harmonic. Tighter embouchure, faster air.'
       },
       {
         id: 'eu-song-1', type: 'song',
@@ -1306,7 +1306,7 @@ const CURRICULUM = {
         freq: 58.27,
         fingeringState: [false, false, false],
         description: 'Open — your first tuba note. Feel the resonance.',
-        prompt: 'No valves pressed. Take a full, relaxed breath and blow a slow, wide stream of air. The whole horn should vibrate.'
+        prompt: 'No valves. Full, relaxed breath. Slow, wide air stream.'
       },
       {
         id: 'tu-2',
@@ -1317,7 +1317,7 @@ const CURRICULUM = {
         freq: 65.41,
         fingeringState: [true, false, true],
         description: 'Valves 1 and 3 — a half-step above Bb.',
-        prompt: 'Press valves 1 and 3. This C is just a step above your first note. Keep the air deep and wide.'
+        prompt: 'Valves 1 and 3. Half-step above Bb.'
       },
       {
         id: 'tu-3',
@@ -1328,7 +1328,7 @@ const CURRICULUM = {
         freq: 73.42,
         fingeringState: [true, true, false],
         description: 'Valves 1 and 2 — up another step.',
-        prompt: 'Press valves 1 and 2 together. D is below the staff. Warm, slow, supported air.'
+        prompt: 'Valves 1 and 2. D sits below the bass staff.'
       },
       {
         id: 'tu-4',
@@ -1339,7 +1339,7 @@ const CURRICULUM = {
         freq: 77.78,
         fingeringState: [true, false, false],
         description: 'Valve 1 alone — Eb sits just below the staff.',
-        prompt: 'Press only valve 1 (index finger). Let the air flow freely and feel the low resonance.'
+        prompt: 'Valve 1 only (index finger). Half-step above C.'
       },
       {
         id: 'tu-5',
@@ -1350,7 +1350,7 @@ const CURRICULUM = {
         freq: 87.31,
         fingeringState: [false, false, false],
         description: 'Open — the 3rd harmonic of the Bb bugle.',
-        prompt: 'No valves. F is the 3rd partial. Speed up the air slightly. This is the first note on the staff.'
+        prompt: 'No valves. F is the 3rd partial. First note on the staff.'
       },
       {
         id: 'tu-6',
@@ -1361,7 +1361,7 @@ const CURRICULUM = {
         freq: 98.00,
         fingeringState: [true, true, false],
         description: 'Valves 1 and 2 — G in the middle of the staff.',
-        prompt: 'Press valves 1 and 2. G is on the second line of the bass clef. Let the air support the sound.'
+        prompt: 'Valves 1 and 2. G is on the second line of the bass clef.'
       },
       {
         id: 'tu-7',
@@ -1372,7 +1372,7 @@ const CURRICULUM = {
         freq: 110.00,
         fingeringState: [false, true, false],
         description: 'Valve 2 alone — A in the second space.',
-        prompt: 'Press only valve 2 (middle finger). A is just a half-step below Bb in the staff space above G.'
+        prompt: 'Valve 2 only (middle finger). Half-step below Bb.'
       },
       {
         id: 'tu-8',
@@ -1383,7 +1383,7 @@ const CURRICULUM = {
         freq: 116.54,
         fingeringState: [false, false, false],
         description: 'Open — an octave above where you started!',
-        prompt: 'No valves! This Bb is on the third line of the staff. Faster, more focused air to reach the top of your first octave.'
+        prompt: 'No valves. Bb is on the third line. Faster, more focused air.'
       },
       {
         id: 'tu-song-1', type: 'song',
