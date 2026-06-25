@@ -445,7 +445,7 @@ const CURRICULUM = {
         concertNote: 'D6',
         staffStep: 14,
         accidental: null,
-        freq: 1318.51,
+        freq: 1174.66,
         fingeringState: [true, true, false, false, false, false, false, false, false],
         description: 'E — same as your first note, an octave higher!',
         prompt: 'Register key + A key. Same fingering as E5. Tighter embouchure, faster air.'
@@ -1071,6 +1071,7 @@ const CURRICULUM = {
     id: 'french-horn', name: 'French Horn', shortName: 'Fr. Horn',
     clef: 'treble', fingeringType: 'horn', isTransposing: true, transposeSemitones: -7, available: true, accentColor: '#C06030',
     lessons: [
+      // ── Note lessons ────────────────────────────────────────────────────
       {
         id: 'fh-1',
         noteName: 'C',
@@ -1080,55 +1081,35 @@ const CURRICULUM = {
         accidental: null,
         freq: 174.61,
         fingeringState: [false, false, false],
-        description: 'Open — no valves! The horn\'s natural note.',
-        prompt: 'No valves. Buzz firm lips into the mouthpiece. Hand in the bell stays cupped.'
+        description: 'No valves — the fundamental resonance of the F horn.',
+        prompt: 'No valves. C is the 4th partial of the F horn.'
       },
       {
         id: 'fh-2',
-        noteName: 'G',
+        noteName: 'D',
         octave: 4,
-        concertNote: 'C4',
-        staffStep: 2,
+        concertNote: 'G3',
+        staffStep: -1,
         accidental: null,
-        freq: 261.63,
-        fingeringState: [false, false, false],
-        description: 'Same open fingering, higher harmonic.',
-        prompt: 'No valves. Tighter embouchure, faster air. 3rd harmonic above C.'
+        freq: 196.00,
+        fingeringState: [true, false, false],
+        description: 'Valve 1 — whole step above C.',
+        prompt: 'Valve 1. Fifth partial with first valve down.'
       },
       {
         id: 'fh-3',
-        noteName: 'C',
-        octave: 5,
-        concertNote: 'F4',
-        staffStep: 5,
-        accidental: null,
-        freq: 349.23,
-        fingeringState: [false, false, false],
-        description: 'Another open note — the octave above your first C.',
-        prompt: 'No valves. More air speed, firmer lips. 4th harmonic.'
-      },
-      {
-        id: 'fh-song-1', type: 'song',
-        noteName: 'Hot Cross Buns',
-        prerequisiteIds: ['fh-1', 'fh-2', 'fh-3'],
-        description: 'A classic melody using C4, G4, and C5 — your first three horn harmonics.',
-        prompt: 'Step through each note. All open — feel the harmonics change with your air speed!',
-        noteIds: ['fh-1', 'fh-2', 'fh-3', 'fh-1', 'fh-2', 'fh-3', 'fh-3', 'fh-3', 'fh-3', 'fh-2', 'fh-2', 'fh-2', 'fh-2', 'fh-1', 'fh-2', 'fh-3'],
-      },
-      {
-        id: 'fh-4',
         noteName: 'E',
         octave: 4,
         concertNote: 'A3',
         staffStep: 0,
         accidental: null,
         freq: 220.00,
-        fingeringState: [true, true, false],
-        description: 'Valves 1 and 2 together.',
-        prompt: 'Valves 1 and 2. Relax the embouchure slightly.'
+        fingeringState: [false, false, false],
+        description: 'No valves — E is the 5th partial of the open series.',
+        prompt: 'No valves. E is the 5th partial of the open series.'
       },
       {
-        id: 'fh-5',
+        id: 'fh-4',
         noteName: 'F',
         octave: 4,
         concertNote: 'B\u266d3',
@@ -1136,16 +1117,107 @@ const CURRICULUM = {
         accidental: null,
         freq: 233.08,
         fingeringState: [true, false, false],
-        description: 'Valve 1 alone — whole step down from G.',
-        prompt: 'Valve 1 only (index finger). Whole step down from G.'
+        description: 'Valve 1 again — half-step below E.',
+        prompt: 'Valve 1. Half-step below E.'
+      },
+      {
+        id: 'fh-5',
+        noteName: 'G',
+        octave: 4,
+        concertNote: 'C4',
+        staffStep: 2,
+        accidental: null,
+        freq: 261.63,
+        fingeringState: [false, false, false],
+        description: 'No valves — the 6th partial.',
+        prompt: 'No valves. 6th partial. Faster air than E.'
+      },
+      {
+        id: 'fh-6',
+        noteName: 'A',
+        octave: 4,
+        concertNote: 'D4',
+        staffStep: 3,
+        accidental: null,
+        freq: 293.66,
+        fingeringState: [true, true, false],
+        description: 'Valves 1 and 2 — whole step below B.',
+        prompt: 'Valves 1 and 2. Whole step below B.'
+      },
+      {
+        id: 'fh-7',
+        noteName: 'B',
+        octave: 4,
+        concertNote: 'E4',
+        staffStep: 4,
+        accidental: null,
+        freq: 329.63,
+        fingeringState: [false, true, false],
+        description: 'Valve 2 — half-step below C5.',
+        prompt: 'Valve 2. Half-step below C5.'
+      },
+      {
+        id: 'fh-8',
+        noteName: 'C',
+        octave: 5,
+        concertNote: 'F4',
+        staffStep: 5,
+        accidental: null,
+        freq: 349.23,
+        fingeringState: [false, false, false],
+        description: 'No valves — the 8th partial. Octave above your first C.',
+        prompt: 'No valves. 8th partial. Firm embouchure, fast air.'
+      },
+      // ── Song 1 ──────────────────────────────────────────────────────────
+      {
+        id: 'fh-song-1', type: 'song',
+        noteName: 'Hot Cross Buns',
+        prerequisiteIds: ['fh-3', 'fh-4', 'fh-5'],
+        description: 'A classic melody using E, F, and G — your first three notes with valves.',
+        prompt: 'Step through each note. The pattern repeats. Feel how the valves move!',
+        noteIds: ['fh-5', 'fh-4', 'fh-3', 'fh-5', 'fh-4', 'fh-3', 'fh-3', 'fh-3', 'fh-3', 'fh-4', 'fh-4', 'fh-4', 'fh-4', 'fh-5', 'fh-4', 'fh-3'],
       },
       {
         id: 'fh-song-2', type: 'song',
+        noteName: 'Merrily We Roll Along',
+        prerequisiteIds: ['fh-2', 'fh-3', 'fh-4', 'fh-5', 'fh-6'],
+        description: 'The tune behind "Mary Had a Little Lamb" using G, A, G, F, E, and D.',
+        prompt: 'Listen for the repeating three-note pattern!',
+        noteIds: ['fh-5', 'fh-6', 'fh-5', 'fh-4', 'fh-3', 'fh-5', 'fh-5', 'fh-5', 'fh-6', 'fh-5', 'fh-4', 'fh-4', 'fh-5', 'fh-6', 'fh-5', 'fh-4', 'fh-3', 'fh-5', 'fh-5', 'fh-5', 'fh-3', 'fh-4', 'fh-4', 'fh-2', 'fh-5', 'fh-6', 'fh-5', 'fh-4', 'fh-3'],
+      },
+      // ── Review 1 ────────────────────────────────────────────────────────
+      {
+        id: 'fh-review-1',
+        type: 'review',
+        reviewLessonIds: ['fh-1', 'fh-2', 'fh-3', 'fh-4', 'fh-5', 'fh-song-1', 'fh-song-2'],
+        noteName: 'Review 1',
+        description: 'Mix up your first five notes and songs — C, D, E, F, and G.',
+        prompt: '',
+      },
+      {
+        id: 'fh-song-3', type: 'song',
+        noteName: 'Lightly Row',
+        prerequisiteIds: ['fh-2', 'fh-3', 'fh-4', 'fh-5', 'fh-6', 'fh-7', 'fh-8'],
+        description: 'A traditional German folk song spanning almost your full octave — D up to C.',
+        prompt: 'This song moves stepwise through your new notes. Take it slowly!',
+        noteIds: ['fh-6', 'fh-5', 'fh-4', 'fh-3', 'fh-2', 'fh-6', 'fh-5', 'fh-4', 'fh-3', 'fh-2', 'fh-5', 'fh-5', 'fh-6', 'fh-6', 'fh-4', 'fh-4', 'fh-3', 'fh-3', 'fh-2', 'fh-2', 'fh-6', 'fh-5', 'fh-4', 'fh-3', 'fh-2'],
+      },
+      {
+        id: 'fh-song-4', type: 'song',
         noteName: 'Horn Calls',
-        prerequisiteIds: ['fh-1', 'fh-2', 'fh-3', 'fh-4', 'fh-5'],
-        description: 'A gentle melody connecting your open harmonics with valve combinations.',
-        prompt: 'Alternate between open and valve notes. Keep the hand in the bell position steady!',
-        noteIds: ['fh-1', 'fh-3', 'fh-5', 'fh-4', 'fh-2', 'fh-5', 'fh-3', 'fh-1', 'fh-1', 'fh-5', 'fh-4', 'fh-3', 'fh-2', 'fh-1'],
+        prerequisiteIds: ['fh-1', 'fh-2', 'fh-3', 'fh-4', 'fh-5', 'fh-6', 'fh-7', 'fh-8'],
+        description: 'A bright fanfare using all eight notes of your first octave — C to C.',
+        prompt: 'This fanfare leaps between all your notes. Keep the air strong and the valves crisp!',
+        noteIds: ['fh-1', 'fh-5', 'fh-8', 'fh-5', 'fh-1', 'fh-7', 'fh-5', 'fh-4', 'fh-3', 'fh-6', 'fh-4', 'fh-5', 'fh-1', 'fh-5', 'fh-8', 'fh-1'],
+      },
+      // ── Review 2 ────────────────────────────────────────────────────────
+      {
+        id: 'fh-review-2',
+        type: 'review',
+        reviewLessonIds: ['fh-1', 'fh-2', 'fh-3', 'fh-4', 'fh-5', 'fh-6', 'fh-7', 'fh-8', 'fh-song-3', 'fh-song-4'],
+        noteName: 'Review 2',
+        description: 'Review all horn notes and songs together — the full C4 to C5 octave.',
+        prompt: '',
       },
     ]
   },
