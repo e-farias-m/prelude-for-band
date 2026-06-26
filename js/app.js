@@ -276,8 +276,10 @@ function renderSettingsScreen() {
 function renderMapScreen() {
   const inst = getInstrument(APP.instrumentId);
   const prog = getInstrumentProgress(APP.instrumentId);
-  const total = inst.lessons.length;
-  const doneCount = inst.lessons.filter(l => prog.completed[l.id]).length;
+  const allImported = JSON.parse(localStorage.getItem(IMPORTED_SONGS_KEY) || '{}');
+  const instImported = (allImported[APP.instrumentId] || []).filter(s => s && s.noteIds);
+  const total = inst.lessons.length + instImported.length;
+  const doneCount = inst.lessons.filter(l => prog.completed[l.id]).length + instImported.filter(s => prog.completed[s.id]).length;
   const pct = total ? Math.round((doneCount / total) * 100) : 0;
 
   const nodes = inst.lessons.map((lesson, i) => {
@@ -323,22 +325,24 @@ function renderMapScreen() {
       </div>`;
   }).join('');
 
-  const importKey = IMPORTED_SONGS_KEY;
-  const allImported = JSON.parse(localStorage.getItem(importKey) || '{}');
-  const instImported = (allImported[APP.instrumentId] || []).filter(s => s && s.noteIds);
-  let importedHtml = '';
-  if (instImported.length > 0) {
-    importedHtml = instImported.map((s, i) => `
+  const importedNodes = instImported.map((s, i) => {
+    const completed = !!prog.completed[s.id];
+    const stateCls = completed ? 'done' : 'current';
+    const stars = completed ? prog.completed[s.id].stars : 0;
+    const inner = completed
+      ? `<span class="map-node-note">${escapeHtml(s.noteName)}</span><span class="map-node-star">${'★'.repeat(stars)}${'☆'.repeat(3 - stars)}</span>`
+      : `<span class="map-node-note">${escapeHtml(s.noteName)}</span>`;
+    const prevId = i === 0 ? inst.lessons[inst.lessons.length - 1]?.id : instImported[i - 1]?.id;
+    const prevDone = prevId ? !!prog.completed[prevId] : false;
+    const connector = inst.lessons.length > 0 || i > 0 ? `<div class="map-connector ${prevDone ? 'done' : ''}"></div>` : '';
+    return `
       <div class="map-node-wrap">
-        <div class="map-connector done"></div>
-        <div class="map-node current" data-action="open-imported-song" data-imported-index="${i}">
-          <span class="map-node-note">${escapeHtml(s.noteName)}</span>
-        </div>
+        ${connector}
+        <div class="map-node ${stateCls}" data-action="open-imported-song" data-imported-index="${i}">${inner}</div>
         <div class="map-node-label">${escapeHtml(s.noteName)}</div>
-        <button class="btn-icon delete-import-btn" data-action="delete-imported-song" data-imported-index="${i}" title="Delete imported song" style="background:none;border:none;cursor:pointer;font-size:14px;color:var(--text-muted);margin-top:4px">✕</button>
-      </div>`).join('');
-    importedHtml = `<div class="map-imported-section"><div class="map-unit-label">Imported Songs</div><div class="map-path">${importedHtml}</div></div>`;
-  }
+        <button class="btn-icon" data-action="delete-imported-song" data-imported-index="${i}" title="Delete imported song" style="background:none;border:none;cursor:pointer;font-size:12px;color:var(--text-danger);margin-top:2px">✕ Delete</button>
+      </div>`;
+  }).join('');
 
   return `
     <div class="screen active">
@@ -352,12 +356,11 @@ function renderMapScreen() {
       </div>
       <div class="map-body">
         <div class="map-unit-label">Unit 1 · First Notes</div>
-        <div class="map-path">${nodes}</div>
-        <div class="import-section" style="margin-top:24px;text-align:center">
-          <button class="btn btn-secondary" data-action="import-song">Import Song (MusicXML)</button>
+        <div class="map-path">${nodes}${importedNodes}</div>
+        <div class="import-section" style="margin-top:20px;text-align:center">
+          <button class="btn btn-secondary" data-action="import-song">+ Import Song</button>
           <input type="file" id="import-file-input" accept=".xml,.musicxml" style="display:none"/>
         </div>
-        ${importedHtml}
       </div>
     </div>`;
 }
