@@ -190,7 +190,16 @@ const AudioEngine = (() => {
     }
   }
 
+  // ── CHORD ──────────────────────────────────────────────────────────────
+  function playChord(freqs, fingeringType, duration = 1.1) {
+    if (!freqs || freqs.length === 0) return;
+    freqs.forEach(freq => {
+      if (freq == null) return;
+      playInstrumentNote(freq, fingeringType, duration);
+    });
+  }
+
   function unlock() { getCtx(); }
 
-  return { playInstrumentNote, playClick, unlock };
+  return { playInstrumentNote, playChord, playClick, unlock };
 })();

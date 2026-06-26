@@ -17,6 +17,9 @@ const APP = {
   reviewTotal: 0,
   // Song session state
   songNoteIndex: 0,
+  importedSong: null,
+  // Imported song list
+  importedSongs: null,
 };
 
 const STORAGE_KEY = 'preludeBandProgress';
@@ -131,7 +134,10 @@ function isLessonUnlocked(instrumentId, index) {
 
 // ── HELPERS ─────────────────────────────────────────────────────────────
 function getInstrument(id) { return CURRICULUM[id]; }
-function getLesson(instrumentId, index) { return CURRICULUM[instrumentId].lessons[index]; }
+function getLesson(instrumentId, index) {
+  if (index === -1 && APP.importedSong) return APP.importedSong;
+  return CURRICULUM[instrumentId].lessons[index];
+}
 function findLessonById(instrumentId, id) {
   return CURRICULUM[instrumentId].lessons.find(l => l.id === id);
 }
@@ -141,6 +147,18 @@ function getResolvedSongNote(instrumentId, lesson) {
   const noteId = lesson.noteIds[APP.songNoteIndex];
   return findLessonById(instrumentId, noteId);
 }
+
+function getChordFrequencies(instrumentId, lesson, index) {
+  if (!lesson.chordIds) return [];
+  const ids = lesson.chordIds[index];
+  if (!ids) return [];
+  return ids.map(id => {
+    const n = findLessonById(instrumentId, id);
+    return n ? n.freq : null;
+  }).filter(f => f != null);
+}
+
+const IMPORTED_SONGS_KEY = 'preludeBandImportedSongs';
 
 function showToast(msg) {
   const t = document.getElementById('toast');
@@ -224,7 +242,7 @@ function renderSelectScreen() {
         <button class="btn-icon settings-gear" data-action="open-settings" title="Settings" style="background:none;border:none;cursor:pointer;font-size:18px;vertical-align:middle;">⚙️</button>
       </div>
       <div class="instrument-grid">${cards}</div>
-      <div class="version-badge" style="cursor:pointer">v1.0.0</div>
+      <div class="version-badge" style="cursor:pointer">v2.0.0</div>
     </div>`;
 }
 
@@ -305,6 +323,23 @@ function renderMapScreen() {
       </div>`;
   }).join('');
 
+  const importKey = IMPORTED_SONGS_KEY;
+  const allImported = JSON.parse(localStorage.getItem(importKey) || '{}');
+  const instImported = (allImported[APP.instrumentId] || []).filter(s => s && s.noteIds);
+  let importedHtml = '';
+  if (instImported.length > 0) {
+    importedHtml = instImported.map((s, i) => `
+      <div class="map-node-wrap">
+        <div class="map-connector done"></div>
+        <div class="map-node current" data-action="open-imported-song" data-imported-index="${i}">
+          <span class="map-node-note">${escapeHtml(s.noteName)}</span>
+        </div>
+        <div class="map-node-label">${escapeHtml(s.noteName)}</div>
+        <button class="btn-icon delete-import-btn" data-action="delete-imported-song" data-imported-index="${i}" title="Delete imported song" style="background:none;border:none;cursor:pointer;font-size:14px;color:var(--text-muted);margin-top:4px">✕</button>
+      </div>`).join('');
+    importedHtml = `<div class="map-imported-section"><div class="map-unit-label">Imported Songs</div><div class="map-path">${importedHtml}</div></div>`;
+  }
+
   return `
     <div class="screen active">
       <div class="app-header">
@@ -318,6 +353,11 @@ function renderMapScreen() {
       <div class="map-body">
         <div class="map-unit-label">Unit 1 · First Notes</div>
         <div class="map-path">${nodes}</div>
+        <div class="import-section" style="margin-top:24px;text-align:center">
+          <button class="btn btn-secondary" data-action="import-song">Import Song (MusicXML)</button>
+          <input type="file" id="import-file-input" accept=".xml,.musicxml" style="display:none"/>
+        </div>
+        ${importedHtml}
       </div>
     </div>`;
 }
@@ -618,6 +658,7 @@ function renderCompletePhase(inst, lesson) {
   const masteryLevel = getMasteryLevel(mastery);
   const masteryColor = getMasteryColor(masteryLevel);
   const alreadyDone = !!APP.progress[APP.instrumentId]?.completed[lesson.id];
+  const isSong = isSongLesson(lesson);
 
   const messages = {
     new: 'You got the basics down!',
@@ -626,14 +667,17 @@ function renderCompletePhase(inst, lesson) {
     mastered: 'You really know this note well!',
   };
 
+  const exportBtn = isSong ? `<button class="btn btn-secondary" data-action="export-musicxml" style="width:100%;margin-bottom:8px">Export MusicXML</button>` : '';
+
   return `
     <div class="complete-layout">
       <div class="complete-stars">${starsHtml}</div>
       <div class="complete-xp">+${xp} XP</div>
       <div class="complete-title">${alreadyDone ? 'Review complete!' : 'Lesson complete!'}</div>
-      <div class="complete-sub">${messages[masteryLevel]}</div>
+      <div class="complete-sub">${isSong ? 'Song complete!' : messages[masteryLevel]}</div>
       <div style="margin-top:8px;padding:6px 14px;border-radius:20px;background:${masteryColor}22;color:${masteryColor};font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em">${getMasteryLabel(masteryLevel)} — ${mastery} correct</div>
       <div class="gap-lg"></div>
+      ${exportBtn}
       <button class="btn btn-primary btn-wide" data-action="finish-lesson">Continue</button>
     </div>`;
 }
@@ -695,10 +739,135 @@ function runSongSequence(inst, lesson) {
   const msPerBeat = 480;
   noteIds.forEach((id, i) => {
     const note = findLessonById(APP.instrumentId, id);
+    const chordFreqs = getChordFrequencies(APP.instrumentId, lesson, i);
     setTimeout(() => {
+      if (chordFreqs.length > 0) {
+        AudioEngine.playChord(chordFreqs, inst.fingeringType, 0.45);
+      }
       AudioEngine.playInstrumentNote(note.freq, inst.fingeringType, 0.45);
     }, i * msPerBeat);
   });
+}
+
+// ── MUSICXML ──────────────────────────────────────────────────────────
+function exportSongMusicXML(inst, lesson) {
+  function pitchAttr(n) {
+    const step = n.noteName.replace(/[♭♯#b]/g, '').charAt(0);
+    const oct = n.octave;
+    const acc = n.accidental;
+    let xml = `<pitch><step>${step}</step>`;
+    if (acc === '♭' || acc === 'b') xml += `<alter>-1</alter>`;
+    else if (acc === '♯' || acc === '#') xml += `<alter>1</alter>`;
+    xml += `<octave>${oct}</octave></pitch>`;
+    return xml;
+  }
+  const clef = inst.clef === 'bass' ? '<sign>F</sign><line>4</line>' : '<sign>G</sign><line>2</line>';
+  const lines = ['<?xml version="1.0" encoding="UTF-8"?>'];
+  lines.push('<!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 4.0 Partwise//EN" "http://www.musicxml.org/dtds/partwise.dtd">');
+  lines.push('<score-partwise version="4.0">');
+  lines.push('  <part-list><score-part id="P1"><part-name>' + escapeXml(lesson.noteName) + '</part-name></score-part></part-list>');
+  lines.push('  <part id="P1">');
+  const noteIds = lesson.noteIds;
+  const chordIds = lesson.chordIds || [];
+  let measure = 1, beat = 0;
+  let measureNotes = [];
+  for (let i = 0; i < noteIds.length; i++) {
+    const n = findLessonById(APP.instrumentId, noteIds[i]);
+    if (!n) continue;
+    const chordEntry = chordIds[i];
+    const chordNotes = chordEntry ? chordEntry.map(id => findLessonById(APP.instrumentId, id)).filter(Boolean) : [];
+    measureNotes.push({ note: n, chord: false });
+    chordNotes.forEach(cn => measureNotes.push({ note: cn, chord: true }));
+    beat++;
+    if (beat === 4 && i < noteIds.length - 1) { flushMeasure(); measure++; beat = 0; }
+  }
+  if (measureNotes.length > 0) flushMeasure();
+  function flushMeasure() {
+    lines.push('    <measure number="' + measure + '">');
+    if (measure === 1) {
+      lines.push('      <attributes>');
+      lines.push('        <divisions>1</divisions>');
+      lines.push('        <key><fifths>0</fifths></key>');
+      lines.push('        <time><beats>4</beats><beat-type>4</beat-type></time>');
+      lines.push('        <clef>' + clef + '</clef>');
+      lines.push('      </attributes>');
+    }
+    measureNotes.forEach(mn => {
+      lines.push('      <note>');
+      if (mn.chord) lines.push('        <chord/>');
+      lines.push('        ' + pitchAttr(mn.note));
+      lines.push('        <duration>1</duration>');
+      lines.push('        <type>quarter</type>');
+      lines.push('      </note>');
+    });
+    lines.push('    </measure>');
+    measureNotes = [];
+  }
+  lines.push('  </part>');
+  lines.push('</score-partwise>');
+  return lines.join('\n');
+}
+function escapeXml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');
+}
+function matchNoteToLesson(instrumentId, noteName, octave) {
+  const inst = getInstrument(instrumentId);
+  const searchName = noteName.replace(/♭/g,'b').replace(/♯/g,'#');
+  const lesson = inst.lessons.find(l => {
+    if (l.type) return false;
+    const lName = l.noteName.replace(/♭/g,'b').replace(/♯/g,'#');
+    return lName === searchName && l.octave === octave;
+  });
+  return lesson ? lesson.id : null;
+}
+function importSongFromMusicXML(xmlString) {
+  const doc = new DOMParser().parseFromString(xmlString, 'text/xml');
+  const parseError = doc.querySelector('parsererror');
+  if (parseError) throw new Error('Invalid XML: ' + parseError.textContent);
+  const partName = doc.querySelector('part-name');
+  const title = partName ? partName.textContent.trim() : 'Imported Song';
+  const noteEls = doc.querySelectorAll('measure note');
+  const noteIds = [];
+  const chordIds = [];
+  let currentChordBuffer = [];
+  noteEls.forEach(noteEl => {
+    const step = noteEl.querySelector('pitch step');
+    const octave = noteEl.querySelector('pitch octave');
+    const alter = noteEl.querySelector('pitch alter');
+    const isChord = noteEl.querySelector('chord');
+    if (noteEl.querySelector('rest')) return;
+    if (!step || !octave) return;
+    let nn = step.textContent;
+    const oct = parseInt(octave.textContent, 10);
+    if (alter) {
+      const a = parseInt(alter.textContent, 10);
+      if (a === -1) nn += 'b';
+      else if (a === 1) nn += '#';
+    }
+    const lessonId = matchNoteToLesson(APP.instrumentId, nn, oct);
+    if (!lessonId) return;
+    if (isChord) {
+      currentChordBuffer.push(lessonId);
+    } else {
+      if (currentChordBuffer.length > 0) {
+        chordIds[chordIds.length - 1] = currentChordBuffer;
+        currentChordBuffer = [];
+      }
+      noteIds.push(lessonId);
+      chordIds.push(null);
+    }
+  });
+  if (currentChordBuffer.length > 0) {
+    chordIds[chordIds.length - 1] = currentChordBuffer;
+  }
+  if (noteIds.length === 0) throw new Error('No playable notes found in MusicXML');
+  const importedId = 'imported-' + Date.now();
+  const song = { id: importedId, type: 'song', noteName: title, prerequisiteIds: [], noteIds, chordIds, prompt: '', description: 'Imported from MusicXML.' };
+  const existing = JSON.parse(localStorage.getItem(IMPORTED_SONGS_KEY) || '{}');
+  if (!existing[APP.instrumentId]) existing[APP.instrumentId] = [];
+  existing[APP.instrumentId].push(song);
+  localStorage.setItem(IMPORTED_SONGS_KEY, JSON.stringify(existing));
+  return song;
 }
 
 // ── EVENT HANDLING ─────────────────────────────────────────────────────
@@ -810,6 +979,7 @@ function handleAction(action, el) {
       APP.reviewCorrect = 0;
       APP.reviewTotal = 0;
       APP.songNoteIndex = 0;
+      APP.importedSong = null;
       APP.screen = 'map';
       render();
       break;
@@ -819,6 +989,10 @@ function handleAction(action, el) {
       const lesson = getLesson(APP.instrumentId, APP.lessonIndex);
       if (isSongLesson(lesson)) {
         const note = getResolvedSongNote(APP.instrumentId, lesson);
+        const chordFreqs = getChordFrequencies(APP.instrumentId, lesson, APP.songNoteIndex);
+        if (chordFreqs.length > 0) {
+          AudioEngine.playChord(chordFreqs, inst.fingeringType, 1.1);
+        }
         AudioEngine.playInstrumentNote(note.freq, inst.fingeringType, 1.1);
       } else {
         AudioEngine.playInstrumentNote(lesson.freq, inst.fingeringType, 1.1);
@@ -924,12 +1098,59 @@ function handleAction(action, el) {
       break;
     }
 
+    case 'export-musicxml': {
+      const inst = getInstrument(APP.instrumentId);
+      const lesson = getLesson(APP.instrumentId, APP.lessonIndex);
+      const xml = exportSongMusicXML(inst, lesson);
+      const blob = new Blob([xml], { type: 'application/xml' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = (lesson.noteName || 'song').replace(/[^a-zA-Z0-9]+/g, '-') + '.musicxml';
+      a.click();
+      URL.revokeObjectURL(url);
+      break;
+    }
+    case 'import-song': {
+      document.getElementById('import-file-input').click();
+      break;
+    }
+    case 'import-file-chosen': {
+      // Handled by the change event listener below
+      break;
+    }
+    case 'open-imported-song': {
+      const idx = parseInt(el.dataset.importedIndex, 10);
+      const allImported = JSON.parse(localStorage.getItem(IMPORTED_SONGS_KEY) || '{}');
+      const songs = allImported[APP.instrumentId] || [];
+      const song = songs[idx];
+      if (!song) { showToast('Song not found.'); break; }
+      APP.importedSong = song;
+      APP.lessonIndex = -1;
+      APP.phase = 'present';
+      APP.songNoteIndex = 0;
+      APP.quiz = null;
+      APP.screen = 'lesson';
+      render();
+      break;
+    }
+    case 'delete-imported-song': {
+      const idx = parseInt(el.dataset.importedIndex, 10);
+      const allImported = JSON.parse(localStorage.getItem(IMPORTED_SONGS_KEY) || '{}');
+      const songs = allImported[APP.instrumentId] || [];
+      songs.splice(idx, 1);
+      allImported[APP.instrumentId] = songs;
+      localStorage.setItem(IMPORTED_SONGS_KEY, JSON.stringify(allImported));
+      render();
+      break;
+    }
     case 'finish-lesson':
       APP.reviewQueue = null;
       APP.reviewIndex = 0;
       APP.reviewCorrect = 0;
       APP.reviewTotal = 0;
       APP.songNoteIndex = 0;
+      APP.importedSong = null;
       APP.screen = 'map';
       render();
       break;
@@ -940,6 +1161,25 @@ document.addEventListener('click', (e) => {
   const el = e.target.closest('[data-action]');
   if (!el || el.hasAttribute('disabled')) return;
   handleAction(el.dataset.action, el);
+});
+
+document.addEventListener('change', (e) => {
+  const input = e.target;
+  if (input.id !== 'import-file-input' || !input.files || !input.files[0]) return;
+  const file = input.files[0];
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const song = importSongFromMusicXML(reader.result);
+      showToast('Imported "' + song.noteName + '"');
+      render();
+    } catch (err) {
+      showToast('Import error: ' + err.message);
+    }
+  };
+  reader.onerror = () => showToast('Error reading file.');
+  reader.readAsText(file);
+  input.value = '';
 });
 
 // ── INIT ───────────────────────────────────────────────────────────────

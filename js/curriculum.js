@@ -132,6 +132,13 @@ const CURRICULUM = {
         description: 'A classic English nursery rhyme using G, F, and E — your first three valve combinations.',
         prompt: 'Step through each note. The pattern repeats. Feel how the valves move in sequence!',
         noteIds: ['tr-5', 'tr-4', 'tr-3', 'tr-5', 'tr-4', 'tr-3', 'tr-3', 'tr-3', 'tr-3', 'tr-4', 'tr-4', 'tr-4', 'tr-4', 'tr-5', 'tr-4', 'tr-3'],
+        chordIds: [
+          ['tr-1','tr-3','tr-5'], ['tr-4','tr-6','tr-8'], ['tr-1','tr-3','tr-5'],
+          ['tr-1','tr-3','tr-5'], ['tr-4','tr-6','tr-8'], ['tr-1','tr-3','tr-5'],
+          ['tr-1','tr-3','tr-5'], ['tr-1','tr-3','tr-5'], ['tr-1','tr-3','tr-5'], ['tr-1','tr-3','tr-5'],
+          ['tr-4','tr-6','tr-8'], ['tr-4','tr-6','tr-8'], ['tr-4','tr-6','tr-8'], ['tr-4','tr-6','tr-8'],
+          ['tr-1','tr-3','tr-5'], ['tr-4','tr-6','tr-8']
+        ],
       },
       {
         id: 'tr-song-2', type: 'song',
@@ -140,6 +147,14 @@ const CURRICULUM = {
         description: 'The tune behind "Mary Had a Little Lamb" using G, A, G, F, E, and D.',
         prompt: 'Listen for the repeating three-note pattern! This song uses five notes across the staff.',
         noteIds: ['tr-5', 'tr-6', 'tr-5', 'tr-4', 'tr-3', 'tr-5', 'tr-5', 'tr-5', 'tr-6', 'tr-5', 'tr-4', 'tr-4', 'tr-5', 'tr-6', 'tr-5', 'tr-4', 'tr-3', 'tr-5', 'tr-5', 'tr-5', 'tr-3', 'tr-4', 'tr-4', 'tr-2', 'tr-5', 'tr-6', 'tr-5', 'tr-4', 'tr-3'],
+        chordIds: [
+          ['tr-1','tr-3','tr-5'], ['tr-4','tr-6','tr-8'], ['tr-1','tr-3','tr-5'], ['tr-4','tr-6','tr-8'], ['tr-1','tr-3','tr-5'],
+          ['tr-1','tr-3','tr-5'], ['tr-1','tr-3','tr-5'], ['tr-1','tr-3','tr-5'], ['tr-4','tr-6','tr-8'], ['tr-1','tr-3','tr-5'],
+          ['tr-4','tr-6','tr-8'], ['tr-4','tr-6','tr-8'], ['tr-1','tr-3','tr-5'], ['tr-4','tr-6','tr-8'], ['tr-1','tr-3','tr-5'],
+          ['tr-4','tr-6','tr-8'], ['tr-1','tr-3','tr-5'], ['tr-1','tr-3','tr-5'], ['tr-1','tr-3','tr-5'], ['tr-1','tr-3','tr-5'],
+          ['tr-1','tr-3','tr-5'], ['tr-4','tr-6','tr-8'], ['tr-4','tr-6','tr-8'], ['tr-5','tr-7','tr-2'],
+          ['tr-1','tr-3','tr-5'], ['tr-4','tr-6','tr-8'], ['tr-1','tr-3','tr-5'], ['tr-4','tr-6','tr-8'], ['tr-1','tr-3','tr-5']
+        ],
       },
       // ── Review 1 ────────────────────────────────────────────────────────
       {
@@ -157,6 +172,14 @@ const CURRICULUM = {
         description: 'A traditional German folk song spanning almost your full octave — D up to C.',
         prompt: 'This song moves stepwise through your new notes. Take it slowly and listen for each pitch!',
         noteIds: ['tr-6', 'tr-5', 'tr-4', 'tr-3', 'tr-2', 'tr-6', 'tr-5', 'tr-4', 'tr-3', 'tr-2', 'tr-5', 'tr-5', 'tr-6', 'tr-6', 'tr-4', 'tr-4', 'tr-3', 'tr-3', 'tr-2', 'tr-2', 'tr-6', 'tr-5', 'tr-4', 'tr-3', 'tr-2'],
+        chordIds: [
+          ['tr-4','tr-6','tr-8'], ['tr-1','tr-3','tr-5'], ['tr-4','tr-6','tr-8'], ['tr-1','tr-3','tr-5'], ['tr-5','tr-7','tr-2'],
+          ['tr-4','tr-6','tr-8'], ['tr-1','tr-3','tr-5'], ['tr-4','tr-6','tr-8'], ['tr-1','tr-3','tr-5'], ['tr-5','tr-7','tr-2'],
+          ['tr-1','tr-3','tr-5'], ['tr-1','tr-3','tr-5'], ['tr-4','tr-6','tr-8'], ['tr-4','tr-6','tr-8'],
+          ['tr-4','tr-6','tr-8'], ['tr-4','tr-6','tr-8'], ['tr-1','tr-3','tr-5'], ['tr-1','tr-3','tr-5'],
+          ['tr-5','tr-7','tr-2'], ['tr-5','tr-7','tr-2'],
+          ['tr-4','tr-6','tr-8'], ['tr-1','tr-3','tr-5'], ['tr-4','tr-6','tr-8'], ['tr-1','tr-3','tr-5'], ['tr-5','tr-7','tr-2']
+        ],
       },
       {
         id: 'tr-song-4', type: 'song',
@@ -165,6 +188,12 @@ const CURRICULUM = {
         description: 'A bright fanfare using all eight notes of your first octave — C to C.',
         prompt: 'This fanfare leaps between all your notes. Keep the air strong and the valves crisp!',
         noteIds: ['tr-1', 'tr-5', 'tr-8', 'tr-5', 'tr-1', 'tr-7', 'tr-5', 'tr-4', 'tr-3', 'tr-6', 'tr-4', 'tr-5', 'tr-1', 'tr-5', 'tr-8', 'tr-1'],
+        chordIds: [
+          ['tr-1','tr-3','tr-5'], ['tr-1','tr-3','tr-5'], ['tr-1','tr-3','tr-5'], ['tr-1','tr-3','tr-5'],
+          ['tr-1','tr-3','tr-5'], ['tr-5','tr-7','tr-2'], ['tr-1','tr-3','tr-5'], ['tr-4','tr-6','tr-8'],
+          ['tr-1','tr-3','tr-5'], ['tr-4','tr-6','tr-8'], ['tr-4','tr-6','tr-8'], ['tr-1','tr-3','tr-5'],
+          ['tr-1','tr-3','tr-5'], ['tr-1','tr-3','tr-5'], ['tr-1','tr-3','tr-5'], ['tr-1','tr-3','tr-5']
+        ],
       },
       // ── Review 2 ────────────────────────────────────────────────────────
       {
@@ -1176,6 +1205,13 @@ const CURRICULUM = {
         description: 'A classic melody using E, F, and G — your first three notes with valves.',
         prompt: 'Step through each note. The pattern repeats. Feel how the valves move!',
         noteIds: ['fh-5', 'fh-4', 'fh-3', 'fh-5', 'fh-4', 'fh-3', 'fh-3', 'fh-3', 'fh-3', 'fh-4', 'fh-4', 'fh-4', 'fh-4', 'fh-5', 'fh-4', 'fh-3'],
+        chordIds: [
+          ['fh-1','fh-3','fh-5'], ['fh-4','fh-6','fh-8'], ['fh-1','fh-3','fh-5'],
+          ['fh-1','fh-3','fh-5'], ['fh-4','fh-6','fh-8'], ['fh-1','fh-3','fh-5'],
+          ['fh-1','fh-3','fh-5'], ['fh-1','fh-3','fh-5'], ['fh-1','fh-3','fh-5'], ['fh-1','fh-3','fh-5'],
+          ['fh-4','fh-6','fh-8'], ['fh-4','fh-6','fh-8'], ['fh-4','fh-6','fh-8'], ['fh-4','fh-6','fh-8'],
+          ['fh-1','fh-3','fh-5'], ['fh-4','fh-6','fh-8']
+        ],
       },
       {
         id: 'fh-song-2', type: 'song',
@@ -1184,6 +1220,14 @@ const CURRICULUM = {
         description: 'The tune behind "Mary Had a Little Lamb" using G, A, G, F, E, and D.',
         prompt: 'Listen for the repeating three-note pattern!',
         noteIds: ['fh-5', 'fh-6', 'fh-5', 'fh-4', 'fh-3', 'fh-5', 'fh-5', 'fh-5', 'fh-6', 'fh-5', 'fh-4', 'fh-4', 'fh-5', 'fh-6', 'fh-5', 'fh-4', 'fh-3', 'fh-5', 'fh-5', 'fh-5', 'fh-3', 'fh-4', 'fh-4', 'fh-2', 'fh-5', 'fh-6', 'fh-5', 'fh-4', 'fh-3'],
+        chordIds: [
+          ['fh-1','fh-3','fh-5'], ['fh-4','fh-6','fh-8'], ['fh-1','fh-3','fh-5'], ['fh-4','fh-6','fh-8'], ['fh-1','fh-3','fh-5'],
+          ['fh-1','fh-3','fh-5'], ['fh-1','fh-3','fh-5'], ['fh-1','fh-3','fh-5'], ['fh-4','fh-6','fh-8'], ['fh-1','fh-3','fh-5'],
+          ['fh-4','fh-6','fh-8'], ['fh-4','fh-6','fh-8'], ['fh-1','fh-3','fh-5'], ['fh-4','fh-6','fh-8'], ['fh-1','fh-3','fh-5'],
+          ['fh-4','fh-6','fh-8'], ['fh-1','fh-3','fh-5'], ['fh-1','fh-3','fh-5'], ['fh-1','fh-3','fh-5'], ['fh-1','fh-3','fh-5'],
+          ['fh-1','fh-3','fh-5'], ['fh-4','fh-6','fh-8'], ['fh-4','fh-6','fh-8'], ['fh-5','fh-7','fh-2'],
+          ['fh-1','fh-3','fh-5'], ['fh-4','fh-6','fh-8'], ['fh-1','fh-3','fh-5'], ['fh-4','fh-6','fh-8'], ['fh-1','fh-3','fh-5']
+        ],
       },
       // ── Review 1 ────────────────────────────────────────────────────────
       {
@@ -1201,6 +1245,14 @@ const CURRICULUM = {
         description: 'A traditional German folk song spanning almost your full octave — D up to C.',
         prompt: 'This song moves stepwise through your new notes. Take it slowly!',
         noteIds: ['fh-6', 'fh-5', 'fh-4', 'fh-3', 'fh-2', 'fh-6', 'fh-5', 'fh-4', 'fh-3', 'fh-2', 'fh-5', 'fh-5', 'fh-6', 'fh-6', 'fh-4', 'fh-4', 'fh-3', 'fh-3', 'fh-2', 'fh-2', 'fh-6', 'fh-5', 'fh-4', 'fh-3', 'fh-2'],
+        chordIds: [
+          ['fh-4','fh-6','fh-8'], ['fh-1','fh-3','fh-5'], ['fh-4','fh-6','fh-8'], ['fh-1','fh-3','fh-5'], ['fh-5','fh-7','fh-2'],
+          ['fh-4','fh-6','fh-8'], ['fh-1','fh-3','fh-5'], ['fh-4','fh-6','fh-8'], ['fh-1','fh-3','fh-5'], ['fh-5','fh-7','fh-2'],
+          ['fh-1','fh-3','fh-5'], ['fh-1','fh-3','fh-5'], ['fh-4','fh-6','fh-8'], ['fh-4','fh-6','fh-8'],
+          ['fh-4','fh-6','fh-8'], ['fh-4','fh-6','fh-8'], ['fh-1','fh-3','fh-5'], ['fh-1','fh-3','fh-5'],
+          ['fh-5','fh-7','fh-2'], ['fh-5','fh-7','fh-2'],
+          ['fh-4','fh-6','fh-8'], ['fh-1','fh-3','fh-5'], ['fh-4','fh-6','fh-8'], ['fh-1','fh-3','fh-5'], ['fh-5','fh-7','fh-2']
+        ],
       },
       {
         id: 'fh-song-4', type: 'song',
@@ -1209,6 +1261,12 @@ const CURRICULUM = {
         description: 'A bright fanfare using all eight notes of your first octave — C to C.',
         prompt: 'This fanfare leaps between all your notes. Keep the air strong and the valves crisp!',
         noteIds: ['fh-1', 'fh-5', 'fh-8', 'fh-5', 'fh-1', 'fh-7', 'fh-5', 'fh-4', 'fh-3', 'fh-6', 'fh-4', 'fh-5', 'fh-1', 'fh-5', 'fh-8', 'fh-1'],
+        chordIds: [
+          ['fh-1','fh-3','fh-5'], ['fh-1','fh-3','fh-5'], ['fh-1','fh-3','fh-5'], ['fh-1','fh-3','fh-5'],
+          ['fh-1','fh-3','fh-5'], ['fh-5','fh-7','fh-2'], ['fh-1','fh-3','fh-5'], ['fh-4','fh-6','fh-8'],
+          ['fh-1','fh-3','fh-5'], ['fh-4','fh-6','fh-8'], ['fh-4','fh-6','fh-8'], ['fh-1','fh-3','fh-5'],
+          ['fh-1','fh-3','fh-5'], ['fh-1','fh-3','fh-5'], ['fh-1','fh-3','fh-5'], ['fh-1','fh-3','fh-5']
+        ],
       },
       // ── Review 2 ────────────────────────────────────────────────────────
       {
