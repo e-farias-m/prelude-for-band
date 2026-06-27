@@ -20,6 +20,9 @@ const APP = {
   importedSong: null,
   // Imported song list
   importedSongs: null,
+  // Audio playback state
+  audioPlaybackTimeouts: [],
+  audioPlaybackAudio: null,
 };
 
 const STORAGE_KEY = 'preludeBandProgress';
@@ -447,9 +450,28 @@ function renderSongPresentPhase(inst, lesson) {
   const currentNum = APP.songNoteIndex + 1;
   const isFirst = APP.songNoteIndex === 0;
   const isLast = APP.songNoteIndex >= totalNotes - 1;
+  const hasAudio = !!lesson.audioUrl;
 
   const fingeringSvg = Graphics.fingeringSVG(inst.fingeringType, note.fingeringState, inst.accentColor, 84);
   const staffSvg = Graphics.staffSVG({ pos: note.staffStep, accidental: note.accidental, clef: inst.clef, accentColor: inst.accentColor, width: 96 });
+
+  let actionButtons;
+  if (hasAudio) {
+    actionButtons = `
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <button class="btn btn-secondary" data-action="song-prev" ${isFirst ? 'disabled' : ''}>‹ Prev</button>
+        <button class="btn btn-secondary" data-action="song-next" ${isLast ? 'disabled' : ''}>Next ›</button>
+      </div>
+      <button class="btn btn-primary btn-wide" data-action="play-song-audio-start" style="margin-top:8px">▶ Play with recording</button>`;
+  } else {
+    actionButtons = `
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <button class="btn btn-secondary" data-action="song-prev" ${isFirst ? 'disabled' : ''}>‹ Prev</button>
+        <button class="btn-hear" data-action="hear-note"><span class="hear-icon">🔊</span> Play note</button>
+        <button class="btn btn-secondary" data-action="song-next" ${isLast ? 'disabled' : ''}>Next ›</button>
+      </div>
+      <button class="btn btn-secondary" data-action="play-melody" style="margin-top:8px;width:100%">▶ Play whole melody</button>`;
+  }
 
   return `
     <div class="lesson-body">
@@ -471,17 +493,125 @@ function renderSongPresentPhase(inst, lesson) {
       <div class="note-description">${lesson.description}</div>
       <div class="gap-md"></div>
       <div class="note-prompt">${lesson.prompt}</div>
-      <div class="gap-md"></div>
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-        <button class="btn btn-secondary" data-action="song-prev" ${isFirst ? 'disabled' : ''}>‹ Prev</button>
-        <button class="btn-hear" data-action="hear-note"><span class="hear-icon">🔊</span> Play note</button>
-        <button class="btn btn-secondary" data-action="song-next" ${isLast ? 'disabled' : ''}>Next ›</button>
-      </div>
-      <button class="btn btn-secondary" data-action="play-melody" style="margin-top:8px;width:100%">▶ Play whole melody</button>
+      ${actionButtons}
     </div>
     <div class="action-bar">
       <button class="btn btn-primary btn-wide" data-action="goto-quiz">Continue to quiz</button>
     </div>`;
+}
+
+function renderSongAudioPlayerContent(inst, lesson) {
+  return `
+    <div class="lesson-body" id="song-audio-body">
+      <div class="lesson-instruction">${lesson.noteName}</div>
+      <div class="song-audio-status" id="song-audio-status">Tap play, then follow along with the recording.</div>
+      <div class="beat-grid" id="song-audio-beats" style="justify-content:center;margin-bottom:20px">
+        ${[1,2,3,4].map(n => `<div class="beat-cell count-in" data-beat="${n}"><span class="beat-num">${n}</span></div>`).join('')}
+      </div>
+      <div id="song-audio-notation">
+        <div class="present-layout">
+          <div class="present-diagram-wrap">
+            <div class="present-diagram-label">Fingering</div>
+            <div class="present-diagram-svg" id="song-audio-fingering"></div>
+          </div>
+          <div class="present-notation-wrap">
+            <div class="present-diagram-label">On the staff</div>
+            <div class="present-diagram-svg" id="song-audio-staff"></div>
+          </div>
+        </div>
+        <div class="note-name-block">
+          <span class="note-name-big" id="song-audio-notename"></span>
+        </div>
+      </div>
+      <div class="song-audio-progress" id="song-audio-progress"></div>
+      <div class="gap-md"></div>
+      <button class="btn btn-primary btn-wide" data-action="play-song-audio-start" id="play-song-audio-btn">▶ Play with recording</button>
+      <div class="gap-sm"></div>
+    </div>`;
+}
+
+function startSongAudioPlayback(inst, lesson) {
+  const statusEl = document.getElementById('song-audio-status');
+  const beatEls = document.querySelectorAll('#song-audio-beats .beat-cell');
+  const fingEl = document.getElementById('song-audio-fingering');
+  const staffEl = document.getElementById('song-audio-staff');
+  const nameEl = document.getElementById('song-audio-notename');
+  const progEl = document.getElementById('song-audio-progress');
+  const playBtn = document.getElementById('play-song-audio-btn');
+  if (!playBtn || playBtn.disabled) return;
+
+  const bpm = lesson.bpm || 100;
+  const msPerBeat = 60000 / bpm;
+
+  playBtn.disabled = true;
+  playBtn.textContent = 'Preparing\u2026';
+
+  // Clean up any previous playback
+  APP.audioPlaybackTimeouts.forEach(clearTimeout);
+  APP.audioPlaybackTimeouts = [];
+
+  statusEl.textContent = 'Count-in\u2026';
+
+  // Preload and start the audio
+  const audio = new Audio(lesson.audioUrl);
+  audio.preload = 'auto';
+  APP.audioPlaybackAudio = audio;
+
+  // Count-in: 4 visual beats
+  let beatCount = 0;
+
+  function showBeat() {
+    beatEls.forEach(el => el.classList.remove('active'));
+    if (beatCount < 4 && beatEls[beatCount]) {
+      beatEls[beatCount].classList.add('active');
+      beatCount++;
+    }
+    if (beatCount >= 4) {
+      clearInterval(countInterval);
+      beatEls.forEach(el => el.classList.remove('active'));
+      startNotes();
+    }
+  }
+
+  showBeat();
+  const countInterval = setInterval(showBeat, msPerBeat);
+
+  audio.play().catch(() => {
+    clearInterval(countInterval);
+    beatEls.forEach(el => el.classList.remove('active'));
+    statusEl.textContent = 'Audio failed to load.';
+    playBtn.textContent = 'Retry';
+    playBtn.disabled = false;
+    playBtn.dataset.action = 'play-song-audio-start';
+    APP.audioPlaybackAudio = null;
+  });
+
+  function startNotes() {
+    statusEl.textContent = 'Playing\u2026';
+    playBtn.textContent = 'Playing\u2026';
+    const noteIds = lesson.noteIds;
+    noteIds.forEach((id, i) => {
+      const t = setTimeout(() => {
+        const note = findLessonById(APP.instrumentId, id);
+        if (fingEl) fingEl.innerHTML = Graphics.fingeringSVG(inst.fingeringType, note.fingeringState, inst.accentColor, 84);
+        if (staffEl) staffEl.innerHTML = Graphics.staffSVG({ pos: note.staffStep, accidental: note.accidental, clef: inst.clef, accentColor: inst.accentColor, width: 96 });
+        if (nameEl) nameEl.textContent = note.noteName;
+        if (progEl) progEl.textContent = `Note ${i + 1} of ${noteIds.length}`;
+
+        beatEls.forEach(el => el.classList.remove('active'));
+        const bi = i % 4;
+        if (beatEls[bi]) beatEls[bi].classList.add('active');
+
+        if (i === noteIds.length - 1) {
+          statusEl.textContent = 'Song complete!';
+          playBtn.textContent = 'Done';
+          playBtn.disabled = false;
+          playBtn.dataset.action = 'back-to-present';
+        }
+      }, i * msPerBeat);
+      APP.audioPlaybackTimeouts.push(t);
+    });
+  }
 }
 
 function buildSongQuizOptions(inst, song) {
@@ -976,7 +1106,34 @@ function handleAction(action, el) {
       break;
     }
 
+    case 'play-song-audio-start': {
+      const inst = getInstrument(APP.instrumentId);
+      const lesson = getLesson(APP.instrumentId, APP.lessonIndex);
+      const body = document.querySelector('.lesson-body');
+      if (body) {
+        body.innerHTML = renderSongAudioPlayerContent(inst, lesson);
+        startSongAudioPlayback(inst, lesson);
+      }
+      break;
+    }
+
+    case 'back-to-present': {
+      APP.audioPlaybackTimeouts.forEach(clearTimeout);
+      APP.audioPlaybackTimeouts = [];
+      if (APP.audioPlaybackAudio) {
+        APP.audioPlaybackAudio.pause();
+        APP.audioPlaybackAudio = null;
+      }
+      APP.songNoteIndex = 0;
+      APP.phase = 'present';
+      render();
+      break;
+    }
+
     case 'exit-lesson':
+      APP.audioPlaybackTimeouts.forEach(clearTimeout);
+      APP.audioPlaybackTimeouts = [];
+      if (APP.audioPlaybackAudio) { APP.audioPlaybackAudio.pause(); APP.audioPlaybackAudio = null; }
       APP.reviewQueue = null;
       APP.reviewIndex = 0;
       APP.reviewCorrect = 0;
@@ -1004,6 +1161,9 @@ function handleAction(action, el) {
     }
 
     case 'goto-quiz':
+      APP.audioPlaybackTimeouts.forEach(clearTimeout);
+      APP.audioPlaybackTimeouts = [];
+      if (APP.audioPlaybackAudio) { APP.audioPlaybackAudio.pause(); APP.audioPlaybackAudio = null; }
       APP.phase = 'quiz';
       APP.quiz = null;
       render();
@@ -1123,6 +1283,9 @@ function handleAction(action, el) {
       break;
     }
     case 'open-imported-song': {
+      APP.audioPlaybackTimeouts.forEach(clearTimeout);
+      APP.audioPlaybackTimeouts = [];
+      if (APP.audioPlaybackAudio) { APP.audioPlaybackAudio.pause(); APP.audioPlaybackAudio = null; }
       const idx = parseInt(el.dataset.importedIndex, 10);
       const allImported = JSON.parse(localStorage.getItem(IMPORTED_SONGS_KEY) || '{}');
       const songs = allImported[APP.instrumentId] || [];
@@ -1148,6 +1311,9 @@ function handleAction(action, el) {
       break;
     }
     case 'finish-lesson':
+      APP.audioPlaybackTimeouts.forEach(clearTimeout);
+      APP.audioPlaybackTimeouts = [];
+      if (APP.audioPlaybackAudio) { APP.audioPlaybackAudio.pause(); APP.audioPlaybackAudio = null; }
       APP.reviewQueue = null;
       APP.reviewIndex = 0;
       APP.reviewCorrect = 0;

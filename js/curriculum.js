@@ -127,6 +127,8 @@ const CURRICULUM = {
       },
       {
         id: 'tr-song-1', type: 'song',
+        audioUrl: null,
+        bpm: 100,
         noteName: 'Hot Cross Buns',
         prerequisiteIds: ['tr-3', 'tr-4', 'tr-5'],
         description: 'A classic English nursery rhyme using G, F, and E — your first three valve combinations.',
@@ -142,6 +144,8 @@ const CURRICULUM = {
       },
       {
         id: 'tr-song-2', type: 'song',
+        audioUrl: null,
+        bpm: 100,
         noteName: 'Merrily We Roll Along',
         prerequisiteIds: ['tr-2', 'tr-3', 'tr-4', 'tr-5', 'tr-6'],
         description: 'The tune behind "Mary Had a Little Lamb" using G, A, G, F, E, and D.',
@@ -167,6 +171,8 @@ const CURRICULUM = {
       },
       {
         id: 'tr-song-3', type: 'song',
+        audioUrl: null,
+        bpm: 100,
         noteName: 'Lightly Row',
         prerequisiteIds: ['tr-2', 'tr-3', 'tr-4', 'tr-5', 'tr-6', 'tr-7', 'tr-8'],
         description: 'A traditional German folk song spanning almost your full octave — D up to C.',
@@ -183,6 +189,8 @@ const CURRICULUM = {
       },
       {
         id: 'tr-song-4', type: 'song',
+        audioUrl: null,
+        bpm: 100,
         noteName: 'Trumpet Tune',
         prerequisiteIds: ['tr-1', 'tr-2', 'tr-3', 'tr-4', 'tr-5', 'tr-6', 'tr-7', 'tr-8'],
         description: 'A bright fanfare using all eight notes of your first octave — C to C.',
@@ -247,6 +255,8 @@ const CURRICULUM = {
       },
       {
         id: 'fl-song-1', type: 'song',
+        audioUrl: null,
+        bpm: 100,
         noteName: 'Hot Cross Buns',
         prerequisiteIds: ['fl-1', 'fl-2', 'fl-3'],
         description: 'A classic English nursery rhyme using F, E, and D — your first three flute notes.',
@@ -277,6 +287,8 @@ const CURRICULUM = {
       },
       {
         id: 'fl-song-2', type: 'song',
+        audioUrl: null,
+        bpm: 100,
         noteName: 'Merrily We Roll Along',
         prerequisiteIds: ['fl-1', 'fl-2', 'fl-3', 'fl-4'],
         description: 'A classic tune using G, F, E, and D — four notes descending through your first octave.',
@@ -327,6 +339,8 @@ const CURRICULUM = {
       },
       {
         id: 'fl-song-3', type: 'song',
+        audioUrl: null,
+        bpm: 100,
         noteName: 'Lightly Row',
         prerequisiteIds: ['fl-1', 'fl-2', 'fl-3', 'fl-4', 'fl-5', 'fl-6', 'fl-7', 'fl-8'],
         description: 'A folk melody climbing up and down the full D octave.',
@@ -335,6 +349,8 @@ const CURRICULUM = {
       },
       {
         id: 'fl-song-4', type: 'song',
+        audioUrl: null,
+        bpm: 100,
         noteName: 'Flute Song',
         prerequisiteIds: ['fl-1', 'fl-2', 'fl-3', 'fl-4', 'fl-5', 'fl-6', 'fl-7', 'fl-8'],
         description: 'A melodic phrase connecting every note of your flute octave.',
@@ -396,6 +412,8 @@ const CURRICULUM = {
       },
       {
         id: 'cl-song-1', type: 'song',
+        audioUrl: null,
+        bpm: 100,
         noteName: 'Hot Cross Buns',
         prerequisiteIds: ['cl-1', 'cl-2', 'cl-3'],
         description: 'A classic English nursery rhyme using G, F, and E — your first three clarinet notes.',
@@ -428,6 +446,8 @@ const CURRICULUM = {
       },
       {
         id: 'cl-song-2', type: 'song',
+        audioUrl: null,
+        bpm: 100,
         noteName: 'Merrily We Roll Along',
         prerequisiteIds: ['cl-1', 'cl-2', 'cl-3', 'cl-4'],
         description: 'A classic tune using A, G, F, and E — four notes descending through your first notes.',
@@ -481,6 +501,8 @@ const CURRICULUM = {
       },
       {
         id: 'cl-song-3', type: 'song',
+        audioUrl: null,
+        bpm: 100,
         noteName: 'Lightly Row',
         prerequisiteIds: ['cl-1', 'cl-2', 'cl-3', 'cl-4', 'cl-5', 'cl-6', 'cl-7', 'cl-8'],
         description: 'A folk melody climbing up and down the full E octave.',
@@ -489,6 +511,8 @@ const CURRICULUM = {
       },
       {
         id: 'cl-song-4', type: 'song',
+        audioUrl: null,
+        bpm: 100,
         noteName: 'Clarinet Song',
         prerequisiteIds: ['cl-1', 'cl-2', 'cl-3', 'cl-4', 'cl-5', 'cl-6', 'cl-7', 'cl-8'],
         description: 'A melodic phrase connecting every note of your clarinet octave.',
@@ -550,6 +574,8 @@ const CURRICULUM = {
       },
       {
         id: 'as-song-1', type: 'song',
+        audioUrl: null,
+        bpm: 100,
         noteName: 'Hot Cross Buns',
         prerequisiteIds: ['as-1', 'as-2', 'as-3'],
         description: 'A classic English nursery rhyme using E, D, and C — your first three alto sax notes.',
@@ -582,6 +608,8 @@ const CURRICULUM = {
       },
       {
         id: 'as-song-2', type: 'song',
+        audioUrl: null,
+        bpm: 100,
         noteName: 'Merrily We Roll Along',
         prerequisiteIds: ['as-1', 'as-2', 'as-3', 'as-4'],
         description: 'A classic tune using F, E, D, and C — four notes descending through your first notes.',
@@ -635,6 +663,8 @@ const CURRICULUM = {
       },
       {
         id: 'as-song-3', type: 'song',
+        audioUrl: null,
+        bpm: 100,
         noteName: 'Lightly Row',
         prerequisiteIds: ['as-1', 'as-2', 'as-3', 'as-4', 'as-5', 'as-6', 'as-7', 'as-8'],
         description: 'A folk melody climbing up and down the full C octave.',
@@ -643,6 +673,8 @@ const CURRICULUM = {
       },
       {
         id: 'as-song-4', type: 'song',
+        audioUrl: null,
+        bpm: 100,
         noteName: 'Saxophone Song',
         prerequisiteIds: ['as-1', 'as-2', 'as-3', 'as-4', 'as-5', 'as-6', 'as-7', 'as-8'],
         description: 'A melodic phrase connecting every note of your alto sax octave.',
@@ -701,6 +733,8 @@ const CURRICULUM = {
       },
       {
         id: 'ob-song-1', type: 'song',
+        audioUrl: null,
+        bpm: 100,
         noteName: 'Hot Cross Buns',
         prerequisiteIds: ['ob-1', 'ob-2', 'ob-3'],
         description: 'A classic English nursery rhyme using F, E, and D — your first three oboe notes.',
@@ -731,6 +765,8 @@ const CURRICULUM = {
       },
       {
         id: 'ob-song-2', type: 'song',
+        audioUrl: null,
+        bpm: 100,
         noteName: 'Merrily We Roll Along',
         prerequisiteIds: ['ob-1', 'ob-2', 'ob-3', 'ob-4'],
         description: 'A classic tune using G, F, E, and D — four notes descending through your first notes.',
@@ -781,6 +817,8 @@ const CURRICULUM = {
       },
       {
         id: 'ob-song-3', type: 'song',
+        audioUrl: null,
+        bpm: 100,
         noteName: 'Lightly Row',
         prerequisiteIds: ['ob-1', 'ob-2', 'ob-3', 'ob-4', 'ob-5', 'ob-6', 'ob-7', 'ob-8'],
         description: 'A folk melody climbing up and down the full D octave.',
@@ -789,6 +827,8 @@ const CURRICULUM = {
       },
       {
         id: 'ob-song-4', type: 'song',
+        audioUrl: null,
+        bpm: 100,
         noteName: 'Oboe Song',
         prerequisiteIds: ['ob-1', 'ob-2', 'ob-3', 'ob-4', 'ob-5', 'ob-6', 'ob-7', 'ob-8'],
         description: 'A melodic phrase connecting every note of your oboe octave.',
@@ -847,6 +887,8 @@ const CURRICULUM = {
       },
       {
         id: 'bn-song-1', type: 'song',
+        audioUrl: null,
+        bpm: 100,
         noteName: 'Hot Cross Buns',
         prerequisiteIds: ['bn-1', 'bn-2', 'bn-3'],
         description: 'A classic English nursery rhyme using F, E, and D — your first three bassoon notes.',
@@ -877,6 +919,8 @@ const CURRICULUM = {
       },
       {
         id: 'bn-song-2', type: 'song',
+        audioUrl: null,
+        bpm: 100,
         noteName: 'Merrily We Roll Along',
         prerequisiteIds: ['bn-1', 'bn-2', 'bn-3', 'bn-4'],
         description: 'A classic tune using G, F, E, and D — four notes descending through your first notes.',
@@ -927,6 +971,8 @@ const CURRICULUM = {
       },
       {
         id: 'bn-song-3', type: 'song',
+        audioUrl: null,
+        bpm: 100,
         noteName: 'Lightly Row',
         prerequisiteIds: ['bn-1', 'bn-2', 'bn-3', 'bn-4', 'bn-5', 'bn-6', 'bn-7', 'bn-8'],
         description: 'A folk melody travelling up and down the full D octave.',
@@ -935,6 +981,8 @@ const CURRICULUM = {
       },
       {
         id: 'bn-song-4', type: 'song',
+        audioUrl: null,
+        bpm: 100,
         noteName: 'Bassoon Song',
         prerequisiteIds: ['bn-1', 'bn-2', 'bn-3', 'bn-4', 'bn-5', 'bn-6', 'bn-7', 'bn-8'],
         description: 'A melodic phrase connecting every note of your bassoon octave.',
@@ -1046,6 +1094,8 @@ const CURRICULUM = {
       },
       {
         id: 'tb-song-1', type: 'song',
+        audioUrl: null,
+        bpm: 100,
         noteName: 'Hot Cross Buns',
         prerequisiteIds: ['tb-3', 'tb-4', 'tb-5'],
         description: 'A classic English nursery rhyme using F3, Eb3, and D3 — your first three slide positions.',
@@ -1054,6 +1104,8 @@ const CURRICULUM = {
       },
       {
         id: 'tb-song-2', type: 'song',
+        audioUrl: null,
+        bpm: 100,
         noteName: 'Merrily We Roll Along',
         prerequisiteIds: ['tb-3', 'tb-4', 'tb-5', 'tb-6'],
         description: 'A classic tune using G3, F3, Eb3, and D3 — four notes across the staff.',
@@ -1071,6 +1123,8 @@ const CURRICULUM = {
       },
       {
         id: 'tb-song-3', type: 'song',
+        audioUrl: null,
+        bpm: 100,
         noteName: 'Lightly Row',
         prerequisiteIds: ['tb-1', 'tb-2', 'tb-3', 'tb-4', 'tb-5', 'tb-6', 'tb-7', 'tb-8'],
         description: 'A folk melody travelling up and down the full Bb octave.',
@@ -1079,6 +1133,8 @@ const CURRICULUM = {
       },
       {
         id: 'tb-song-4', type: 'song',
+        audioUrl: null,
+        bpm: 100,
         noteName: 'Slide Serenade',
         prerequisiteIds: ['tb-1', 'tb-2', 'tb-3', 'tb-4', 'tb-5', 'tb-6', 'tb-7', 'tb-8'],
         description: 'A melodic phrase connecting all your slide positions.',
@@ -1200,6 +1256,8 @@ const CURRICULUM = {
       // ── Song 1 ──────────────────────────────────────────────────────────
       {
         id: 'fh-song-1', type: 'song',
+        audioUrl: null,
+        bpm: 100,
         noteName: 'Hot Cross Buns',
         prerequisiteIds: ['fh-3', 'fh-4', 'fh-5'],
         description: 'A classic melody using E, F, and G — your first three notes with valves.',
@@ -1215,6 +1273,8 @@ const CURRICULUM = {
       },
       {
         id: 'fh-song-2', type: 'song',
+        audioUrl: null,
+        bpm: 100,
         noteName: 'Merrily We Roll Along',
         prerequisiteIds: ['fh-2', 'fh-3', 'fh-4', 'fh-5', 'fh-6'],
         description: 'The tune behind "Mary Had a Little Lamb" using G, A, G, F, E, and D.',
@@ -1240,6 +1300,8 @@ const CURRICULUM = {
       },
       {
         id: 'fh-song-3', type: 'song',
+        audioUrl: null,
+        bpm: 100,
         noteName: 'Lightly Row',
         prerequisiteIds: ['fh-2', 'fh-3', 'fh-4', 'fh-5', 'fh-6', 'fh-7', 'fh-8'],
         description: 'A traditional German folk song spanning almost your full octave — D up to C.',
@@ -1256,6 +1318,8 @@ const CURRICULUM = {
       },
       {
         id: 'fh-song-4', type: 'song',
+        audioUrl: null,
+        bpm: 100,
         noteName: 'Horn Calls',
         prerequisiteIds: ['fh-1', 'fh-2', 'fh-3', 'fh-4', 'fh-5', 'fh-6', 'fh-7', 'fh-8'],
         description: 'A bright fanfare using all eight notes of your first octave — C to C.',
@@ -1373,6 +1437,8 @@ const CURRICULUM = {
       },
       {
         id: 'eu-song-1', type: 'song',
+        audioUrl: null,
+        bpm: 100,
         noteName: 'Hot Cross Buns',
         prerequisiteIds: ['eu-3', 'eu-4', 'eu-5'],
         description: 'A classic English nursery rhyme using F3, Eb3, and D3 — your first three valve combinations.',
@@ -1381,6 +1447,8 @@ const CURRICULUM = {
       },
       {
         id: 'eu-song-2', type: 'song',
+        audioUrl: null,
+        bpm: 100,
         noteName: 'Merrily We Roll Along',
         prerequisiteIds: ['eu-3', 'eu-4', 'eu-5', 'eu-6'],
         description: 'A classic tune using G3, F3, Eb3, and D3 — four notes across the staff.',
@@ -1398,6 +1466,8 @@ const CURRICULUM = {
       },
       {
         id: 'eu-song-3', type: 'song',
+        audioUrl: null,
+        bpm: 100,
         noteName: 'Lightly Row',
         prerequisiteIds: ['eu-1', 'eu-2', 'eu-3', 'eu-4', 'eu-5', 'eu-6', 'eu-7', 'eu-8'],
         description: 'A folk melody travelling up and down the full Bb octave.',
@@ -1406,6 +1476,8 @@ const CURRICULUM = {
       },
       {
         id: 'eu-song-4', type: 'song',
+        audioUrl: null,
+        bpm: 100,
         noteName: 'Euphonium Air',
         prerequisiteIds: ['eu-1', 'eu-2', 'eu-3', 'eu-4', 'eu-5', 'eu-6', 'eu-7', 'eu-8'],
         description: 'A melodic phrase connecting all your valve combinations.',
@@ -1517,6 +1589,8 @@ const CURRICULUM = {
       },
       {
         id: 'tu-song-1', type: 'song',
+        audioUrl: null,
+        bpm: 100,
         noteName: 'Hot Cross Buns',
         prerequisiteIds: ['tu-3', 'tu-4', 'tu-5'],
         description: 'A classic English nursery rhyme using F2, Eb2, and D2 — your first three notes below the staff.',
@@ -1525,6 +1599,8 @@ const CURRICULUM = {
       },
       {
         id: 'tu-song-2', type: 'song',
+        audioUrl: null,
+        bpm: 100,
         noteName: 'Merrily We Roll Along',
         prerequisiteIds: ['tu-3', 'tu-4', 'tu-5', 'tu-6'],
         description: 'A classic tune using G2, F2, Eb2, and D2 — four notes across and below the staff.',
@@ -1542,6 +1618,8 @@ const CURRICULUM = {
       },
       {
         id: 'tu-song-3', type: 'song',
+        audioUrl: null,
+        bpm: 100,
         noteName: 'Lightly Row',
         prerequisiteIds: ['tu-1', 'tu-2', 'tu-3', 'tu-4', 'tu-5', 'tu-6', 'tu-7', 'tu-8'],
         description: 'A folk melody climbing up and down the full Bb octave.',
@@ -1550,6 +1628,8 @@ const CURRICULUM = {
       },
       {
         id: 'tu-song-4', type: 'song',
+        audioUrl: null,
+        bpm: 100,
         noteName: 'Tuba Foundation',
         prerequisiteIds: ['tu-1', 'tu-2', 'tu-3', 'tu-4', 'tu-5', 'tu-6', 'tu-7', 'tu-8'],
         description: 'A grounding melody connecting all your notes across the octave.',
