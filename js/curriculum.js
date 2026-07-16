@@ -488,9 +488,9 @@ const CURRICULUM = {
         staffStep: 8,
         accidental: null,
         freq: 622.25,
-        fingeringState: [true, true, false, false, false, false, false, false, true],
-        description: 'F — add the A key with your left index finger.',
-        prompt: 'Register key + A key (left index). All other keys open.'
+        fingeringState: [true, true, false, false, true, false, false, false, true],
+        description: 'F — add the A ring and E/B side key.',
+        prompt: 'Register key + A ring (left index) + E/B key (right index). Left middle and ring open.'
       },
       {
         id: 'cl-3',
@@ -500,9 +500,9 @@ const CURRICULUM = {
         staffStep: 9,
         accidental: null,
         freq: 698.46,
-        fingeringState: [true, true, true, false, false, false, false, false, true],
-        description: 'G — add left middle finger. Three keys down now.',
-        prompt: 'Register key + A key + G key (left middle).'
+        fingeringState: [true, true, true, true, false, false, false, false, true],
+        description: 'G — close all three left-hand rings.',
+        prompt: 'Register key + A ring + W ring + T ring. All three left-hand fingers down.'
       },
       {
         id: 'cl-song-1', type: 'song',
@@ -540,9 +540,9 @@ const CURRICULUM = {
         staffStep: 10,
         accidental: null,
         freq: 783.99,
-        fingeringState: [true, true, true, true, false, false, false, false, true],
-        description: 'A — add left ring finger. All three left-hand fingers down.',
-        prompt: 'Register key + all three left-hand fingers. Right hand open.'
+        fingeringState: [true, true, true, true, true, false, false, false, true],
+        description: 'A — add the E/B key with your right index finger.',
+        prompt: 'Register key + three left-hand rings + E/B key (right index).'
       },
       {
         id: 'cl-5',
@@ -552,9 +552,9 @@ const CURRICULUM = {
         staffStep: 11,
         accidental: null,
         freq: 880.00,
-        fingeringState: [true, true, true, true, true, false, false, false, true],
-        description: 'B — add right index finger. Climbing the clarion register!',
-        prompt: 'Register key + all three left fingers + right index (E/B key).'
+        fingeringState: [true, true, true, true, true, true, false, false, true],
+        description: 'B — add the F♯/C♯ key with your right middle finger.',
+        prompt: 'Register key + three left rings + E/B key + F♯/C♯ key.'
       },
       {
         id: 'cl-song-2', type: 'song',
@@ -614,9 +614,9 @@ const CURRICULUM = {
         staffStep: 12,
         accidental: null,
         freq: 932.33,
-        fingeringState: [true, true, true, true, true, true, false, false, true],
-        description: 'C — add the F/C key with your right middle finger.',
-        prompt: 'Register key + all three left fingers + right index + right middle (F/C key).'
+        fingeringState: [true, true, true, true, true, true, true, false, true],
+        description: 'C — add the C sliver key with your right ring finger.',
+        prompt: 'Register key + all three left rings + E/B + F♯/C♯ + C sliver.'
       },
       {
         id: 'cl-7',
@@ -626,9 +626,9 @@ const CURRICULUM = {
         staffStep: 13,
         accidental: null,
         freq: 1046.50,
-        fingeringState: [true, true, true, true, true, true, true, false, true],
-        description: 'D — add the sixth key down. Only the pinky key left.',
-        prompt: 'Register key + keys 1 through 6. All but the last key.'
+        fingeringState: [true, true, true, false, true, true, false, false, true],
+        description: 'D — altissimo. Lift the T ring, add E/B and F♯/C♯.',
+        prompt: 'Register key + A + W rings + E/B + F♯/C♯ keys. T ring open.'
       },
       {
         id: 'cl-8',
@@ -638,9 +638,9 @@ const CURRICULUM = {
         staffStep: 14,
         accidental: null,
         freq: 1174.66,
-        fingeringState: [true, true, true, true, true, true, true, true, true],
-        description: 'E — all seven keys down with the register key.',
-        prompt: 'Register key + all seven keys. Full hand position.'
+        fingeringState: [true, true, false, false, false, false, false, false, true],
+        description: 'E — altissimo. Register key plus A ring, overblow from E5.',
+        prompt: 'Register key + A ring (left index). All other keys open. Tighter embouchure.'
       },
       {
         id: 'cl-song-3', type: 'song',
