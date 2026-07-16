@@ -476,9 +476,9 @@ const CURRICULUM = {
         staffStep: 7,
         accidental: null,
         freq: 587.33,
-        fingeringState: [true, true, false, false, false, false, false, false, true],
-        description: 'E (written) — first note above the break! Register key plus A key.',
-        prompt: 'Register key + A key. All other keys open. Steady air stream through the mouthpiece.'
+        fingeringState: [true, false, false, false, false, false, false, false, true],
+        description: 'E (written) — first note above the break! Register key only.',
+        prompt: 'Register key only. All other keys open. Steady air stream through the mouthpiece.'
       },
       {
         id: 'cl-2',
