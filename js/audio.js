@@ -113,7 +113,6 @@ const AudioEngine = (() => {
     vibratoGain.connect(osc1.frequency);
     vibratoGain.connect(osc3.frequency);
     vibratoGain.gain.setValueAtTime(0, t0);
-    vibratoGain.gain.setValueAtTime(0, t0 + 0.35);
     vibratoGain.gain.linearRampToValueAtTime(freq * 0.006, t0 + 0.55);
 
     osc1.connect(filter);

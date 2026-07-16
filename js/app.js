@@ -407,7 +407,7 @@ function renderPresentPhase(inst, lesson) {
   const fingeringSvg = Graphics.fingeringSVG(inst.fingeringType, lesson.fingeringState, inst.accentColor, 84);
   const staffSvg = Graphics.staffSVG({ pos: lesson.staffStep, accidental: lesson.accidental, clef: inst.clef, accentColor: inst.accentColor, width: 96 });
   const transposeNote = inst.isTransposing && lesson.concertNote
-    ? `<div class="note-description">Sounds as concert ${lesson.concertNote} (${ inst.transposeSemitones === -9 ? 'E\u266d' : inst.transposeSemitones === -7 ? 'F' : 'B\u266d' } instrument).</div>` : '';
+    ? `<div class="note-description">Sounds as concert ${lesson.concertNote} (${ inst.transposeSemitones === -9 ? 'E\u266d' : inst.transposeSemitones === -7 ? 'F' : inst.transposeSemitones === -2 ? 'B\u266d' : 'B\u266d' } instrument).</div>` : '';
 
   const mastery = getNoteMastery(APP.instrumentId, lesson.id);
   const masteryLevel = getMasteryLevel(mastery);
