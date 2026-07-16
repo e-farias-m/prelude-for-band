@@ -488,9 +488,9 @@ const CURRICULUM = {
         staffStep: 8,
         accidental: null,
         freq: 622.25,
-        fingeringState: [true, true, false, false, true, false, false, false, true],
-        description: 'F — add the E/B key with your right index finger.',
-        prompt: 'Register key + A key + E/B key (right index).'
+        fingeringState: [true, true, false, false, false, false, false, false, true],
+        description: 'F — add the A key with your left index finger.',
+        prompt: 'Register key + A key (left index). All other keys open.'
       },
       {
         id: 'cl-3',
@@ -626,9 +626,9 @@ const CURRICULUM = {
         staffStep: 13,
         accidental: null,
         freq: 1046.50,
-        fingeringState: [true, true, true, true, true, false, true, false, true],
-        description: 'D — use the first trill key with your right hand.',
-        prompt: 'Register key + all three left fingers + right index + right ring (side trill key).'
+        fingeringState: [true, true, true, true, true, true, true, false, true],
+        description: 'D — add the sixth key down. Only the pinky key left.',
+        prompt: 'Register key + keys 1 through 6. All but the last key.'
       },
       {
         id: 'cl-8',
@@ -638,9 +638,9 @@ const CURRICULUM = {
         staffStep: 14,
         accidental: null,
         freq: 1174.66,
-        fingeringState: [true, true, false, false, false, false, false, false, true],
-        description: 'E — same as your first note, an octave higher!',
-        prompt: 'Register key + A key. Same fingering as E5. Tighter embouchure, faster air.'
+        fingeringState: [true, true, true, true, true, true, true, true, true],
+        description: 'E — all seven keys down with the register key.',
+        prompt: 'Register key + all seven keys. Full hand position.'
       },
       {
         id: 'cl-song-3', type: 'song',
