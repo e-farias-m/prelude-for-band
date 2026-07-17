@@ -44,7 +44,7 @@ const Graphics = (() => {
     if (clef === 'treble') {
       svg += `<text x="${STAFF_LEFT_X - 8}" y="${STAFF_BOTTOM_Y + 8}" font-size="110" font-family="Georgia, 'Apple Symbols', serif" fill="${lineColor}">&#119070;</text>`;
     } else {
-      svg += `<text x="${STAFF_LEFT_X - 6}" y="${STAFF_BOTTOM_Y - 4}" font-size="66" font-family="Georgia, 'Apple Symbols', serif" fill="${lineColor}">&#119074;</text>`;
+      svg += `<text x="${STAFF_LEFT_X - 6}" y="${yForPos(2)}" font-size="66" font-family="Georgia, 'Apple Symbols', serif" fill="${lineColor}">&#119074;</text>`;
     }
 
     // Ledger lines
