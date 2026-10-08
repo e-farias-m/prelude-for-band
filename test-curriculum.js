@@ -71,8 +71,8 @@ const REF = {
     'cl-4': [T, F, F, F, F, F, F, F, F], // F4  T ---|---
     'cl-5': [F, F, F, F, F, F, F, F, F], // G4  --- (open)
     'cl-6': [F, T, F, F, F, F, F, F, F], // A4  A--- (left index A key)
-    'cl-7': [F, T, F, F, F, F, F, F, T], // B4  R A---
-    'cl-8': [T, T, T, T, F, F, F, F, T], // C5  R T 123
+    'cl-7': [T, T, T, T, T, T, T, F, T, T], // B4  RT 123|123 + left little-finger E key
+    'cl-8': [T, T, T, T, T, T, T, T, T, F], // C5  RT 123|123 + right little-finger F key
   },
   'alto-saxophone': {
     'as-1': [F, T, T, T, T, T, T, T, F], // C4  123|123 C
@@ -87,7 +87,7 @@ const REF = {
   oboe: {
     'ob-1': [F, T, T, T, T, T, T, F, F], // D4  123|123
     'ob-2': [F, T, T, T, T, T, F, F, F], // E4  123|12-
-    'ob-3': [F, T, T, T, T, F, F, F, F], // F4  123|1--
+    'ob-3': [F, T, T, T, T, T, F, F, F, T], // F4  123|12 + F resonance key
     'ob-4': [F, T, T, T, F, F, F, F, F], // G4  123|---
     'ob-5': [F, T, T, F, F, F, F, F, F], // A4  12-|---
     'ob-6': [F, T, F, F, F, F, F, F, F], // B4  1--|--- (no octave key)

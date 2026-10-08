@@ -548,9 +548,9 @@ const CURRICULUM = {
         staffStep: 4,
         accidental: null,
         freq: 440.00,
-        fingeringState: [false, true, false, false, false, false, false, false, true],
-        description: 'B — register key + A key. Crossing the break!',
-        prompt: 'Register key + A key (left index side). Thumb hole open.'
+        fingeringState: [true, true, true, true, true, true, true, false, true, true],
+        description: 'B — the clarion register! Thumb hole closed, all fingers down, register key, and the left little-finger E key.',
+        prompt: 'Thumb hole closed + all left and right fingers down + register key. Add the left little-finger E key.'
       },
       {
         id: 'cl-8',
@@ -560,9 +560,9 @@ const CURRICULUM = {
         staffStep: 5,
         accidental: null,
         freq: 466.16,
-        fingeringState: [true, true, true, true, false, false, false, false, true],
-        description: 'C — register key + all three left-hand rings.',
-        prompt: 'Register key + left-hand rings 1-2-3. Right hand open.'
+        fingeringState: [true, true, true, true, true, true, true, true, true, false],
+        description: 'C — same as B but switch to the right little-finger F key. All fingers stay down.',
+        prompt: 'Thumb hole closed + all fingers down + register key. Press the right little-finger F key instead of the left.'
       },
       {
         id: 'cl-song-1', type: 'song',
@@ -661,9 +661,9 @@ const CURRICULUM = {
         staffStep: 4,
         accidental: null,
         freq: 440.00,
-        fingeringState: [false, true, false, false, false, false, false, false, true],
-        description: 'B — register key + A key. Crossing the break!',
-        prompt: 'Register key + A key (left index side). Thumb hole open.'
+        fingeringState: [true, true, true, true, true, true, true, false, true, true],
+        description: 'B — the clarion register! Thumb hole closed, all fingers down, register key, and the left little-finger E key.',
+        prompt: 'Thumb hole closed + all left and right fingers down + register key. Add the left little-finger E key.'
       },
       {
         id: 'cl-8',
@@ -673,9 +673,9 @@ const CURRICULUM = {
         staffStep: 5,
         accidental: null,
         freq: 466.16,
-        fingeringState: [true, true, true, true, false, false, false, false, true],
-        description: 'C — register key + all three left-hand rings.',
-        prompt: 'Register key + left-hand rings 1-2-3. Right hand open.'
+        fingeringState: [true, true, true, true, true, true, true, true, true, false],
+        description: 'C — same as B but switch to the right little-finger F key. All fingers stay down.',
+        prompt: 'Thumb hole closed + all fingers down + register key. Press the right little-finger F key instead of the left.'
       },
       {
         id: 'cl-song-3', type: 'song',
@@ -1043,9 +1043,9 @@ const CURRICULUM = {
         staffStep: 1,
         accidental: null,
         freq: 349.23,
-        fingeringState: [false, true, true, true, true, false, false, false, false],
-        description: 'F — just left hand plus right index. An open, centered note.',
-        prompt: 'No octave key. All three left fingers down. Right index only.'
+        fingeringState: [false, true, true, true, true, true, false, false, false, true],
+        description: 'F — left hand down, right index and middle fingers, plus the F resonance key.',
+        prompt: 'No octave key. All three left fingers + right index + right middle. Press the F resonance key with your right hand.'
       },
       {
         id: 'ob-song-1', type: 'song',

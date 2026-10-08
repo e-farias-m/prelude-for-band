@@ -140,7 +140,7 @@ const Graphics = (() => {
   // Simplified key pads on a tube — same visual language as recorder but with
   // a distinct label and smaller "key" circles to suggest pads not holes.
   function woodwindFingeringSVG(fingeringState, accentColor = '#7BAFC0', size = 130) {
-    const [thumb, h1, h2, h3, h4, h5, h6, h7, extra] = fingeringState;
+    const [thumb, h1, h2, h3, h4, h5, h6, h7, extra, extra2] = fingeringState;
     const cx = 65;
     const tubeTop = 18, tubeBottom = 215, tubeW = 30;
     const allKeys = [h1, h2, h3, h4, h5, h6, h7];
@@ -170,6 +170,16 @@ const Graphics = (() => {
     svg += `<line x1="${cx - tubeW/2 - 2}" y1="${thumbY}" x2="${cx - tubeW/2 - 22}" y2="${thumbY}" stroke="#524F70" stroke-width="1" stroke-dasharray="2,2"/>`;
     svg += `<circle cx="${cx - tubeW/2 - 28}" cy="${thumbY}" r="9" fill="${thumb ? accentColor : '#161530'}" stroke="${accentColor}" stroke-width="2"/>`;
     svg += `<text x="${cx - tubeW/2 - 28}" y="${thumbY + 24}" font-size="9" fill="#8986A8" text-anchor="middle" font-weight="600">TH</text>`;
+
+    // Auxiliary little-finger / resonance key (extra2) — offset right of the tube,
+    // mirroring the thumb layout. Used by clarinet clarion (left little finger)
+    // and oboe F4 (F resonance key).
+    if (extra2 !== undefined) {
+      const ex2Y = keyYs[6];
+      svg += `<line x1="${cx + tubeW/2 + 2}" y1="${ex2Y}" x2="${cx + tubeW/2 + 22}" y2="${ex2Y}" stroke="#524F70" stroke-width="1" stroke-dasharray="2,2"/>`;
+      svg += `<circle cx="${cx + tubeW/2 + 28}" cy="${ex2Y}" r="8" fill="${extra2 ? accentColor : '#161530'}" stroke="${accentColor}" stroke-width="2"/>`;
+      svg += `<text x="${cx + tubeW/2 + 28}" y="${ex2Y + 22}" font-size="9" fill="#8986A8" text-anchor="middle" font-weight="600">L</text>`;
+    }
 
     // Finger keys 1-7 down the tube — circles for key pads
     allKeys.forEach((pressed, i) => {
