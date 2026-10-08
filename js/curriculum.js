@@ -249,9 +249,9 @@ const CURRICULUM = {
         staffStep: 1,
         accidental: null,
         freq: 349.23,
-        fingeringState: [true, true, true, true, false, false, true, true, false],
-        description: 'Forked F — right ring finger and pinky only in the right hand.',
-        prompt: 'Left thumb + all three left fingers. Right ring finger and pinky only.'
+        fingeringState: [true, true, true, true, true, false, false, true, false],
+        description: 'F — left hand down, right index finger, and the Eb key.',
+        prompt: 'Left thumb + all three left fingers + right index. Add the Eb key with your right pinky.'
       },
       {
         id: 'fl-song-1', type: 'song',
@@ -360,9 +360,9 @@ const CURRICULUM = {
         staffStep: 4,
         accidental: null,
         freq: 493.88,
-        fingeringState: [true, true, false, false, false, false, false, false, false],
-        description: 'B — just left thumb and left index. A light, focused note.',
-        prompt: 'Left thumb + left index only. All other fingers up.'
+        fingeringState: [true, true, false, false, false, false, false, true, false],
+        description: 'B — left thumb and left index, plus the Eb key.',
+        prompt: 'Left thumb + left index only. Add the Eb key with your right pinky.'
       },
       {
         id: 'fl-7',
@@ -371,9 +371,9 @@ const CURRICULUM = {
         staffStep: 5,
         accidental: null,
         freq: 523.25,
-        fingeringState: [true, false, false, false, false, false, false, false, false],
-        description: 'C — just the left thumb. Your first note in the second octave.',
-        prompt: 'Left thumb only. All other fingers up.'
+        fingeringState: [false, true, false, false, false, false, false, true, false],
+        description: 'C — left index finger only (thumb off), plus the Eb key. Your first note in the second octave.',
+        prompt: 'Left index only, thumb off. Keep the Eb key down with your right pinky.'
       },
       {
         id: 'fl-8',
@@ -382,9 +382,9 @@ const CURRICULUM = {
         staffStep: 6,
         accidental: null,
         freq: 587.33,
-        fingeringState: [true, true, true, true, true, true, true, false, false],
-        description: 'D — all main keys again, one octave higher. Faster air!',
-        prompt: 'Same fingering as D4. Faster, more focused air to overblow the octave.'
+        fingeringState: [true, false, true, true, true, true, true, false, false],
+        description: 'D — left thumb with left middle and ring fingers, right hand down. A special overblown fingering.',
+        prompt: 'Left thumb + left middle and ring fingers (left index open) + all three right fingers. No Eb key. Faster air!'
       },
       {
         id: 'fl-song-3', type: 'song',
@@ -524,9 +524,9 @@ const CURRICULUM = {
         staffStep: 2,
         accidental: null,
         freq: 349.23,
-        fingeringState: [false, false, false, false, true, true, true, false, false],
-        description: 'G — no thumb, all three right-hand rings closed.',
-        prompt: 'Lift thumb. Close all three right-hand rings. Left hand open.'
+        fingeringState: [false, false, false, false, false, false, false, false, false],
+        description: 'G — completely open. No fingers down, no register key.',
+        prompt: 'Lift every finger and the thumb. The clarinet sings open on G.'
       },
       {
         id: 'cl-6',
@@ -830,9 +830,9 @@ const CURRICULUM = {
         staffStep: 1,
         accidental: null,
         freq: 207.65,
-        fingeringState: [false, true, true, true, false, true, false, false, false],
-        description: 'F — right middle finger only. A forked feel.',
-        prompt: 'No octave key. All three left fingers down. Right middle finger only.'
+        fingeringState: [false, true, true, true, true, false, false, false, false],
+        description: 'F — right index finger only with the left hand down.',
+        prompt: 'No octave key. All three left fingers down. Right index finger only.'
       },
       {
         id: 'as-5',
@@ -904,9 +904,9 @@ const CURRICULUM = {
         staffStep: 3,
         accidental: null,
         freq: 261.63,
-        fingeringState: [true, true, true, false, false, false, false, false, false],
-        description: 'A — octave key on, just left index and middle. Your first note with the octave key.',
-        prompt: 'Octave key on. Left index + left middle. Right hand open.'
+        fingeringState: [false, true, true, false, false, false, false, false, false],
+        description: 'A — left index and middle fingers. No octave key needed.',
+        prompt: 'No octave key. Left index + left middle. Right hand open.'
       },
       {
         id: 'as-7',
@@ -916,9 +916,9 @@ const CURRICULUM = {
         staffStep: 4,
         accidental: null,
         freq: 293.66,
-        fingeringState: [true, true, true, true, false, false, false, false, false],
-        description: 'B — add left ring finger. All three left fingers plus octave key.',
-        prompt: 'Octave key on. All three left fingers down. Right hand open.'
+        fingeringState: [false, true, false, false, false, false, false, false, false],
+        description: 'B — left index finger only. No octave key.',
+        prompt: 'No octave key. Left index only. Right hand open and left ring up.'
       },
       {
         id: 'as-8',
@@ -928,9 +928,9 @@ const CURRICULUM = {
         staffStep: 5,
         accidental: null,
         freq: 311.13,
-        fingeringState: [true, true, true, true, true, false, false, false, false],
-        description: 'C — add right index finger. The top of your first octave!',
-        prompt: 'Octave key on. All three left fingers + right index (C key).'
+        fingeringState: [false, false, true, false, false, false, false, false, false],
+        description: 'C — left middle finger only. The top of your first octave!',
+        prompt: 'Left middle finger only (left index and thumb open). No octave key.'
       },
       {
         id: 'as-song-3', type: 'song',
@@ -1154,9 +1154,9 @@ const CURRICULUM = {
         staffStep: 4,
         accidental: null,
         freq: 493.88,
-        fingeringState: [true, true, true, true, false, false, false, false, true],
-        description: 'B — add the octave key. Left hand all down, right open.',
-        prompt: 'Octave key on. All three left fingers down. Right hand open.'
+        fingeringState: [false, true, false, false, false, false, false, false, false],
+        description: 'B — left index finger only. No octave key.',
+        prompt: 'No octave key. Left index only. Thumb and all other fingers open.'
       },
       {
         id: 'ob-7',
@@ -1165,9 +1165,9 @@ const CURRICULUM = {
         staffStep: 5,
         accidental: null,
         freq: 523.25,
-        fingeringState: [true, true, true, true, true, false, false, false, true],
-        description: 'C — add right index finger. Your first note in the second octave.',
-        prompt: 'Octave key on. All three left fingers + right index.'
+        fingeringState: [false, true, false, false, true, false, false, false, false],
+        description: 'C — left index plus right index fingers. No octave key.',
+        prompt: 'No octave key. Left index + right index. Thumb and other fingers open.'
       },
       {
         id: 'ob-8',
@@ -1176,9 +1176,9 @@ const CURRICULUM = {
         staffStep: 6,
         accidental: null,
         freq: 587.33,
-        fingeringState: [true, true, true, true, true, true, false, false, true],
-        description: 'D — add right middle finger. The top of your first octave!',
-        prompt: 'Octave key on. All three left fingers + right index + right middle.'
+        fingeringState: [true, false, true, true, true, true, true, false, false],
+        description: 'D — octave key with the left index half-open (half-hole), all other fingers down.',
+        prompt: 'Octave key on. Left index half-hole (cracked open), left middle + ring down, all three right fingers down.'
       },
       {
         id: 'ob-song-3', type: 'song',
@@ -1269,9 +1269,9 @@ const CURRICULUM = {
         staffStep: 4,
         accidental: null,
         freq: 146.83,
-        fingeringState: [true, true, true, true, true, true, true, false, false],
-        description: 'Low D — whisper key on, all main fingers down.',
-        prompt: 'Whisper key on. All three left-hand and all three right-hand fingers down. Right pinky up. Slow, wide air stream.'
+        fingeringState: [true, true, true, false, false, false, false, false, false],
+        description: 'Low D — whisper key with the left index and middle fingers down.',
+        prompt: 'Whisper key on. Left index + left middle down, left ring up. Right hand open.'
       },
       {
         id: 'bn-2',
@@ -1280,9 +1280,9 @@ const CURRICULUM = {
         staffStep: 5,
         accidental: null,
         freq: 164.81,
-        fingeringState: [true, true, true, false, true, true, true, false, false],
-        description: 'E — lift your left ring finger to open the E tone hole.',
-        prompt: 'Whisper key on. Same as D3 but lift left ring finger.'
+        fingeringState: [true, true, false, false, false, false, false, false, false],
+        description: 'E — whisper key with only the left index finger down.',
+        prompt: 'Whisper key on. Left index only. Left middle and ring up. Right hand open.'
       },
       {
         id: 'bn-3',
@@ -1291,9 +1291,9 @@ const CURRICULUM = {
         staffStep: 6,
         accidental: null,
         freq: 174.61,
-        fingeringState: [true, true, true, true, false, true, false, false, false],
-        description: 'F — a forked pattern. Right middle down, ring up.',
-        prompt: 'Whisper key on. All three left fingers down. Right middle down. Right index and ring up.'
+        fingeringState: [true, false, false, false, false, false, false, false, false],
+        description: 'F — whisper key with no fingers down. An open, resonant note.',
+        prompt: 'Whisper key on. No fingers down at all. Open throat, slow air.'
       },
       {
         id: 'bn-song-1', type: 'song',
@@ -1330,9 +1330,9 @@ const CURRICULUM = {
         staffStep: 7,
         accidental: null,
         freq: 196.00,
-        fingeringState: [true, true, true, false, false, false, false, false, false],
-        description: 'G — left hand only, whisper key on.',
-        prompt: 'Whisper key on. All three left fingers down. Right hand open.'
+        fingeringState: [true, false, true, true, true, true, true, false, false],
+        description: 'G — whisper key with a half-hole on the left index and all other main fingers down.',
+        prompt: 'Whisper key on. Left index half-hole (cracked open), left middle + ring down, all three right fingers down.'
       },
       {
         id: 'bn-5',
@@ -1341,9 +1341,9 @@ const CURRICULUM = {
         staffStep: 8,
         accidental: null,
         freq: 220.00,
-        fingeringState: [true, true, false, false, false, false, false, false, false],
-        description: 'A — just your first two left-hand fingers and the whisper key.',
-        prompt: 'Whisper key on. Left index + left middle only. Left ring up. Right hand open.'
+        fingeringState: [false, true, true, true, true, true, false, false, false],
+        description: 'A — whisper key off, left hand down with right index and middle fingers.',
+        prompt: 'Whisper key off. Left hand down + right index + right middle.'
       },
       {
         id: 'bn-song-2', type: 'song',
@@ -1402,9 +1402,9 @@ const CURRICULUM = {
         staffStep: 9,
         accidental: null,
         freq: 246.94,
-        fingeringState: [false, true, true, true, false, false, false, false, false],
-        description: 'B — whisper key off, left hand down, right hand open.',
-        prompt: 'Whisper key off. All three left fingers down. Right hand open.'
+        fingeringState: [false, true, true, true, true, false, false, false, false],
+        description: 'B — whisper key off, left hand down with the right index finger.',
+        prompt: 'Whisper key off. All three left fingers + right index.'
       },
       {
         id: 'bn-7',
@@ -1413,9 +1413,9 @@ const CURRICULUM = {
         staffStep: 10,
         accidental: null,
         freq: 261.63,
-        fingeringState: [false, true, true, true, true, false, false, false, false],
-        description: 'C — add right index finger. Above the staff now.',
-        prompt: 'Whisper key off. All three left fingers + right index.'
+        fingeringState: [false, true, true, true, false, false, false, false, false],
+        description: 'C — whisper key off, just the left hand down.',
+        prompt: 'Whisper key off. All three left fingers only. Right hand open.'
       },
       {
         id: 'bn-8',
@@ -1424,9 +1424,9 @@ const CURRICULUM = {
         staffStep: 11,
         accidental: null,
         freq: 293.66,
-        fingeringState: [false, true, true, true, true, true, true, false, false],
-        description: 'D — all main fingers like your first note, but whisper key off!',
-        prompt: 'Whisper key off. Same fingering as D3. Faster, more focused air.'
+        fingeringState: [false, true, true, false, false, false, false, false, false],
+        description: 'D — whisper key off, left index and middle fingers.',
+        prompt: 'Whisper key off. Left index + left middle only. Right hand open. Faster air.'
       },
       {
         id: 'bn-song-3', type: 'song',
