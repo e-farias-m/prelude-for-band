@@ -1586,6 +1586,8 @@ function renderMapScreen() {
           </div>
           <button class="btn btn-primary" data-action="open-practice" ${practiceReady ? '' : 'disabled'}>Practice</button>
         </div>
+        <div class="map-unit-label">Tools</div>
+        ${renderPracticeTools()}
         <div class="map-unit-label">Unit 1 · First Notes</div>
         <div class="map-path">${nodes}${importedNodes}</div>
         <div class="import-section" style="margin-top:20px;text-align:center">
@@ -3338,6 +3340,7 @@ function handleAction(action, el) {
 
     case 'open-metronome':
       if (!APP.metronome) APP.metronome = createMetronome();
+      APP.toolReturnScreen = APP.screen;
       startSession();
       APP.screen = 'metronome';
       render();
@@ -3346,7 +3349,7 @@ function handleAction(action, el) {
     case 'close-metronome':
       stopMetronome();
       endSession();
-      APP.screen = 'practice';
+      APP.screen = APP.toolReturnScreen || 'practice';
       render();
       break;
 
@@ -3426,6 +3429,7 @@ function handleAction(action, el) {
     }
 
     case 'open-tuner':
+      APP.toolReturnScreen = APP.screen;
       startSession();
       APP.screen = 'tuner';
       render();
@@ -3435,7 +3439,7 @@ function handleAction(action, el) {
       stopTuner();
       APP.tuner = null;
       endSession();
-      APP.screen = 'practice';
+      APP.screen = APP.toolReturnScreen || 'practice';
       render();
       break;
 

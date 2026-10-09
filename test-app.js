@@ -988,6 +988,30 @@ const fluteNotes = flute.lessons.filter(l => !l.type);
     if (savedTut === undefined) delete store['preludeBandTutorials']; else store['preludeBandTutorials'] = savedTut;
   }
 
+// ── 55. Practice tools stay reachable from the map, whatever the lock ─────
+{
+  const savedInst = store['preludeBandInstrument'];
+  api.APP.instrumentId = 'flute';
+  store['preludeBandInstrument'] = 'flute';
+
+  const map = api.renderMapScreen();
+  check(map.includes('data-action="open-metronome"'), 'the map offers the metronome even before drills unlock');
+  check(map.includes('data-action="open-tuner"'), 'the map offers the tuner too');
+
+  api.APP.screen = 'map';
+  api.handleAction('open-metronome', { dataset: {} });
+  check(api.APP.screen === 'metronome', 'the metronome opens from the map');
+  api.handleAction('close-metronome', { dataset: {} });
+  check(api.APP.screen === 'map', 'closing the metronome returns to where it was opened');
+
+  api.handleAction('open-tuner', { dataset: {} });
+  check(api.APP.screen === 'tuner', 'the tuner opens from the map');
+  api.handleAction('close-tuner', { dataset: {} });
+  check(api.APP.screen === 'map', 'closing the tuner returns to the map');
+
+  if (savedInst === undefined) delete store['preludeBandInstrument']; else store['preludeBandInstrument'] = savedInst;
+}
+
   if (failures.length) console.log(failures.join('\n'));
   console.log(`\n${pass} passed, ${fail} failed`);
   process.exit(fail ? 1 : 0);
