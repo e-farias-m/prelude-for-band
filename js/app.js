@@ -1205,7 +1205,7 @@ function renderSelectScreen() {
       ${renderInstrumentGrid()}`;
   } else {
     headline = studentName ? `Ready, ${escapeHtml(studentName)}?` : 'Ready to play?';
-    sub = `You're set up on ${savedInst.shortName}. Pick up where you left off, or switch instruments anytime.`;
+    sub = `You're set up on ${savedInst.shortName}. Pick up where you left off.`;
     instrumentArea = renderFocusCard(savedInst);
   }
 
