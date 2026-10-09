@@ -7,14 +7,27 @@ const path = require('path');
 
 const read = f => fs.readFileSync(path.join(__dirname, 'js', f), 'utf8');
 
+global.confirm = () => true;
+
 function makeEl() {
-  return {
-    textContent: '', innerHTML: '', value: '', style: {}, dataset: {},
+  const el = {
+    value: '', style: {}, dataset: {}, _text: '', _html: '',
     classList: { add() {}, remove() {}, contains() { return false; } },
     appendChild() {}, addEventListener() {}, focus() {}, remove() {},
     querySelector() { return null; }, querySelectorAll() { return []; },
     setAttribute() {}, hasAttribute() { return false; },
   };
+  // Mirror the DOM contract used by escapeHtml(): writing textContent makes the
+  // same string readable back through innerHTML.
+  Object.defineProperty(el, 'textContent', {
+    get() { return el._text; },
+    set(v) { el._text = String(v); el._html = String(v); },
+  });
+  Object.defineProperty(el, 'innerHTML', {
+    get() { return el._html; },
+    set(v) { el._html = String(v); },
+  });
+  return el;
 }
 const document = {
   addEventListener() {},
@@ -35,7 +48,10 @@ ${read('graphics.js')}
 ${read('app.js')}
 return { handleAction, renderCompletePhase, CURRICULUM, APP, IMPORTED_SONGS_KEY,
   buildSprintQuestion, getSprintBest, setSprintBest, finishSprint, startSprint,
-  renderPracticeScreen, getLearnedNotes, SPRINT_MODES };
+  renderPracticeScreen, getLearnedNotes, SPRINT_MODES,
+  getMotivation, addPracticeSeconds, getTotalPracticeSeconds, getCurrentStreak,
+  getTotalXp, getLevel, getAvatar, getStats, evaluateBadges, hasBadge, todayKey,
+  endSession, renderStudentCard, renderBadgeShelf, renderSelectScreen, BADGES };
 `);
 const api = sandbox(document, localStorage, {});
 
@@ -189,6 +205,95 @@ api.APP.instrumentId = 'flute';
   check(done.includes('sprint-result-score') && done.includes('Play again'), 'finished sprint shows the result');
   check(done.includes('+4 XP'), 'finished sprint shows XP earned');
   check(!done.includes('undefined') && !done.includes('NaN'), 'sprint result has no undefined/NaN');
+}
+
+// ── 10. Practice time accumulates and drives the streak ───────────────────
+{
+  api.APP.motivation = { days: {}, badges: {} };
+  api.addPracticeSeconds(60);
+  check(api.getTotalPracticeSeconds() === 60, 'practice seconds accumulate');
+  api.addPracticeSeconds(90);
+  check(api.getTotalPracticeSeconds() === 150, 'practice seconds keep accumulating');
+
+  api.APP.motivation = { days: {}, badges: {} };
+  const now = new Date('2026-10-08T10:00:00');
+  for (let i = 0; i < 3; i++) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    api.APP.motivation.days[api.todayKey(d)] = 30;
+  }
+  check(api.getCurrentStreak(now) === 3, 'three consecutive days is a 3-day streak');
+  const d5 = new Date(now);
+  d5.setDate(d5.getDate() - 5);
+  api.APP.motivation.days[api.todayKey(d5)] = 30;
+  check(api.getCurrentStreak(now) === 3, 'a gap breaks the streak');
+}
+
+// ── 11. Levels and avatars scale with XP ──────────────────────────────────
+{
+  check(api.getLevel(0) === 1, 'zero XP is level 1');
+  check(api.getLevel(99) === 1, 'under 100 XP is level 1');
+  check(api.getLevel(100) === 2, '100 XP is level 2');
+  check(api.getLevel(550) === 6, '550 XP is level 6');
+  check(api.getAvatar(1) !== api.getAvatar(12), 'avatar changes across levels');
+}
+
+// ── 12. Badges unlock from milestones and only once ───────────────────────
+{
+  api.APP.motivation = { days: {}, badges: {} };
+  api.APP.progress = { flute: { completed: {}, xp: 0, mastery: {} } };
+  check(api.evaluateBadges().length === 0, 'no badges are earned with no progress');
+
+  const note = flute.lessons.find(l => !l.type);
+  api.APP.progress.flute.completed[note.id] = { stars: 3 };
+  const earned = api.evaluateBadges();
+  check(earned.some(b => b.id === 'first-steps'), 'completing a lesson unlocks First Steps');
+  check(api.hasBadge('first-steps'), 'the earned badge is stored');
+  check(api.evaluateBadges().length === 0, 'badges are not re-awarded');
+}
+
+// ── 13. A strong finger sprint unlocks Quick Fingers ──────────────────────
+{
+  api.APP.motivation = { days: {}, badges: {} };
+  api.APP.progress = { flute: { completed: {}, xp: 0, mastery: {}, sprints: { [api.SPRINT_MODES.FINGER]: 15 } } };
+  const earned = api.evaluateBadges();
+  check(earned.some(b => b.id === 'quick-fingers'), 'a 15-point finger sprint unlocks Quick Fingers');
+}
+
+// ── 14. Session timing records practice time ──────────────────────────────
+{
+  api.APP.motivation = { days: {}, badges: {} };
+  api.APP.sessionStart = Date.now() - 60000;
+  api.endSession();
+  check(api.getTotalPracticeSeconds() >= 55, 'ending a session records practice time');
+  check(api.APP.sessionStart === null, 'session start is cleared after ending');
+  const afterFirst = api.getTotalPracticeSeconds();
+  api.endSession();
+  check(api.getTotalPracticeSeconds() === afterFirst, 'ending with no active session is a no-op');
+}
+
+// ── 15. Student card and badge shelf render on the home screen ────────────
+{
+  api.APP.motivation = { days: {}, badges: {} };
+  api.APP.progress = { flute: { completed: {}, xp: 250, mastery: {} } };
+  const card = api.renderStudentCard('Ada');
+  check(card.includes('Ada') && card.includes('Lv 3'), 'student card shows name and level');
+  check(card.includes('streak') || card.includes('Practice today'), 'student card shows streak state');
+  const shelf = api.renderBadgeShelf();
+  check(shelf.includes('Badges'), 'badge shelf renders');
+  check(shelf.includes('First Steps'), 'badge shelf lists badge names');
+  const home = api.renderSelectScreen();
+  check(home.includes('student-card') && home.includes('badges-shelf'), 'home shows card and badges');
+}
+
+// ── 16. Resetting progress also clears motivation ─────────────────────────
+{
+  api.APP.progress = { flute: { completed: { 'fl-1': { stars: 3 } }, xp: 10, mastery: {} } };
+  api.APP.motivation = { days: { '2026-01-01': 60 }, badges: { 'first-steps': 'x' } };
+  api.handleAction('reset-progress', { dataset: {} });
+  check(Object.keys(api.APP.progress).length === 0, 'reset clears instrument progress');
+  check(Object.keys(api.APP.motivation.badges).length === 0, 'reset clears badges');
+  check(Object.keys(api.APP.motivation.days).length === 0, 'reset clears practice days');
 }
 
 if (failures.length) console.log(failures.join('\n'));

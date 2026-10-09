@@ -29,6 +29,9 @@ const APP = {
   // Timed practice sprint state (null when not in a sprint)
   sprint: null,
   sprintTimer: null,
+  // Motivation: streaks, minutes and badges
+  motivation: null,
+  sessionStart: null,
 };
 
 const STORAGE_KEY = 'preludeBandProgress';
@@ -138,6 +141,171 @@ function setSprintBest(instrumentId, mode, score) {
     return true;
   }
   return false;
+}
+
+// ── MOTIVATION: STREAKS, MINUTES, BADGES ────────────────────────────────────
+const MOTIVATION_KEY = 'preludeBandMotivation';
+const MAX_SESSION_SECONDS = 30 * 60; // ignore implausible idle stretches
+
+const BADGES = [
+  { id: 'first-steps', icon: '\u{1F331}', name: 'First Steps', desc: 'Complete your first lesson' },
+  { id: 'first-song', icon: '\u{1F3B5}', name: 'First Song', desc: 'Complete a song' },
+  { id: 'octave', icon: '\u{1F3BC}', name: 'Full Octave', desc: 'Learn all 8 notes on an instrument' },
+  { id: 'streak-3', icon: '\u{1F525}', name: 'On a Roll', desc: 'Practice 3 days in a row' },
+  { id: 'streak-7', icon: '\u{1F525}', name: 'Week Strong', desc: 'Practice 7 days in a row' },
+  { id: 'marathon', icon: '\u{23F1}', name: 'Marathon', desc: 'Practice for 30 minutes in total' },
+  { id: 'xp-500', icon: '\u{2B50}', name: 'Rising Star', desc: 'Earn 500 XP' },
+  { id: 'quick-fingers', icon: '\u{26A1}', name: 'Quick Fingers', desc: 'Score 15 in a Finger gym sprint' },
+];
+
+function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+function todayKey(d = new Date()) {
+  return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+}
+
+function loadMotivation() {
+  try {
+    const raw = localStorage.getItem(MOTIVATION_KEY);
+    APP.motivation = raw ? JSON.parse(raw) : null;
+  } catch (e) { APP.motivation = null; }
+  if (!APP.motivation || typeof APP.motivation !== 'object') APP.motivation = {};
+  if (!APP.motivation.days) APP.motivation.days = {};
+  if (!APP.motivation.badges) APP.motivation.badges = {};
+  return APP.motivation;
+}
+
+function getMotivation() {
+  return APP.motivation || loadMotivation();
+}
+
+function saveMotivation() {
+  try {
+    localStorage.setItem(MOTIVATION_KEY, JSON.stringify(APP.motivation));
+  } catch (e) { /* storage unavailable — fail silently */ }
+}
+
+// Records `seconds` of practice on today's date.
+function addPracticeSeconds(seconds) {
+  const m = getMotivation();
+  const k = todayKey();
+  m.days[k] = (m.days[k] || 0) + seconds;
+  saveMotivation();
+  return m.days[k];
+}
+
+function getTotalPracticeSeconds() {
+  const m = getMotivation();
+  return Object.values(m.days).reduce((sum, s) => sum + (s || 0), 0);
+}
+
+// Number of consecutive days (ending today or yesterday) with any practice.
+function getCurrentStreak(now = new Date()) {
+  const m = getMotivation();
+  const has = d => (m.days[todayKey(d)] || 0) > 0;
+  const cursor = new Date(now);
+  if (!has(cursor)) cursor.setDate(cursor.getDate() - 1); // streak survives until today ends
+  let streak = 0;
+  while (has(cursor)) {
+    streak++;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  return streak;
+}
+
+function getTotalXp() {
+  return Object.values(APP.progress).reduce((sum, p) => sum + (p.xp || 0), 0);
+}
+
+function getLevel(xp = getTotalXp()) {
+  return Math.floor(xp / 100) + 1;
+}
+
+function getAvatar(level = getLevel()) {
+  if (level >= 12) return '\u{1F451}'; // crown
+  if (level >= 8) return '\u{1F3C5}';  // medal
+  if (level >= 5) return '\u{1F3BA}';  // trumpet
+  if (level >= 3) return '\u{1F3B6}';  // notes
+  return '\u{1F331}';                  // seedling
+}
+
+// Aggregate cross-instrument stats used for badges.
+function getStats() {
+  let notesCompleted = 0, songsCompleted = 0, octaveInstruments = 0, bestFinger = 0;
+  for (const id of INSTRUMENT_ORDER) {
+    const prog = APP.progress[id];
+    if (!prog) continue;
+    let noteCount = 0;
+    (CURRICULUM[id].lessons || []).forEach(l => {
+      if (!prog.completed || !prog.completed[l.id]) return;
+      if (isSongLesson(l)) songsCompleted++;
+      else if (!isReviewLesson(l)) { notesCompleted++; noteCount++; }
+    });
+    if (noteCount >= 8) octaveInstruments++;
+    if (prog.sprints && prog.sprints[SPRINT_MODES.FINGER] > bestFinger) {
+      bestFinger = prog.sprints[SPRINT_MODES.FINGER];
+    }
+  }
+  return {
+    notesCompleted,
+    songsCompleted,
+    octaveInstruments,
+    bestFinger,
+    streak: getCurrentStreak(),
+    totalSeconds: getTotalPracticeSeconds(),
+    xp: getTotalXp(),
+  };
+}
+
+function badgeEarned(id, stats) {
+  switch (id) {
+    case 'first-steps': return stats.notesCompleted >= 1;
+    case 'first-song': return stats.songsCompleted >= 1;
+    case 'octave': return stats.octaveInstruments >= 1;
+    case 'streak-3': return stats.streak >= 3;
+    case 'streak-7': return stats.streak >= 7;
+    case 'marathon': return stats.totalSeconds >= 1800;
+    case 'xp-500': return stats.xp >= 500;
+    case 'quick-fingers': return stats.bestFinger >= 15;
+    default: return false;
+  }
+}
+
+// Awards any newly-earned badges. Returns their definitions (optionally toasts).
+function evaluateBadges(opts = {}) {
+  const m = getMotivation();
+  const stats = getStats();
+  const newly = [];
+  BADGES.forEach(b => {
+    if (!m.badges[b.id] && badgeEarned(b.id, stats)) {
+      m.badges[b.id] = new Date().toISOString();
+      newly.push(b);
+    }
+  });
+  if (newly.length) {
+    saveMotivation();
+    if (opts.toast && typeof showToast === 'function') {
+      showToast(`${newly[0].icon} Badge unlocked: ${newly[0].name}`);
+    }
+  }
+  return newly;
+}
+
+function hasBadge(id) {
+  return !!getMotivation().badges[id];
+}
+
+// ── SESSION TIMING ─────────────────────────────────────────────────────────
+function startSession() {
+  if (APP.sessionStart) return;
+  APP.sessionStart = Date.now();
+}
+
+function endSession() {
+  if (!APP.sessionStart) return;
+  const seconds = Math.min(Math.round((Date.now() - APP.sessionStart) / 1000), MAX_SESSION_SECONDS);
+  APP.sessionStart = null;
+  if (seconds >= 5) addPracticeSeconds(seconds);
+  evaluateBadges({ toast: true });
 }
 
 function getLearnedNotes(instrumentId) {
@@ -276,6 +444,51 @@ function showNamePrompt() {
 }
 
 // ── RENDER: SELECT SCREEN ──────────────────────────────────────────────────
+function renderStudentCard(name) {
+  const xp = getTotalXp();
+  const level = getLevel(xp);
+  const avatar = getAvatar(level);
+  const streak = getCurrentStreak();
+  const minutes = Math.floor(getTotalPracticeSeconds() / 60);
+  const pct = xp % 100;
+  const streakHtml = streak > 0
+    ? `<span class="student-stat student-stat-streak">\u{1F525} ${streak}-day streak</span>`
+    : `<span class="student-stat">Practice today to start a streak!</span>`;
+  return `
+    <div class="student-card">
+      <div class="student-avatar">${avatar}</div>
+      <div class="student-details">
+        <div class="student-name-row">
+          <span class="student-name">${escapeHtml(name)}</span>
+          <span class="student-level">Lv ${level}</span>
+        </div>
+        <div class="student-stats">
+          ${streakHtml}
+          <span class="student-stat">\u{23F1} ${minutes} min</span>
+          <span class="student-stat">\u{2B50} ${xp} XP</span>
+        </div>
+        <div class="level-bar-track"><div class="level-bar-fill" style="width:${pct}%"></div></div>
+      </div>
+    </div>`;
+}
+
+function renderBadgeShelf() {
+  const earned = BADGES.filter(b => hasBadge(b.id)).length;
+  const items = BADGES.map(b => {
+    const got = hasBadge(b.id);
+    return `
+      <div class="badge ${got ? 'badge-earned' : 'badge-locked'}" title="${b.name}: ${b.desc}">
+        <div class="badge-icon">${got ? b.icon : '\u{1F512}'}</div>
+        <div class="badge-name">${b.name}</div>
+      </div>`;
+  }).join('');
+  return `
+    <div class="badges-shelf">
+      <div class="badges-shelf-title">Badges · ${earned}/${BADGES.length}</div>
+      <div class="badges-grid">${items}</div>
+    </div>`;
+}
+
 function renderSelectScreen() {
   const cards = INSTRUMENT_ORDER.map(id => {
     const inst = CURRICULUM[id];
@@ -291,6 +504,8 @@ function renderSelectScreen() {
   }).join('');
 
   const studentName = getStudentName();
+  const motivationHtml = studentName ? renderStudentCard(studentName) : '';
+  const badgesHtml = studentName ? renderBadgeShelf() : '';
 
   return `
     <div class="screen active select-screen">
@@ -307,10 +522,11 @@ function renderSelectScreen() {
         <div class="select-sub">Pick an instrument to start your very first lessons — fingerings, notes, and your first sounds.</div>
       </div>
       <div class="select-hero-settings">
-        ${studentName ? `<span class="select-student-name">${escapeHtml(studentName)}</span>` : ''}
         <button class="btn-icon settings-gear" data-action="open-settings" title="Settings" style="background:none;border:none;cursor:pointer;font-size:18px;vertical-align:middle;">⚙️</button>
       </div>
+      ${motivationHtml}
       <div class="instrument-grid">${cards}</div>
+      ${badgesHtml}
       <div class="version-badge" style="cursor:pointer">v2.0.0</div>
     </div>`;
 }
@@ -587,6 +803,7 @@ function finishSprint() {
     prog.xp += s.xp;
     saveProgress();
   }
+  evaluateBadges({ toast: true });
   render();
 }
 
@@ -1370,7 +1587,9 @@ function handleAction(action, el) {
     case 'reset-progress': {
       if (!confirm('Reset all progress for all instruments? This cannot be undone.')) return;
       APP.progress = {};
+      APP.motivation = { days: {}, badges: {} };
       saveProgress();
+      saveMotivation();
       APP.screen = 'select';
       render();
       showToast('Progress reset.');
@@ -1388,6 +1607,7 @@ function handleAction(action, el) {
     }
 
     case 'go-select':
+      endSession();
       clearInterval(APP.sprintTimer);
       APP.sprintTimer = null;
       APP.sprint = null;
@@ -1400,6 +1620,7 @@ function handleAction(action, el) {
       APP.lessonIndex = idx;
       const lesson = getLesson(APP.instrumentId, idx);
       APP.play = { running: false, hasPlayed: false };
+      startSession();
 
       if (isSongLesson(lesson)) {
         APP.phase = 'present';
@@ -1430,11 +1651,13 @@ function handleAction(action, el) {
 
     case 'open-practice':
       APP.sprint = null;
+      startSession();
       APP.screen = 'practice';
       render();
       break;
 
     case 'close-practice':
+      endSession();
       APP.sprint = null;
       APP.screen = 'map';
       render();
@@ -1466,6 +1689,7 @@ function handleAction(action, el) {
       clearInterval(APP.sprintTimer);
       APP.sprintTimer = null;
       APP.sprint = null;
+      evaluateBadges({ toast: true });
       render();
       break;
 
@@ -1510,6 +1734,7 @@ function handleAction(action, el) {
 
     case 'exit-lesson':
       stopAudioPlayback();
+      endSession();
       APP.reviewQueue = null;
       APP.reviewIndex = 0;
       APP.reviewCorrect = 0;
@@ -1660,6 +1885,7 @@ function handleAction(action, el) {
     }
     case 'open-imported-song': {
       stopAudioPlayback();
+      startSession();
       const idx = parseInt(el.dataset.importedIndex, 10);
       const allImported = JSON.parse(localStorage.getItem(IMPORTED_SONGS_KEY) || '{}');
       const songs = allImported[APP.instrumentId] || [];
@@ -1695,6 +1921,7 @@ function handleAction(action, el) {
     }
     case 'finish-lesson':
       stopAudioPlayback();
+      endSession();
       APP.reviewQueue = null;
       APP.reviewIndex = 0;
       APP.reviewCorrect = 0;
@@ -1734,5 +1961,6 @@ document.addEventListener('change', (e) => {
 
 // ── INIT ───────────────────────────────────────────────────────────────
 loadProgress();
+loadMotivation();
 if (!getStudentName()) showNamePrompt();
 render();
