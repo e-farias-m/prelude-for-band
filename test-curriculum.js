@@ -158,6 +158,20 @@ for (const inst of Object.values(CURRICULUM)) {
   }
 }
 
+for (const inst of Object.values(CURRICULUM)) {
+  for (const lesson of inst.lessons || []) {
+    if (lesson.type !== 'song' || lesson.durations === undefined) continue;
+    if (!Array.isArray(lesson.durations)) {
+      check(false, `${inst.id}/${lesson.id} durations must be an array`);
+      continue;
+    }
+    check(lesson.durations.length === lesson.noteIds.length,
+      `${inst.id}/${lesson.id} durations length ${lesson.durations.length} != noteIds ${lesson.noteIds.length}`);
+    check(lesson.durations.every(d => typeof d === 'number' && d > 0),
+      `${inst.id}/${lesson.id} durations must be positive numbers`);
+  }
+}
+
 if (failures.length) console.log(failures.join('\n'));
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

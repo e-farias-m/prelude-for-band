@@ -162,6 +162,16 @@ function getChordFrequencies(instrumentId, lesson, index) {
   }).filter(f => f != null);
 }
 
+// Per-note durations in beats, parallel to lesson.noteIds. Songs without a
+// valid `durations` array are treated as one beat per note.
+function getNoteDurations(lesson) {
+  const n = lesson.noteIds.length;
+  if (Array.isArray(lesson.durations) && lesson.durations.length === n) {
+    return lesson.durations;
+  }
+  return lesson.noteIds.map(() => 1);
+}
+
 const IMPORTED_SONGS_KEY = 'preludeBandImportedSongs';
 
 function showToast(msg) {
@@ -601,26 +611,36 @@ function startSongAudioPlayback(inst, lesson) {
     });
 
     const noteIds = lesson.noteIds;
+    const durations = getNoteDurations(lesson);
+    let totalBeats = 0;
     noteIds.forEach((id, i) => {
+      const startBeat = totalBeats;
+      totalBeats += durations[i];
       const t = setTimeout(() => {
         const note = findLessonById(APP.instrumentId, id);
         if (fingEl) fingEl.innerHTML = Graphics.fingeringSVG(inst.fingeringType, note.fingeringState, inst.accentColor, 84);
         if (staffEl) staffEl.innerHTML = Graphics.staffSVG({ pos: note.staffStep, accidental: note.accidental, clef: inst.clef, accentColor: inst.accentColor, width: 96 });
         if (nameEl) nameEl.textContent = note.noteName;
         if (progEl) progEl.textContent = `Note ${i + 1} of ${noteIds.length}`;
-
-        beatEls.forEach(el => el.classList.remove('active'));
-        if (beatEls[i % 4]) beatEls[i % 4].classList.add('active');
-      }, i * msPerBeat);
+      }, startBeat * msPerBeat);
       APP.audioPlaybackTimeouts.push(t);
     });
+
+    // Beat indicator: advance one cell per beat for the length of the song.
+    for (let b = 0; b < totalBeats; b++) {
+      const t = setTimeout(() => {
+        beatEls.forEach(el => el.classList.remove('active'));
+        if (beatEls[b % 4]) beatEls[b % 4].classList.add('active');
+      }, b * msPerBeat);
+      APP.audioPlaybackTimeouts.push(t);
+    }
 
     const done = setTimeout(() => {
       statusEl.textContent = 'Song complete!';
       playBtn.textContent = 'Done';
       playBtn.disabled = false;
       playBtn.dataset.action = 'back-to-present';
-    }, noteIds.length * msPerBeat);
+    }, totalBeats * msPerBeat);
     APP.audioPlaybackTimeouts.push(done);
   }
 }
@@ -880,16 +900,21 @@ function runPlaySequence(inst, lesson) {
 // ── SONG SEQUENCE ──────────────────────────────────────────────────────
 function runSongSequence(inst, lesson) {
   const noteIds = lesson.noteIds;
+  const durations = getNoteDurations(lesson);
   const msPerBeat = 480;
+  let beat = 0;
   noteIds.forEach((id, i) => {
     const note = findLessonById(APP.instrumentId, id);
     const chordFreqs = getChordFrequencies(APP.instrumentId, lesson, i);
+    const start = beat;
+    beat += durations[i];
+    const seconds = durations[i] * msPerBeat / 1000;
     setTimeout(() => {
       if (chordFreqs.length > 0) {
-        AudioEngine.playChord(chordFreqs, inst.fingeringType, 0.45);
+        AudioEngine.playChord(chordFreqs, inst.fingeringType, seconds);
       }
-      AudioEngine.playInstrumentNote(note.freq, inst.fingeringType, 0.45);
-    }, i * msPerBeat);
+      AudioEngine.playInstrumentNote(note.freq, inst.fingeringType, seconds);
+    }, start * msPerBeat);
   });
 }
 
@@ -912,20 +937,29 @@ function exportSongMusicXML(inst, lesson) {
   lines.push('  <part-list><score-part id="P1"><part-name>' + escapeXml(lesson.noteName) + '</part-name></score-part></part-list>');
   lines.push('  <part id="P1">');
   const noteIds = lesson.noteIds;
+  const durations = getNoteDurations(lesson);
   const chordIds = lesson.chordIds || [];
   let measure = 1, beat = 0;
   let measureNotes = [];
   for (let i = 0; i < noteIds.length; i++) {
     const n = findLessonById(APP.instrumentId, noteIds[i]);
     if (!n) continue;
+    const d = durations[i] || 1;
     const chordEntry = chordIds[i];
     const chordNotes = chordEntry ? chordEntry.map(id => findLessonById(APP.instrumentId, id)).filter(Boolean) : [];
-    measureNotes.push({ note: n, chord: false });
-    chordNotes.forEach(cn => measureNotes.push({ note: cn, chord: true }));
-    beat++;
+    measureNotes.push({ note: n, chord: false, duration: d });
+    chordNotes.forEach(cn => measureNotes.push({ note: cn, chord: true, duration: d }));
+    beat += d;
     if (beat === 4 && i < noteIds.length - 1) { flushMeasure(); measure++; beat = 0; }
   }
   if (measureNotes.length > 0) flushMeasure();
+  function typeFor(d) {
+    if (d >= 4) return 'whole';
+    if (d >= 2) return 'half';
+    if (d >= 1) return 'quarter';
+    if (d >= 0.5) return 'eighth';
+    return '16th';
+  }
   function flushMeasure() {
     lines.push('    <measure number="' + measure + '">');
     if (measure === 1) {
@@ -935,13 +969,16 @@ function exportSongMusicXML(inst, lesson) {
       lines.push('        <time><beats>4</beats><beat-type>4</beat-type></time>');
       lines.push('        <clef>' + clef + '</clef>');
       lines.push('      </attributes>');
+      if (lesson.bpm) {
+        lines.push('      <direction placement="above"><direction-type><metronome><beat-unit>quarter</beat-unit><per-minute>' + lesson.bpm + '</per-minute></metronome></direction-type><sound tempo="' + lesson.bpm + '"/></direction>');
+      }
     }
     measureNotes.forEach(mn => {
       lines.push('      <note>');
       if (mn.chord) lines.push('        <chord/>');
       lines.push('        ' + pitchAttr(mn.note));
-      lines.push('        <duration>1</duration>');
-      lines.push('        <type>quarter</type>');
+      lines.push('        <duration>' + mn.duration + '</duration>');
+      lines.push('        <type>' + typeFor(mn.duration) + '</type>');
       lines.push('      </note>');
     });
     lines.push('    </measure>');
@@ -971,8 +1008,11 @@ function importSongFromMusicXML(xmlString) {
   const partName = doc.querySelector('part-name');
   const title = partName ? partName.textContent.trim() : 'Imported Song';
   const noteEls = doc.querySelectorAll('measure note');
+  const divisionsEl = doc.querySelector('attributes divisions');
+  const divisions = divisionsEl ? parseFloat(divisionsEl.textContent) || 1 : 1;
   const noteIds = [];
   const chordIds = [];
+  const durations = [];
   let currentChordBuffer = [];
   noteEls.forEach(noteEl => {
     const step = noteEl.querySelector('pitch step');
@@ -999,6 +1039,9 @@ function importSongFromMusicXML(xmlString) {
       }
       noteIds.push(lessonId);
       chordIds.push(null);
+      const durEl = noteEl.querySelector('duration');
+      const beats = durEl ? (parseFloat(durEl.textContent) || divisions) / divisions : 1;
+      durations.push(beats);
     }
   });
   if (currentChordBuffer.length > 0) {
@@ -1006,7 +1049,7 @@ function importSongFromMusicXML(xmlString) {
   }
   if (noteIds.length === 0) throw new Error('No playable notes found in MusicXML');
   const importedId = 'imported-' + Date.now();
-  const song = { id: importedId, type: 'song', noteName: title, prerequisiteIds: [], noteIds, chordIds, prompt: '', description: 'Imported from MusicXML.' };
+  const song = { id: importedId, type: 'song', noteName: title, prerequisiteIds: [], noteIds, chordIds, durations, prompt: '', description: 'Imported from MusicXML.' };
   const existing = JSON.parse(localStorage.getItem(IMPORTED_SONGS_KEY) || '{}');
   if (!existing[APP.instrumentId]) existing[APP.instrumentId] = [];
   existing[APP.instrumentId].push(song);

@@ -261,7 +261,8 @@ const CURRICULUM = {
         prerequisiteIds: ['fl-1', 'fl-2', 'fl-3'],
         description: 'A classic English nursery rhyme using F, E, and D — your first three flute notes.',
         prompt: 'Step through each note slowly. Notice how your right hand alternates between keys!',
-        noteIds: ['fl-3', 'fl-2', 'fl-1', 'fl-3', 'fl-2', 'fl-1', 'fl-1', 'fl-1', 'fl-1', 'fl-2', 'fl-2', 'fl-2', 'fl-2', 'fl-3', 'fl-2', 'fl-1'],
+        noteIds: ['fl-3', 'fl-2', 'fl-1', 'fl-3', 'fl-2', 'fl-1', 'fl-1', 'fl-1', 'fl-1', 'fl-1', 'fl-2', 'fl-2', 'fl-2', 'fl-2', 'fl-3', 'fl-2', 'fl-1'],
+        durations: [1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2],
         chordIds: [
           ["fl-1","fl-3","fl-5"],
           ["fl-4","fl-6","fl-8"],
@@ -278,7 +279,8 @@ const CURRICULUM = {
           ["fl-4","fl-6","fl-8"],
           ["fl-4","fl-6","fl-8"],
           ["fl-1","fl-3","fl-5"],
-          ["fl-4","fl-6","fl-8"]
+          ["fl-4","fl-6","fl-8"],
+          ["fl-1","fl-3","fl-5"]
         ],
       },
       {
