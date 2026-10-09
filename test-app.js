@@ -33,7 +33,9 @@ const sandbox = new Function('document', 'localStorage', 'window', `
 ${read('curriculum.js')}
 ${read('graphics.js')}
 ${read('app.js')}
-return { handleAction, renderCompletePhase, CURRICULUM, APP, IMPORTED_SONGS_KEY };
+return { handleAction, renderCompletePhase, CURRICULUM, APP, IMPORTED_SONGS_KEY,
+  buildSprintQuestion, getSprintBest, setSprintBest, finishSprint, startSprint,
+  renderPracticeScreen, getLearnedNotes, SPRINT_MODES };
 `);
 const api = sandbox(document, localStorage, {});
 
@@ -86,6 +88,107 @@ api.APP.instrumentId = 'flute';
   store[api.IMPORTED_SONGS_KEY] = JSON.stringify({ flute: [] });
   api.handleAction('delete-imported-song', { dataset: { importedIndex: '5' } });
   check(true, 'deleting an out-of-range imported song should not throw');
+}
+
+// ── 4. Sprint questions draw only from learned notes ───────────────────────
+{
+  const fluteLessons = flute.lessons.filter(l => !l.type);
+  const learnedIds = fluteLessons.slice(0, 3).map(l => l.id);
+  api.APP.instrumentId = 'flute';
+  api.APP.progress = { flute: { completed: {}, xp: 0, mastery: {} } };
+  learnedIds.forEach(id => { api.APP.progress.flute.completed[id] = { stars: 3 }; });
+
+  for (let i = 0; i < 20; i++) {
+    const q = api.buildSprintQuestion('flute', api.SPRINT_MODES.SIGHT);
+    check(q.options.some(o => o.id === q.correctId), 'sprint options include the correct note');
+    check(q.options.every(o => learnedIds.includes(o.id)), 'sprint options only use learned notes');
+    check(new Set(q.options.map(o => o.id)).size === q.options.length, 'sprint options are unique');
+  }
+}
+
+// ── 5. Sprint personal best only moves upward ──────────────────────────────
+{
+  api.APP.progress = { flute: { completed: {}, xp: 0, mastery: {}, sprints: {} } };
+  check(api.getSprintBest('flute', api.SPRINT_MODES.SIGHT) === 0, 'no sprint best initially');
+  check(api.setSprintBest('flute', api.SPRINT_MODES.SIGHT, 5) === true, 'first score sets a best');
+  check(api.setSprintBest('flute', api.SPRINT_MODES.SIGHT, 3) === false, 'lower score is not a best');
+  check(api.getSprintBest('flute', api.SPRINT_MODES.SIGHT) === 5, 'best stays at the higher score');
+  check(api.setSprintBest('flute', api.SPRINT_MODES.SIGHT, 7) === true, 'higher score sets a new best');
+}
+
+// ── 6. Sprint answering scores correct taps and flags wrong ones ───────────
+{
+  api.APP.instrumentId = 'flute';
+  api.APP.progress = { flute: { completed: {}, xp: 0, mastery: {} } };
+  flute.lessons.filter(l => !l.type).slice(0, 3).forEach(l => { api.APP.progress.flute.completed[l.id] = { stars: 3 }; });
+  api.APP.sprint = {
+    mode: api.SPRINT_MODES.SIGHT, endsAt: Date.now() + 30000, score: 0,
+    finished: false, isBest: false, xp: 0,
+    question: api.buildSprintQuestion('flute', api.SPRINT_MODES.SIGHT),
+  };
+  const correct = api.APP.sprint.question.correctId;
+  api.handleAction('sprint-answer', { dataset: { id: correct } });
+  check(api.APP.sprint.score === 1, 'correct answer increments the score');
+  const before = api.APP.sprint.score;
+  const wrong = api.APP.sprint.question.options.find(o => o.id !== api.APP.sprint.question.correctId);
+  api.handleAction('sprint-answer', { dataset: { id: wrong.id } });
+  check(api.APP.sprint.score === before, 'wrong answer does not increment the score');
+  check(api.APP.sprint.question.wrongId === wrong.id, 'wrong answer is flagged for feedback');
+}
+
+// ── 7. Finishing a sprint awards XP and records the best ───────────────────
+{
+  api.APP.progress = { flute: { completed: {}, xp: 0, mastery: {}, sprints: {} } };
+  api.APP.instrumentId = 'flute';
+  api.APP.sprint = {
+    mode: api.SPRINT_MODES.SIGHT, endsAt: Date.now(), score: 6,
+    finished: false, isBest: false, xp: 0, question: {},
+  };
+  api.finishSprint();
+  check(api.APP.sprint.finished === true, 'sprint is marked finished');
+  check(api.APP.sprint.isBest === true, 'first score is a new best');
+  check(api.APP.sprint.xp === 12, 'sprint awards 2 XP per correct answer');
+  check(api.getSprintBest('flute', api.SPRINT_MODES.SIGHT) === 6, 'finish records the personal best');
+  check(api.APP.progress.flute.xp === 12, 'sprint XP is added to instrument progress');
+}
+
+// ── 8. Practice screen gates drills until two notes are learned ────────────
+{
+  api.APP.instrumentId = 'flute';
+  api.APP.sprint = null;
+  api.APP.progress = { flute: { completed: {}, xp: 0, mastery: {} } };
+  api.APP.progress.flute.completed['fl-1'] = { stars: 3 };
+  let html = api.renderPracticeScreen();
+  check(html.includes('unlock'), 'practice screen stays locked with fewer than two notes');
+  check(html.includes('disabled'), 'locked practice screen disables the sprint cards');
+  api.APP.progress.flute.completed['fl-2'] = { stars: 3 };
+  html = api.renderPracticeScreen();
+  check(!html.includes('unlock'), 'practice screen unlocks once two notes are learned');
+  check(html.includes('data-action="start-sprint"'), 'practice screen offers sprints once ready');
+  check(html.includes('sight') && html.includes('finger'), 'practice screen lists both sprint modes');
+}
+
+// ── 9. Sprint view renders prompt, HUD and result cleanly ─────────────────
+{
+  api.APP.instrumentId = 'flute';
+  api.APP.progress = { flute: { completed: {}, xp: 0, mastery: {} } };
+  flute.lessons.filter(l => !l.type).slice(0, 3).forEach(l => { api.APP.progress.flute.completed[l.id] = { stars: 3 }; });
+  api.APP.sprint = {
+    mode: api.SPRINT_MODES.FINGER, endsAt: Date.now() + 30000, score: 2,
+    finished: false, isBest: false, xp: 0,
+    question: api.buildSprintQuestion('flute', api.SPRINT_MODES.FINGER),
+  };
+  const live = api.renderPracticeScreen();
+  check(live.includes('sprint-timer') && live.includes('sprint-score'), 'sprint view shows the HUD');
+  check(live.includes('data-action="sprint-answer"'), 'sprint view offers answer options');
+  check(!live.includes('undefined') && !live.includes('NaN'), 'live sprint view has no undefined/NaN');
+
+  api.APP.sprint.finished = true;
+  api.APP.sprint.xp = 4;
+  const done = api.renderPracticeScreen();
+  check(done.includes('sprint-result-score') && done.includes('Play again'), 'finished sprint shows the result');
+  check(done.includes('+4 XP'), 'finished sprint shows XP earned');
+  check(!done.includes('undefined') && !done.includes('NaN'), 'sprint result has no undefined/NaN');
 }
 
 if (failures.length) console.log(failures.join('\n'));

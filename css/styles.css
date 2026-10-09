@@ -1151,3 +1151,84 @@ button:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2
 .settings-input:focus {
   border-color: var(--accent-warm);
 }
+
+/* ── PRACTICE DRILLS ────────────────────────────────────────────────────── */
+.practice-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-card);
+}
+.practice-banner-locked { opacity: 0.7; }
+.practice-banner-text { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.practice-banner-title { font-size: 16px; font-weight: 700; }
+.practice-banner-sub { font-size: 13px; color: var(--text-muted); line-height: 1.4; }
+.practice-banner-best { font-size: 12px; font-weight: 600; color: var(--gold); margin-top: 4px; }
+.practice-banner .btn { flex-shrink: 0; padding: 12px 22px; }
+
+.practice-screen { background: var(--bg-deep); }
+.practice-intro {
+  font-size: 15px;
+  color: var(--text-muted);
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.sprint-cards { display: flex; flex-direction: column; gap: 14px; }
+.sprint-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 18px;
+  color: var(--text-primary);
+  box-shadow: var(--shadow-card);
+  transition: transform 0.12s, border-color 0.12s;
+}
+.sprint-card:hover:not(:disabled) { transform: translateY(-2px); border-color: var(--accent-warm); }
+.sprint-card:active:not(:disabled) { transform: scale(0.98); }
+.sprint-card:disabled { opacity: 0.5; }
+.sprint-card-title { font-size: 17px; font-weight: 700; }
+.sprint-card-sub { font-size: 13px; color: var(--text-muted); line-height: 1.4; }
+.sprint-card-best { font-size: 12px; font-weight: 600; color: var(--gold); margin-top: 6px; }
+
+.sprint-hud { display: flex; align-items: center; gap: 16px; margin-left: auto; }
+.sprint-timer {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--accent-warm);
+  font-variant-numeric: tabular-nums;
+  min-width: 44px;
+  text-align: center;
+}
+.sprint-score { font-size: 14px; color: var(--text-muted); }
+.sprint-score b { color: var(--text-primary); font-size: 18px; }
+
+.sprint-result-score {
+  font-size: 64px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: var(--accent-cool);
+  animation: stars-pop 0.5s ease;
+}
+.sprint-best-badge {
+  padding: 6px 16px;
+  border-radius: 20px;
+  background: rgba(255, 209, 102, 0.15);
+  color: var(--gold);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.sprint-result-best { font-size: 14px; color: var(--text-muted); }

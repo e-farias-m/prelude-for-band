@@ -26,6 +26,9 @@ const APP = {
   audioPlaybackAudio: null,
   // Whether the current lesson was already complete before this attempt
   completedBefore: false,
+  // Timed practice sprint state (null when not in a sprint)
+  sprint: null,
+  sprintTimer: null,
 };
 
 const STORAGE_KEY = 'preludeBandProgress';
@@ -46,6 +49,13 @@ const QUIZ_TYPES = {
   NOTE_TO_FINGERING: 'note-to-fingering',   // See note name, pick fingering
   STAFF_TO_NOTE: 'staff-to-note',           // See note on staff, pick note name
   NOTE_TO_STAFF: 'note-to-staff',           // See note name, pick staff position
+};
+
+// ── TIMED PRACTICE SPRINTS ─────────────────────────────────────────────────
+const SPRINT_SECONDS = 30;
+const SPRINT_MODES = {
+  SIGHT: 'sight',    // See a note on the staff, name it
+  FINGER: 'finger',  // See a note name, pick its fingering
 };
 
 // ── MASTERY LEVELS ────────────────────────────────────────────────────────
@@ -109,6 +119,25 @@ function addNoteMastery(instrumentId, noteId, amount = 1) {
   const prog = getInstrumentProgress(instrumentId);
   prog.mastery[noteId] = (prog.mastery[noteId] || 0) + amount;
   saveProgress();
+}
+
+// Personal best for a sprint mode is stored per instrument.
+function getSprintBest(instrumentId, mode) {
+  const prog = getInstrumentProgress(instrumentId);
+  if (!prog.sprints) prog.sprints = {};
+  return prog.sprints[mode] || 0;
+}
+
+// Saves a new best if `score` beats it. Returns true when a record was set.
+function setSprintBest(instrumentId, mode, score) {
+  const prog = getInstrumentProgress(instrumentId);
+  if (!prog.sprints) prog.sprints = {};
+  if (score > (prog.sprints[mode] || 0)) {
+    prog.sprints[mode] = score;
+    saveProgress();
+    return true;
+  }
+  return false;
 }
 
 function getLearnedNotes(instrumentId) {
@@ -321,6 +350,13 @@ function renderMapScreen() {
   const total = inst.lessons.length + instImported.length;
   const doneCount = inst.lessons.filter(l => prog.completed[l.id]).length + instImported.filter(s => prog.completed[s.id]).length;
   const pct = total ? Math.round((doneCount / total) * 100) : 0;
+  const learnedCount = getLearnedNotes(APP.instrumentId).length;
+  const practiceReady = learnedCount >= 2;
+  const bestSight = getSprintBest(APP.instrumentId, SPRINT_MODES.SIGHT);
+  const bestFinger = getSprintBest(APP.instrumentId, SPRINT_MODES.FINGER);
+  const bestLine = practiceReady && (bestSight || bestFinger)
+    ? `<div class="practice-banner-best">Best: ${bestSight} names · ${bestFinger} fingerings</div>`
+    : '';
 
   const nodes = inst.lessons.map((lesson, i) => {
     const unlocked = isLessonUnlocked(APP.instrumentId, i);
@@ -395,6 +431,14 @@ function renderMapScreen() {
         </div>
       </div>
       <div class="map-body">
+        <div class="practice-banner ${practiceReady ? '' : 'practice-banner-locked'}">
+          <div class="practice-banner-text">
+            <div class="practice-banner-title">Practice drills</div>
+            <div class="practice-banner-sub">${practiceReady ? 'Timed games to build speed and confidence.' : 'Learn 2 notes to unlock timed drills.'}</div>
+            ${bestLine}
+          </div>
+          <button class="btn btn-primary" data-action="open-practice" ${practiceReady ? '' : 'disabled'}>Practice</button>
+        </div>
         <div class="map-unit-label">Unit 1 · First Notes</div>
         <div class="map-path">${nodes}${importedNodes}</div>
         <div class="import-section" style="margin-top:20px;text-align:center">
@@ -403,6 +447,147 @@ function renderMapScreen() {
         </div>
       </div>
     </div>`;
+}
+
+// ── RENDER: PRACTICE (SPRINTS) ─────────────────────────────────────────────
+function renderPracticeScreen() {
+  const inst = getInstrument(APP.instrumentId);
+  if (APP.sprint) return renderSprintView(inst);
+
+  const learned = getLearnedNotes(APP.instrumentId);
+  const ready = learned.length >= 2;
+  const modes = [
+    { mode: SPRINT_MODES.SIGHT, title: 'Sight-reading', sub: 'See a note on the staff, name it fast.' },
+    { mode: SPRINT_MODES.FINGER, title: 'Finger gym', sub: 'See a note name, match its fingering fast.' },
+  ];
+  const cards = modes.map(m => {
+    const best = getSprintBest(APP.instrumentId, m.mode);
+    return `
+      <button class="sprint-card" data-action="start-sprint" data-mode="${m.mode}" ${ready ? '' : 'disabled'}>
+        <div class="sprint-card-title">${m.title}</div>
+        <div class="sprint-card-sub">${m.sub}</div>
+        <div class="sprint-card-best">${best ? `Best: ${best}` : 'No score yet'}</div>
+      </button>`;
+  }).join('');
+
+  return `
+    <div class="screen active practice-screen">
+      <div class="app-header">
+        <button class="header-back" data-action="close-practice">←</button>
+        <div class="header-title">Practice · ${inst.shortName}</div>
+      </div>
+      <div class="lesson-body">
+        <div class="practice-intro">${ready
+          ? `${SPRINT_SECONDS} seconds. How many can you get?`
+          : 'Finish a couple of lessons to unlock the timed drills.'}</div>
+        <div class="sprint-cards">${cards}</div>
+      </div>
+    </div>`;
+}
+
+function renderSprintView(inst) {
+  const s = APP.sprint;
+
+  if (s.finished) {
+    const best = getSprintBest(APP.instrumentId, s.mode);
+    const title = s.mode === SPRINT_MODES.SIGHT ? 'Sight-reading' : 'Finger gym';
+    return `
+      <div class="screen active practice-screen">
+        <div class="app-header">
+          <button class="header-back" data-action="exit-sprint">✕</button>
+          <div class="header-title">${title}</div>
+        </div>
+        <div class="complete-layout">
+          <div class="sprint-result-score">${s.score}</div>
+          <div class="complete-sub">correct in ${SPRINT_SECONDS} seconds</div>
+          ${s.isBest ? `<div class="sprint-best-badge">New best!</div>` : `<div class="sprint-result-best">Best: ${best}</div>`}
+          <div class="complete-xp">+${s.xp} XP</div>
+          <div class="gap-lg"></div>
+          <button class="btn btn-primary btn-wide" data-action="sprint-again">Play again</button>
+          <div class="gap-sm"></div>
+          <button class="btn btn-secondary btn-wide" data-action="exit-sprint">Done</button>
+        </div>
+      </div>`;
+  }
+
+  const q = s.question;
+  const promptHtml = q.mode === SPRINT_MODES.SIGHT
+    ? `<div class="quiz-prompt-svg">${Graphics.staffSVG({ pos: q.prompt.staffStep, accidental: q.prompt.accidental, clef: inst.clef, accentColor: inst.accentColor, width: 100 })}</div>`
+    : `<div class="quiz-prompt-note">${q.prompt.noteName}</div>`;
+
+  const optionsHtml = q.options.map(opt => {
+    let cls = 'quiz-option';
+    if (opt.id === q.wrongId) cls += ' selected-wrong';
+    let content;
+    if (q.mode === SPRINT_MODES.SIGHT) {
+      cls += ' text-only';
+      content = `<div class="quiz-option-note">${opt.noteName}</div>`;
+    } else {
+      content = `<div class="quiz-option-svg">${Graphics.fingeringSVG(inst.fingeringType, opt.fingeringState, inst.accentColor, 72)}</div>`;
+    }
+    return `<div class="${cls}" data-action="sprint-answer" data-id="${opt.id}">${content}</div>`;
+  }).join('');
+
+  const remain = Math.max(0, Math.ceil((s.endsAt - Date.now()) / 1000));
+  return `
+    <div class="screen active practice-screen sprint-screen">
+      <div class="app-header">
+        <button class="header-back" data-action="exit-sprint">✕</button>
+        <div class="sprint-hud">
+          <div class="sprint-timer" id="sprint-timer">${remain}</div>
+          <div class="sprint-score">Score <b id="sprint-score">${s.score}</b></div>
+        </div>
+      </div>
+      <div class="lesson-body">
+        <div class="lesson-instruction">${q.mode === SPRINT_MODES.SIGHT ? 'Which note is this?' : 'Which fingering plays this note?'}</div>
+        <div class="quiz-prompt">${promptHtml}</div>
+        <div class="quiz-options sprint-options">${optionsHtml}</div>
+      </div>
+    </div>`;
+}
+
+function startSprintTimer() {
+  clearInterval(APP.sprintTimer);
+  APP.sprintTimer = setInterval(() => {
+    const s = APP.sprint;
+    if (!s || s.finished) { clearInterval(APP.sprintTimer); APP.sprintTimer = null; return; }
+    const remain = Math.max(0, Math.ceil((s.endsAt - Date.now()) / 1000));
+    const el = document.getElementById('sprint-timer');
+    if (el) el.textContent = remain;
+    if (remain <= 0) finishSprint();
+  }, 250);
+}
+
+function startSprint(mode) {
+  const learned = getLearnedNotes(APP.instrumentId);
+  if (learned.length < 2) { showToast('Learn a couple of notes first.'); return; }
+  APP.sprint = {
+    mode,
+    endsAt: Date.now() + SPRINT_SECONDS * 1000,
+    score: 0,
+    finished: false,
+    isBest: false,
+    xp: 0,
+    question: buildSprintQuestion(APP.instrumentId, mode),
+  };
+  startSprintTimer();
+  render();
+}
+
+function finishSprint() {
+  clearInterval(APP.sprintTimer);
+  APP.sprintTimer = null;
+  const s = APP.sprint;
+  if (!s || s.finished) return;
+  s.finished = true;
+  s.isBest = setSprintBest(APP.instrumentId, s.mode, s.score);
+  s.xp = s.score * 2;
+  if (s.xp > 0) {
+    const prog = getInstrumentProgress(APP.instrumentId);
+    prog.xp += s.xp;
+    saveProgress();
+  }
+  render();
 }
 
 // ── RENDER: LESSON SCREEN ───────────────────────────────────────────────────
@@ -713,6 +898,22 @@ function buildQuizOptions(inst, lesson) {
   };
 }
 
+// A sprint question is drawn only from notes the student has completed, so it
+// always tests material they have met. Up to three distractors keep options at
+// four once enough notes are known (sprints require at least two notes).
+function buildSprintQuestion(instrumentId, mode) {
+  const learned = getLearnedNotes(instrumentId);
+  const prompt = learned[Math.floor(Math.random() * learned.length)];
+  const distractors = shuffle(learned.filter(l => l.id !== prompt.id)).slice(0, 3);
+  return {
+    mode,
+    prompt,
+    options: shuffle([prompt, ...distractors]),
+    correctId: prompt.id,
+    wrongId: null,
+  };
+}
+
 function getQuizQuestionText(quizType) {
   switch (quizType) {
     case QUIZ_TYPES.FINGERING_TO_NOTE:  return 'Which note does this fingering play?';
@@ -885,6 +1086,7 @@ function render() {
   if (APP.screen === 'select') app.innerHTML = renderSelectScreen();
   else if (APP.screen === 'settings') app.innerHTML = renderSettingsScreen();
   else if (APP.screen === 'map') app.innerHTML = renderMapScreen();
+  else if (APP.screen === 'practice') app.innerHTML = renderPracticeScreen();
   else if (APP.screen === 'lesson') app.innerHTML = renderLessonScreen();
 }
 
@@ -1186,6 +1388,9 @@ function handleAction(action, el) {
     }
 
     case 'go-select':
+      clearInterval(APP.sprintTimer);
+      APP.sprintTimer = null;
+      APP.sprint = null;
       APP.screen = 'select';
       render();
       break;
@@ -1221,6 +1426,47 @@ function handleAction(action, el) {
 
     case 'locked-node':
       showToast('Finish the previous note first.');
+      break;
+
+    case 'open-practice':
+      APP.sprint = null;
+      APP.screen = 'practice';
+      render();
+      break;
+
+    case 'close-practice':
+      APP.sprint = null;
+      APP.screen = 'map';
+      render();
+      break;
+
+    case 'start-sprint':
+      startSprint(el.dataset.mode);
+      break;
+
+    case 'sprint-answer': {
+      const s = APP.sprint;
+      if (!s || s.finished) return;
+      const id = el.dataset.id;
+      if (id === s.question.correctId) {
+        s.score++;
+        s.question = buildSprintQuestion(APP.instrumentId, s.mode);
+      } else {
+        s.question.wrongId = id;
+      }
+      render();
+      break;
+    }
+
+    case 'sprint-again':
+      startSprint(APP.sprint ? APP.sprint.mode : SPRINT_MODES.SIGHT);
+      break;
+
+    case 'exit-sprint':
+      clearInterval(APP.sprintTimer);
+      APP.sprintTimer = null;
+      APP.sprint = null;
+      render();
       break;
 
     case 'song-next': {
