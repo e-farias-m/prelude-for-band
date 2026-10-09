@@ -22,6 +22,7 @@ const APP = {
   importedSongs: null,
   // Audio playback state
   audioPlaybackTimeouts: [],
+  audioPlaybackInterval: null,
   audioPlaybackAudio: null,
 };
 
@@ -530,6 +531,19 @@ function renderSongAudioPlayerContent(inst, lesson) {
     </div>`;
 }
 
+function stopAudioPlayback() {
+  APP.audioPlaybackTimeouts.forEach(clearTimeout);
+  APP.audioPlaybackTimeouts = [];
+  if (APP.audioPlaybackInterval) {
+    clearInterval(APP.audioPlaybackInterval);
+    APP.audioPlaybackInterval = null;
+  }
+  if (APP.audioPlaybackAudio) {
+    APP.audioPlaybackAudio.pause();
+    APP.audioPlaybackAudio = null;
+  }
+}
+
 function startSongAudioPlayback(inst, lesson) {
   const statusEl = document.getElementById('song-audio-status');
   const beatEls = document.querySelectorAll('#song-audio-beats .beat-cell');
@@ -547,48 +561,45 @@ function startSongAudioPlayback(inst, lesson) {
   playBtn.textContent = 'Preparing\u2026';
 
   // Clean up any previous playback
-  APP.audioPlaybackTimeouts.forEach(clearTimeout);
-  APP.audioPlaybackTimeouts = [];
+  stopAudioPlayback();
 
   statusEl.textContent = 'Count-in\u2026';
 
-  // Preload and start the audio
+  // Preload the recording. We only start it once the count-in finishes so the
+  // first note sounds at the same moment its highlight appears.
   const audio = new Audio(lesson.audioUrl);
   audio.preload = 'auto';
   APP.audioPlaybackAudio = audio;
 
-  // Count-in: 4 visual beats
+  // Four-beat visual count-in, then start the recording and the note
+  // highlighting together.
   let beatCount = 0;
-
-  function showBeat() {
+  function tick() {
     beatEls.forEach(el => el.classList.remove('active'));
-    if (beatCount < 4 && beatEls[beatCount]) {
-      beatEls[beatCount].classList.add('active');
+    if (beatCount < 4) {
+      if (beatEls[beatCount]) beatEls[beatCount].classList.add('active');
       beatCount++;
-    }
-    if (beatCount >= 4) {
-      clearInterval(countInterval);
+    } else {
+      clearInterval(APP.audioPlaybackInterval);
+      APP.audioPlaybackInterval = null;
       beatEls.forEach(el => el.classList.remove('active'));
       startNotes();
     }
   }
-
-  showBeat();
-  const countInterval = setInterval(showBeat, msPerBeat);
-
-  audio.play().catch(() => {
-    clearInterval(countInterval);
-    beatEls.forEach(el => el.classList.remove('active'));
-    statusEl.textContent = 'Audio failed to load.';
-    playBtn.textContent = 'Retry';
-    playBtn.disabled = false;
-    playBtn.dataset.action = 'play-song-audio-start';
-    APP.audioPlaybackAudio = null;
-  });
+  tick();
+  APP.audioPlaybackInterval = setInterval(tick, msPerBeat);
 
   function startNotes() {
     statusEl.textContent = 'Playing\u2026';
     playBtn.textContent = 'Playing\u2026';
+
+    audio.play().catch(() => {
+      statusEl.textContent = 'Audio failed to load.';
+      playBtn.textContent = 'Retry';
+      playBtn.disabled = false;
+      APP.audioPlaybackAudio = null;
+    });
+
     const noteIds = lesson.noteIds;
     noteIds.forEach((id, i) => {
       const t = setTimeout(() => {
@@ -599,18 +610,18 @@ function startSongAudioPlayback(inst, lesson) {
         if (progEl) progEl.textContent = `Note ${i + 1} of ${noteIds.length}`;
 
         beatEls.forEach(el => el.classList.remove('active'));
-        const bi = i % 4;
-        if (beatEls[bi]) beatEls[bi].classList.add('active');
-
-        if (i === noteIds.length - 1) {
-          statusEl.textContent = 'Song complete!';
-          playBtn.textContent = 'Done';
-          playBtn.disabled = false;
-          playBtn.dataset.action = 'back-to-present';
-        }
+        if (beatEls[i % 4]) beatEls[i % 4].classList.add('active');
       }, i * msPerBeat);
       APP.audioPlaybackTimeouts.push(t);
     });
+
+    const done = setTimeout(() => {
+      statusEl.textContent = 'Song complete!';
+      playBtn.textContent = 'Done';
+      playBtn.disabled = false;
+      playBtn.dataset.action = 'back-to-present';
+    }, noteIds.length * msPerBeat);
+    APP.audioPlaybackTimeouts.push(done);
   }
 }
 
@@ -1118,12 +1129,7 @@ function handleAction(action, el) {
     }
 
     case 'back-to-present': {
-      APP.audioPlaybackTimeouts.forEach(clearTimeout);
-      APP.audioPlaybackTimeouts = [];
-      if (APP.audioPlaybackAudio) {
-        APP.audioPlaybackAudio.pause();
-        APP.audioPlaybackAudio = null;
-      }
+      stopAudioPlayback();
       APP.songNoteIndex = 0;
       APP.phase = 'present';
       render();
@@ -1131,9 +1137,7 @@ function handleAction(action, el) {
     }
 
     case 'exit-lesson':
-      APP.audioPlaybackTimeouts.forEach(clearTimeout);
-      APP.audioPlaybackTimeouts = [];
-      if (APP.audioPlaybackAudio) { APP.audioPlaybackAudio.pause(); APP.audioPlaybackAudio = null; }
+      stopAudioPlayback();
       APP.reviewQueue = null;
       APP.reviewIndex = 0;
       APP.reviewCorrect = 0;
@@ -1161,9 +1165,7 @@ function handleAction(action, el) {
     }
 
     case 'goto-quiz':
-      APP.audioPlaybackTimeouts.forEach(clearTimeout);
-      APP.audioPlaybackTimeouts = [];
-      if (APP.audioPlaybackAudio) { APP.audioPlaybackAudio.pause(); APP.audioPlaybackAudio = null; }
+      stopAudioPlayback();
       APP.phase = 'quiz';
       APP.quiz = null;
       render();
@@ -1283,9 +1285,7 @@ function handleAction(action, el) {
       break;
     }
     case 'open-imported-song': {
-      APP.audioPlaybackTimeouts.forEach(clearTimeout);
-      APP.audioPlaybackTimeouts = [];
-      if (APP.audioPlaybackAudio) { APP.audioPlaybackAudio.pause(); APP.audioPlaybackAudio = null; }
+      stopAudioPlayback();
       const idx = parseInt(el.dataset.importedIndex, 10);
       const allImported = JSON.parse(localStorage.getItem(IMPORTED_SONGS_KEY) || '{}');
       const songs = allImported[APP.instrumentId] || [];
@@ -1311,9 +1311,7 @@ function handleAction(action, el) {
       break;
     }
     case 'finish-lesson':
-      APP.audioPlaybackTimeouts.forEach(clearTimeout);
-      APP.audioPlaybackTimeouts = [];
-      if (APP.audioPlaybackAudio) { APP.audioPlaybackAudio.pause(); APP.audioPlaybackAudio = null; }
+      stopAudioPlayback();
       APP.reviewQueue = null;
       APP.reviewIndex = 0;
       APP.reviewCorrect = 0;

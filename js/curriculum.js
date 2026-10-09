@@ -255,7 +255,7 @@ const CURRICULUM = {
       },
       {
         id: 'fl-song-1', type: 'song',
-        audioUrl: null,
+        audioUrl: 'audio/flute-hot-cross-buns.mp3',
         bpm: 100,
         noteName: 'Hot Cross Buns',
         prerequisiteIds: ['fl-1', 'fl-2', 'fl-3'],
