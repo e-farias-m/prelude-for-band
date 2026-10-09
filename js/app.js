@@ -41,14 +41,23 @@ const APP = {
   // Microphone recording state
   recorder: null,
   recordingUrl: null,
+  // Home screen: true while the user is choosing a different instrument
+  pickingInstrument: false,
 };
 
 const STORAGE_KEY = 'preludeBandProgress';
 const NAME_KEY = 'preludeBandName';
 const THEME_KEY = 'preludeBandTheme';
+const INSTRUMENT_KEY = 'preludeBandInstrument';
 
 function getStudentName() { return localStorage.getItem(NAME_KEY) || ''; }
 function setStudentName(name) { localStorage.setItem(NAME_KEY, name); }
+
+// Last instrument the student opened — lets the home screen focus on one
+// instrument instead of the full set until they ask to switch.
+function getSavedInstrument() { return localStorage.getItem(INSTRUMENT_KEY) || ''; }
+function setSavedInstrument(id) { localStorage.setItem(INSTRUMENT_KEY, id); }
+function clearSavedInstrument() { localStorage.removeItem(INSTRUMENT_KEY); }
 
 // ── THEME ──────────────────────────────────────────────────────────────────
 function getTheme() { return localStorage.getItem(THEME_KEY) || 'light'; }
@@ -1131,7 +1140,7 @@ function renderBadgeShelf() {
     </div>`;
 }
 
-function renderSelectScreen() {
+function renderInstrumentGrid() {
   const cards = INSTRUMENT_ORDER.map(id => {
     const inst = CURRICULUM[id];
     const icon = Graphics.instrumentIconSVG(id, 56);
@@ -1144,6 +1153,36 @@ function renderSelectScreen() {
         <div class="card-name" style="color: var(--text-primary)">${inst.shortName}</div>
       </div>`;
   }).join('');
+  return `<div class="instrument-grid">${cards}</div>`;
+}
+
+// A single, prominent card for the instrument the student is working in, so the
+// home screen stays focused instead of showing every instrument all the time.
+function renderFocusCard(inst) {
+  const ir = getInstrumentReport(inst.id);
+  const progress = ir.xp > 0
+    ? `${ir.notesLearned}/${ir.notesTotal} notes · ${ir.songsCompleted}/${ir.songsTotal} songs`
+    : 'Ready for your first lesson';
+  return `
+    <div class="focus-instrument">
+      <div class="focus-card" data-action="select-instrument" data-id="${inst.id}" style="color:${instAccent(inst)}">
+        <div class="focus-icon">${Graphics.instrumentIconSVG(inst.id, 64)}</div>
+        <div class="focus-info">
+          <div class="focus-name">${inst.name}</div>
+          <div class="focus-progress">${progress}</div>
+        </div>
+        <div class="focus-go">Continue \u2192</div>
+      </div>
+      <button class="switch-instrument" data-action="switch-instrument">Switch instrument</button>
+    </div>`;
+}
+
+function renderSelectScreen() {
+  const savedId = getSavedInstrument();
+  const savedInst = savedId && CURRICULUM[savedId] && CURRICULUM[savedId].available
+    ? CURRICULUM[savedId]
+    : null;
+  const picking = APP.pickingInstrument || !savedInst;
 
   const studentName = getStudentName();
   const motivationHtml = studentName ? renderStudentCard(studentName) : '';
@@ -1152,6 +1191,21 @@ function renderSelectScreen() {
   const reportHtml = studentName
     ? `<button class="btn btn-secondary report-open" data-action="open-report">\u{1F4CB} Progress report</button>`
     : '';
+
+  let headline;
+  let sub;
+  let instrumentArea;
+  if (picking) {
+    headline = 'First notes, first wins.';
+    sub = 'Pick an instrument to start your very first lessons — fingerings, notes, and your first sounds.';
+    instrumentArea = `
+      ${savedInst ? `<button class="picker-back" data-action="cancel-instrument-pick">\u2190 Back to ${savedInst.shortName}</button>` : ''}
+      ${renderInstrumentGrid()}`;
+  } else {
+    headline = studentName ? `Ready, ${escapeHtml(studentName)}?` : 'Ready to play?';
+    sub = `You're set up on ${savedInst.shortName}. Pick up where you left off, or switch instruments anytime.`;
+    instrumentArea = renderFocusCard(savedInst);
+  }
 
   return `
     <div class="screen active select-screen">
@@ -1164,8 +1218,8 @@ function renderSelectScreen() {
           </svg>
           <span class="wordmark-text">Prelude <span>for Band</span></span>
         </div>
-        <div class="select-headline">First notes, first wins.</div>
-        <div class="select-sub">Pick an instrument to start your very first lessons — fingerings, notes, and your first sounds.</div>
+        <div class="select-headline">${headline}</div>
+        <div class="select-sub">${sub}</div>
       </div>
       <div class="select-hero-settings">
         <button class="theme-toggle" data-action="toggle-theme" title="Switch to ${getTheme() === 'light' ? 'dark' : 'light'} theme">${getTheme() === 'light' ? '\u{1F319}' : '\u2600\uFE0F'}</button>
@@ -1173,7 +1227,7 @@ function renderSelectScreen() {
       </div>
       ${motivationHtml}
       ${digestHtml}
-      <div class="instrument-grid">${cards}</div>
+      ${instrumentArea}
       ${badgesHtml}
       ${reportHtml}
       <div class="version-badge" style="cursor:pointer">v2.0.0</div>
@@ -2860,10 +2914,22 @@ function handleAction(action, el) {
       const inst = getInstrument(id);
       if (!inst.available) { showToast(`${inst.name} is coming soon!`); return; }
       APP.instrumentId = id;
+      setSavedInstrument(id);
+      APP.pickingInstrument = false;
       APP.screen = 'map';
       render();
       break;
     }
+
+    case 'switch-instrument':
+      APP.pickingInstrument = true;
+      render();
+      break;
+
+    case 'cancel-instrument-pick':
+      APP.pickingInstrument = false;
+      render();
+      break;
 
     case 'go-select':
       endSession();
@@ -2871,6 +2937,7 @@ function handleAction(action, el) {
       clearInterval(APP.sprintTimer);
       APP.sprintTimer = null;
       APP.sprint = null;
+      APP.pickingInstrument = false;
       APP.screen = 'select';
       render();
       break;

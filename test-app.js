@@ -78,7 +78,8 @@ return { handleAction, renderCompletePhase, CURRICULUM, APP, IMPORTED_SONGS_KEY,
   getWeekStart, getWeekKey, getWeekDays, buildWeeklyDigest, formatDigestText,
   renderDigestCard, renderDigestScreen, DEFAULT_WEEKLY_GOAL, WEEKLY_GOAL_OPTIONS,
   getWeeklyGoalMinutes, setWeeklyGoalMinutes, shouldRemindDigest, markDigestReminded,
-  maybeRemindDigest, getTheme, setTheme, applyTheme, toggleTheme, instAccent, Graphics };
+  maybeRemindDigest, getTheme, setTheme, applyTheme, toggleTheme, instAccent, Graphics,
+  getSavedInstrument, setSavedInstrument, clearSavedInstrument, renderFocusCard, renderInstrumentGrid };
 `);
 const api = sandbox(document, localStorage, {}, navigator, FakeMediaRecorder, URL, Blob, Audio);
 
@@ -819,6 +820,50 @@ const fluteNotes = flute.lessons.filter(l => !l.type);
     api.cleanupRecording();
     check(api.APP.recordingUrl === null, 'cleanup clears the recording URL');
     check(revoked.includes('blob:fake'), 'cleanup revokes the object URL');
+  }
+
+  // ── 50. The home screen focuses on a single instrument once chosen ──────
+  {
+    const saved = store['preludeBandInstrument'];
+    delete store['preludeBandInstrument'];
+    api.APP.pickingInstrument = false;
+
+    const picker = api.renderSelectScreen();
+    check(picker.includes('instrument-grid'), 'home shows every instrument before one is chosen');
+    check(!picker.includes('focus-card'), 'no focus card before an instrument is chosen');
+
+    api.handleAction('select-instrument', { dataset: { id: 'flute' } });
+    check(api.getSavedInstrument() === 'flute', 'opening an instrument remembers it');
+    check(api.APP.screen === 'map', 'opening an instrument goes to its lesson map');
+
+    api.APP.screen = 'select';
+    api.APP.pickingInstrument = false;
+    const home = api.renderSelectScreen();
+    check(home.includes('focus-card') && home.includes('data-id="flute"'),
+      'home focuses on the chosen instrument');
+    check(!home.includes('instrument-grid'), 'the full instrument grid is hidden in the focused view');
+    check(home.includes('data-action="switch-instrument"'), 'the focused view offers a switch control');
+
+    if (saved === undefined) delete store['preludeBandInstrument']; else store['preludeBandInstrument'] = saved;
+  }
+
+  // ── 51. Switching instruments reveals the picker with a way back ────────
+  {
+    const saved = store['preludeBandInstrument'];
+    store['preludeBandInstrument'] = 'trumpet';
+    api.APP.pickingInstrument = false;
+
+    api.handleAction('switch-instrument', { dataset: {} });
+    check(api.APP.pickingInstrument === true, 'switch-instrument enters picking mode');
+    const picker = api.renderSelectScreen();
+    check(picker.includes('instrument-grid'), 'picking mode shows every instrument');
+    check(picker.includes('data-action="cancel-instrument-pick"'), 'picking mode offers a way back');
+
+    api.handleAction('cancel-instrument-pick', { dataset: {} });
+    check(api.APP.pickingInstrument === false, 'cancelling returns to the focused view');
+    check(api.renderSelectScreen().includes('focus-card'), 'the focused view is restored after cancel');
+
+    if (saved === undefined) delete store['preludeBandInstrument']; else store['preludeBandInstrument'] = saved;
   }
 
   if (failures.length) console.log(failures.join('\n'));

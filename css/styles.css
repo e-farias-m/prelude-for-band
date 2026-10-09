@@ -291,11 +291,105 @@ button:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2
   opacity: 0.45;
   cursor: not-allowed;
 }
-.instrument-card.coming-soon:hover {
-  transform: none;
-  border-color: var(--border);
-  box-shadow: none;
+.card-name {
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.3;
 }
+
+/* ── FOCUSED HOME (single instrument) ───────────────────────────────────── */
+.focus-instrument {
+  padding: 0 20px 8px;
+}
+
+.focus-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 22px 20px;
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s, background 0.15s, box-shadow 0.15s;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.focus-card:hover {
+  background: var(--bg-elevated);
+  border-color: var(--accent-warm);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow);
+}
+.focus-card:active { transform: scale(0.98); }
+
+.focus-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  flex-shrink: 0;
+}
+
+.focus-info { flex: 1; min-width: 0; }
+
+.focus-name {
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.focus-progress {
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.focus-go {
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+  color: var(--accent-warm);
+}
+
+.switch-instrument {
+  display: block;
+  margin: 10px auto 8px;
+  padding: 10px 18px;
+  background: transparent;
+  border: none;
+  border-radius: var(--r-md);
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+.switch-instrument:hover {
+  color: var(--text-primary);
+  background: var(--bg-elevated);
+}
+
+.picker-back {
+  display: inline-flex;
+  align-items: center;
+  margin: 0 20px 12px;
+  background: var(--bg-elevated);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 10px 16px;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.picker-back:hover { border-color: var(--accent-warm); }
 
 .card-icon {
   height: 72px;
