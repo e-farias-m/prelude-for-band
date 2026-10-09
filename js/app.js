@@ -862,6 +862,9 @@ function renderCompletePhase(inst, lesson) {
   };
 
   const exportBtn = isSong ? `<button class="btn btn-secondary" data-action="export-musicxml" style="width:100%;margin-bottom:8px">Export MusicXML</button>` : '';
+  // Mastery is tracked per note, so it is meaningless for a song (whose id is
+  // not a note) — only show the badge for regular note lessons.
+  const masteryBadge = isSong ? '' : `<div style="margin-top:8px;padding:6px 14px;border-radius:20px;background:${masteryColor}22;color:${masteryColor};font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em">${getMasteryLabel(masteryLevel)} — ${mastery} correct</div>`;
 
   return `
     <div class="complete-layout">
@@ -869,7 +872,7 @@ function renderCompletePhase(inst, lesson) {
       <div class="complete-xp">+${xp} XP</div>
       <div class="complete-title">${alreadyDone ? 'Review complete!' : 'Lesson complete!'}</div>
       <div class="complete-sub">${isSong ? 'Song complete!' : messages[masteryLevel]}</div>
-      <div style="margin-top:8px;padding:6px 14px;border-radius:20px;background:${masteryColor}22;color:${masteryColor};font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em">${getMasteryLabel(masteryLevel)} — ${mastery} correct</div>
+      ${masteryBadge}
       <div class="gap-lg"></div>
       ${exportBtn}
       <button class="btn btn-primary btn-wide" data-action="finish-lesson">Continue</button>
@@ -1429,9 +1432,18 @@ function handleAction(action, el) {
       const idx = parseInt(el.dataset.importedIndex, 10);
       const allImported = JSON.parse(localStorage.getItem(IMPORTED_SONGS_KEY) || '{}');
       const songs = allImported[APP.instrumentId] || [];
+      const removed = songs[idx];
       songs.splice(idx, 1);
       allImported[APP.instrumentId] = songs;
       localStorage.setItem(IMPORTED_SONGS_KEY, JSON.stringify(allImported));
+      // Drop any saved progress for the deleted song so it doesn't linger in
+      // localStorage (or inflate completion counts if the id is ever reused).
+      if (removed) {
+        const prog = APP.progress[APP.instrumentId];
+        if (prog && prog.completed) delete prog.completed[removed.id];
+        if (prog && prog.mastery) delete prog.mastery[removed.id];
+        saveProgress();
+      }
       render();
       break;
     }
