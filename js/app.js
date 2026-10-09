@@ -152,11 +152,25 @@ function getResolvedSongNote(instrumentId, lesson) {
   return findLessonById(instrumentId, noteId);
 }
 
+// The accompaniment for a song is derived from each melody note's scale degree
+// (the number in the note id, 1..8), so it can never drift out of sync with
+// noteIds. Each degree maps to the primary triad it belongs to:
+//   1,3,5,8 -> I [1,3,5]    4,6 -> IV [4,6,8]    2,7 -> V [5,7,2]
+function chordLessonIds(instrumentId, noteId) {
+  const dash = noteId.lastIndexOf('-');
+  if (dash < 0) return [];
+  const prefix = noteId.slice(0, dash + 1);
+  const deg = parseInt(noteId.slice(dash + 1), 10);
+  const degrees = (deg === 2 || deg === 7) ? [5, 7, 2]
+    : (deg === 4 || deg === 6) ? [4, 6, 8]
+    : [1, 3, 5];
+  return degrees.map(d => prefix + d).filter(id => findLessonById(instrumentId, id));
+}
+
 function getChordFrequencies(instrumentId, lesson, index) {
-  if (!lesson.chordIds) return [];
-  const ids = lesson.chordIds[index];
-  if (!ids) return [];
-  return ids.map(id => {
+  const noteId = lesson.noteIds[index];
+  if (!noteId) return [];
+  return chordLessonIds(instrumentId, noteId).map(id => {
     const n = findLessonById(instrumentId, id);
     return n ? n.freq : null;
   }).filter(f => f != null);
@@ -938,15 +952,14 @@ function exportSongMusicXML(inst, lesson) {
   lines.push('  <part id="P1">');
   const noteIds = lesson.noteIds;
   const durations = getNoteDurations(lesson);
-  const chordIds = lesson.chordIds || [];
   let measure = 1, beat = 0;
   let measureNotes = [];
   for (let i = 0; i < noteIds.length; i++) {
     const n = findLessonById(APP.instrumentId, noteIds[i]);
     if (!n) continue;
     const d = durations[i] || 1;
-    const chordEntry = chordIds[i];
-    const chordNotes = chordEntry ? chordEntry.map(id => findLessonById(APP.instrumentId, id)).filter(Boolean) : [];
+    const chordNotes = chordLessonIds(APP.instrumentId, noteIds[i])
+      .map(id => findLessonById(APP.instrumentId, id)).filter(Boolean);
     measureNotes.push({ note: n, chord: false, duration: d });
     chordNotes.forEach(cn => measureNotes.push({ note: cn, chord: true, duration: d }));
     beat += d;
@@ -1011,14 +1024,12 @@ function importSongFromMusicXML(xmlString) {
   const divisionsEl = doc.querySelector('attributes divisions');
   const divisions = divisionsEl ? parseFloat(divisionsEl.textContent) || 1 : 1;
   const noteIds = [];
-  const chordIds = [];
   const durations = [];
-  let currentChordBuffer = [];
   noteEls.forEach(noteEl => {
     const step = noteEl.querySelector('pitch step');
     const octave = noteEl.querySelector('pitch octave');
     const alter = noteEl.querySelector('pitch alter');
-    const isChord = noteEl.querySelector('chord');
+    if (noteEl.querySelector('chord')) return; // accompaniment is derived, not imported
     if (noteEl.querySelector('rest')) return;
     if (!step || !octave) return;
     let nn = step.textContent;
@@ -1030,26 +1041,14 @@ function importSongFromMusicXML(xmlString) {
     }
     const lessonId = matchNoteToLesson(APP.instrumentId, nn, oct);
     if (!lessonId) return;
-    if (isChord) {
-      currentChordBuffer.push(lessonId);
-    } else {
-      if (currentChordBuffer.length > 0) {
-        chordIds[chordIds.length - 1] = currentChordBuffer;
-        currentChordBuffer = [];
-      }
-      noteIds.push(lessonId);
-      chordIds.push(null);
-      const durEl = noteEl.querySelector('duration');
-      const beats = durEl ? (parseFloat(durEl.textContent) || divisions) / divisions : 1;
-      durations.push(beats);
-    }
+    noteIds.push(lessonId);
+    const durEl = noteEl.querySelector('duration');
+    const beats = durEl ? (parseFloat(durEl.textContent) || divisions) / divisions : 1;
+    durations.push(beats);
   });
-  if (currentChordBuffer.length > 0) {
-    chordIds[chordIds.length - 1] = currentChordBuffer;
-  }
   if (noteIds.length === 0) throw new Error('No playable notes found in MusicXML');
   const importedId = 'imported-' + Date.now();
-  const song = { id: importedId, type: 'song', noteName: title, prerequisiteIds: [], noteIds, chordIds, durations, prompt: '', description: 'Imported from MusicXML.' };
+  const song = { id: importedId, type: 'song', noteName: title, prerequisiteIds: [], noteIds, durations, prompt: '', description: 'Imported from MusicXML.' };
   const existing = JSON.parse(localStorage.getItem(IMPORTED_SONGS_KEY) || '{}');
   if (!existing[APP.instrumentId]) existing[APP.instrumentId] = [];
   existing[APP.instrumentId].push(song);

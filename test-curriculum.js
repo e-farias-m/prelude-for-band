@@ -159,16 +159,24 @@ for (const inst of Object.values(CURRICULUM)) {
 }
 
 for (const inst of Object.values(CURRICULUM)) {
+  const ids = new Set((inst.lessons || []).map(l => l.id));
   for (const lesson of inst.lessons || []) {
-    if (lesson.type !== 'song' || lesson.durations === undefined) continue;
-    if (!Array.isArray(lesson.durations)) {
-      check(false, `${inst.id}/${lesson.id} durations must be an array`);
-      continue;
+    if (lesson.type !== 'song') continue;
+
+    // melody must reference real lessons in this instrument
+    for (const nid of lesson.noteIds || []) {
+      check(ids.has(nid), `${inst.id}/${lesson.id} unknown noteId ${nid}`);
     }
-    check(lesson.durations.length === lesson.noteIds.length,
-      `${inst.id}/${lesson.id} durations length ${lesson.durations.length} != noteIds ${lesson.noteIds.length}`);
-    check(lesson.durations.every(d => typeof d === 'number' && d > 0),
+
+    // durations must be present and align with the melody
+    check(Array.isArray(lesson.durations) && lesson.durations.length === lesson.noteIds.length,
+      `${inst.id}/${lesson.id} durations must align with noteIds`);
+    check(Array.isArray(lesson.durations) && lesson.durations.every(d => typeof d === 'number' && d > 0),
       `${inst.id}/${lesson.id} durations must be positive numbers`);
+
+    // accompaniment is derived from the melody, so no stored chords
+    check(lesson.chordIds === undefined,
+      `${inst.id}/${lesson.id} should not define chordIds (derived at runtime)`);
   }
 }
 
