@@ -24,6 +24,8 @@ const APP = {
   audioPlaybackTimeouts: [],
   audioPlaybackInterval: null,
   audioPlaybackAudio: null,
+  // Whether the current lesson was already complete before this attempt
+  completedBefore: false,
 };
 
 const STORAGE_KEY = 'preludeBandProgress';
@@ -70,6 +72,16 @@ function loadProgress() {
   } catch (e) {
     APP.progress = {};
   }
+  // Migrate legacy data where `completed[id]` was a boolean instead of the
+  // current `{ stars }` shape, so star rendering never sees a boolean.
+  Object.values(APP.progress).forEach(prog => {
+    if (!prog || !prog.completed) return;
+    Object.keys(prog.completed).forEach(id => {
+      const v = prog.completed[id];
+      if (v === true) prog.completed[id] = { stars: 0 };
+      else if (!v) delete prog.completed[id];
+    });
+  });
 }
 
 function saveProgress() {
@@ -470,8 +482,9 @@ function renderPresentPhase(inst, lesson) {
 }
 
 function renderSongPresentPhase(inst, lesson) {
-  const note = getResolvedSongNote(APP.instrumentId, lesson);
   const totalNotes = lesson.noteIds.length;
+  APP.songNoteIndex = Math.min(Math.max(APP.songNoteIndex, 0), totalNotes - 1);
+  const note = getResolvedSongNote(APP.instrumentId, lesson);
   const currentNum = APP.songNoteIndex + 1;
   const isFirst = APP.songNoteIndex === 0;
   const isLast = APP.songNoteIndex >= totalNotes - 1;
@@ -682,9 +695,12 @@ function buildQuizOptions(inst, lesson) {
   // Draw distractors from learned notes for spaced repetition;
   // fall back to all lessons if not enough learned notes exist.
   const learned = getLearnedNotes(APP.instrumentId).filter(l => l.id !== lesson.id);
+  // Songs and review sessions have no fingering/notation of their own, so they
+  // can never be distractors — only real note lessons may appear as options.
+  const noteLessons = inst.lessons.filter(l => !isReviewLesson(l) && !isSongLesson(l));
   const pool = learned.length >= 2
     ? learned
-    : inst.lessons.filter(l => l.id !== lesson.id);
+    : noteLessons.filter(l => l.id !== lesson.id);
   const distractors = shuffle(pool).slice(0, 2);
 
   return {
@@ -835,7 +851,7 @@ function renderCompletePhase(inst, lesson) {
   const mastery = getNoteMastery(APP.instrumentId, lesson.id);
   const masteryLevel = getMasteryLevel(mastery);
   const masteryColor = getMasteryColor(masteryLevel);
-  const alreadyDone = !!APP.progress[APP.instrumentId]?.completed[lesson.id];
+  const alreadyDone = !!APP.completedBefore;
   const isSong = isSongLesson(lesson);
 
   const messages = {
@@ -1239,6 +1255,7 @@ function handleAction(action, el) {
         APP.lastXp = xp;
         const prog = getInstrumentProgress(APP.instrumentId);
         const prevStars = prog.completed[lesson.id] ? prog.completed[lesson.id].stars : 0;
+        APP.completedBefore = !!prog.completed[lesson.id];
         prog.completed[lesson.id] = { stars: Math.max(stars, prevStars) };
         prog.xp += xp;
         saveProgress();
@@ -1296,6 +1313,7 @@ function handleAction(action, el) {
       const prog = getInstrumentProgress(APP.instrumentId);
       const lesson = getLesson(APP.instrumentId, APP.lessonIndex);
       const prevStars = prog.completed[lesson.id] ? prog.completed[lesson.id].stars : 0;
+      APP.completedBefore = !!prog.completed[lesson.id];
       prog.completed[lesson.id] = { stars: Math.max(stars, prevStars) };
       prog.xp += xp;
       saveProgress();
