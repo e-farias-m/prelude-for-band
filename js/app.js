@@ -47,15 +47,33 @@ const APP = {
   digestDismissed: false,
   // Fingering-chart abbreviation currently being explained (TH, R, L), or null
   fingeringHelp: null,
+  // Slide index while the per-instrument "how to use the app" tour is open
+  tutorialIndex: 0,
 };
 
 const STORAGE_KEY = 'preludeBandProgress';
 const NAME_KEY = 'preludeBandName';
 const THEME_KEY = 'preludeBandTheme';
 const INSTRUMENT_KEY = 'preludeBandInstrument';
+const TUTORIAL_KEY = 'preludeBandTutorials';
 
 function getStudentName() { return localStorage.getItem(NAME_KEY) || ''; }
 function setStudentName(name) { localStorage.setItem(NAME_KEY, name); }
+
+// Instruments whose "how to use the app" tour the student has already seen.
+function getTutorialSeen(id) {
+  let seen = [];
+  try { seen = JSON.parse(localStorage.getItem(TUTORIAL_KEY) || '[]'); } catch (e) {}
+  return Array.isArray(seen) && seen.indexOf(id) !== -1;
+}
+function markTutorialSeen(id) {
+  if (getTutorialSeen(id)) return;
+  let seen = [];
+  try { seen = JSON.parse(localStorage.getItem(TUTORIAL_KEY) || '[]'); } catch (e) {}
+  if (!Array.isArray(seen)) seen = [];
+  seen.push(id);
+  localStorage.setItem(TUTORIAL_KEY, JSON.stringify(seen));
+}
 
 // Last instrument the student opened — lets the home screen focus on one
 // instrument instead of the full set until they ask to switch.
@@ -1295,6 +1313,80 @@ function renderSettingsScreen() {
     </div>`;
 }
 
+// ── RENDER: APP TUTORIAL (how to use the app) ──────────────────────────────
+// The same short tour for every instrument, shown automatically the first time
+// a student opens a given instrument and replayable from its lesson map.
+function buildTutorialSlides(inst) {
+  const firstNote = getNoteLessons(inst.id)[0];
+  const noteArt = firstNote
+    ? `<div class="tutorial-visual">${Graphics.fingeringSVG(inst.fingeringType, firstNote.fingeringState, instAccent(inst), 92)}${Graphics.staffSVG({ pos: firstNote.staffStep, accidental: firstNote.accidental, clef: inst.clef, accentColor: instAccent(inst), width: 74 })}</div>`
+    : '';
+  const instrumentArt = `<div class="tutorial-visual tutorial-visual-icon">${Graphics.instrumentIconSVG(inst.id, 96)}</div>`;
+  return [
+    {
+      icon: '🎉',
+      title: `You're set up on ${inst.name}`,
+      body: `Welcome! This is a one-minute tour of how the app works. You can skip it and replay it any time from your lesson map.`,
+      visual: instrumentArt,
+    },
+    {
+      icon: '🗺️',
+      title: 'Follow your lesson path',
+      body: `Every note and song is a stop on your ${inst.shortName} map. Finish one step to unlock the next — a 🔒 just means the step before it is still waiting.`,
+    },
+    {
+      icon: '👀',
+      title: 'See it, then check it',
+      body: 'Each new note shows its name, sound, and fingering. Tap “Hear it,” then answer a quick check to lock the note in.',
+      visual: noteArt,
+    },
+    {
+      icon: '🎵',
+      title: 'Play it yourself',
+      body: 'Then play the note on your instrument. On a device with a microphone you can record a take and listen back to compare.',
+    },
+    {
+      icon: '🥁',
+      title: 'Practice and tools',
+      body: 'Practice drills build speed, ear training sharpens your listening, and the metronome and tuner keep you steady and in tune.',
+    },
+    {
+      icon: '⭐',
+      title: 'Watch yourself grow',
+      body: 'You earn XP, streaks, and badges as you play, and the weekly recap shows how much you practiced. Ready? Let’s play!',
+    },
+  ];
+}
+
+function renderTutorialScreen() {
+  const inst = getInstrument(APP.instrumentId) || CURRICULUM[INSTRUMENT_ORDER[0]];
+  const slides = buildTutorialSlides(inst);
+  const i = Math.min(Math.max(APP.tutorialIndex || 0, 0), slides.length - 1);
+  const slide = slides[i];
+  const last = i === slides.length - 1;
+  const art = slide.visual || `<div class="tutorial-emoji">${slide.icon}</div>`;
+  const dots = slides.map((_, n) => `<span class="tutorial-dot${n === i ? ' active' : ''}${n < i ? ' done' : ''}"></span>`).join('');
+  return `
+    <div class="screen active tutorial-screen">
+      <div class="app-header">
+        <button class="header-back" data-action="tutorial-finish" title="Skip the tour">✕</button>
+        <div class="header-title">Quick tour</div>
+      </div>
+      <div class="tutorial-body">
+        <div class="tutorial-art">${art}</div>
+        <h2 class="tutorial-title">${slide.title}</h2>
+        <p class="tutorial-text">${slide.body}</p>
+        <div class="tutorial-dots">${dots}</div>
+      </div>
+      <div class="action-bar">
+        <div class="tutorial-actions">
+          <button class="btn btn-secondary" data-action="tutorial-back" ${i === 0 ? 'disabled' : ''}>Back</button>
+          <button class="btn btn-primary" data-action="tutorial-next">${last ? 'Start playing' : 'Next'}</button>
+        </div>
+      </div>
+    </div>`;
+}
+
 // ── RENDER: MAP SCREEN ─────────────────────────────────────────────────────
 function renderPlanCard(instrumentId) {
   const plan = getTodayPlan(instrumentId);
@@ -1440,6 +1532,9 @@ function renderMapScreen() {
         <div class="import-section" style="margin-top:20px;text-align:center">
           <button class="btn btn-secondary" data-action="import-song">+ Import Song</button>
           <input type="file" id="import-file-input" accept=".xml,.musicxml" style="display:none"/>
+        </div>
+        <div class="map-guide">
+          <button class="map-guide-link" data-action="open-tutorial">❔ How this app works</button>
         </div>
       </div>
     </div>`;
@@ -2455,6 +2550,7 @@ function render() {
   else if (APP.screen === 'settings') app.innerHTML = renderSettingsScreen();
   else if (APP.screen === 'report') app.innerHTML = renderReportScreen();
   else if (APP.screen === 'digest') app.innerHTML = renderDigestScreen();
+  else if (APP.screen === 'tutorial') app.innerHTML = renderTutorialScreen();
   else if (APP.screen === 'map') app.innerHTML = renderMapScreen();
   else if (APP.screen === 'practice') app.innerHTML = renderPracticeScreen();
   else if (APP.screen === 'ear') app.innerHTML = renderEarScreen();
@@ -2963,10 +3059,45 @@ function handleAction(action, el) {
       APP.instrumentId = id;
       setSavedInstrument(id);
       APP.pickingInstrument = false;
-      APP.screen = 'map';
+      // First time on this instrument? Show the quick app tour before the map.
+      if (!getTutorialSeen(id)) {
+        APP.tutorialIndex = 0;
+        APP.screen = 'tutorial';
+      } else {
+        APP.screen = 'map';
+      }
       render();
       break;
     }
+
+    case 'open-tutorial':
+      APP.tutorialIndex = 0;
+      APP.screen = 'tutorial';
+      render();
+      break;
+
+    case 'tutorial-next': {
+      const slides = buildTutorialSlides(getInstrument(APP.instrumentId));
+      if (APP.tutorialIndex >= slides.length - 1) {
+        markTutorialSeen(APP.instrumentId);
+        APP.screen = 'map';
+      } else {
+        APP.tutorialIndex += 1;
+      }
+      render();
+      break;
+    }
+
+    case 'tutorial-back':
+      APP.tutorialIndex = Math.max((APP.tutorialIndex || 0) - 1, 0);
+      render();
+      break;
+
+    case 'tutorial-finish':
+      markTutorialSeen(APP.instrumentId);
+      APP.screen = 'map';
+      render();
+      break;
 
     case 'switch-instrument':
       APP.pickingInstrument = true;

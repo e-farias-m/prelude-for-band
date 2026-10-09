@@ -80,7 +80,8 @@ return { handleAction, renderCompletePhase, CURRICULUM, APP, IMPORTED_SONGS_KEY,
   getWeeklyGoalMinutes, setWeeklyGoalMinutes, shouldRemindDigest, markDigestReminded,
   maybeRemindDigest, getTheme, setTheme, applyTheme, toggleTheme, instAccent, Graphics,
   getSavedInstrument, setSavedInstrument, clearSavedInstrument, renderFocusCard, renderInstrumentGrid,
-  showFingeringHelp, hideFingeringHelp, FINGERING_HELP };
+  showFingeringHelp, hideFingeringHelp, FINGERING_HELP,
+  getTutorialSeen, markTutorialSeen, buildTutorialSlides, renderTutorialScreen, renderMapScreen };
 `);
 const api = sandbox(document, localStorage, {}, navigator, FakeMediaRecorder, URL, Blob, Audio);
 
@@ -832,7 +833,9 @@ const fluteNotes = flute.lessons.filter(l => !l.type);
   // ── 50. The home screen focuses on a single instrument once chosen ──────
   {
     const saved = store['preludeBandInstrument'];
+    const savedTutorials = store['preludeBandTutorials'];
     delete store['preludeBandInstrument'];
+    store['preludeBandTutorials'] = JSON.stringify(['flute']);
     api.APP.pickingInstrument = false;
 
     const picker = api.renderSelectScreen();
@@ -852,6 +855,7 @@ const fluteNotes = flute.lessons.filter(l => !l.type);
     check(home.includes('data-action="switch-instrument"'), 'the focused view offers a switch control');
 
     if (saved === undefined) delete store['preludeBandInstrument']; else store['preludeBandInstrument'] = saved;
+    if (savedTutorials === undefined) delete store['preludeBandTutorials']; else store['preludeBandTutorials'] = savedTutorials;
   }
 
   // ── 51. Switching instruments reveals the picker with a way back ────────
@@ -886,6 +890,55 @@ const fluteNotes = flute.lessons.filter(l => !l.type);
 
     api.handleAction('close-fingering-help', { dataset: {} });
     check(api.APP.fingeringHelp === null, 'the explainer can be dismissed');
+  }
+
+  // ── 53. The app tour opens the first time an instrument is chosen ───────
+  {
+    const savedInst = store['preludeBandInstrument'];
+    const savedTut = store['preludeBandTutorials'];
+    delete store['preludeBandInstrument'];
+    delete store['preludeBandTutorials'];
+    api.APP.pickingInstrument = false;
+
+    const slides = api.buildTutorialSlides(api.CURRICULUM.flute);
+    check(slides.length >= 4, 'the tour has several slides');
+    check(slides.every(s => s.title && s.body), 'every tour slide has a title and body');
+    check(api.renderTutorialScreen().includes('tutorial-dot'), 'the tour renders progress dots');
+
+    api.handleAction('select-instrument', { dataset: { id: 'flute' } });
+    check(api.APP.screen === 'tutorial', 'first time on an instrument opens the tour');
+    check(api.getTutorialSeen('flute') === false, 'the tour is only marked seen once finished');
+
+    for (let n = 0; n < slides.length + 1; n++) api.handleAction('tutorial-next', { dataset: {} });
+    check(api.APP.screen === 'map', 'finishing the tour drops into the lesson map');
+    check(api.getTutorialSeen('flute') === true, 'finishing the tour records it as seen');
+
+    if (savedInst === undefined) delete store['preludeBandInstrument']; else store['preludeBandInstrument'] = savedInst;
+    if (savedTut === undefined) delete store['preludeBandTutorials']; else store['preludeBandTutorials'] = savedTut;
+  }
+
+  // ── 54. A seen instrument skips the tour, which can be replayed ─────────
+  {
+    const savedInst = store['preludeBandInstrument'];
+    const savedTut = store['preludeBandTutorials'];
+    store['preludeBandTutorials'] = JSON.stringify(['trumpet']);
+
+    api.handleAction('select-instrument', { dataset: { id: 'trumpet' } });
+    check(api.APP.screen === 'map', 'a seen instrument skips straight to the map');
+    check(api.renderMapScreen().includes('data-action="open-tutorial"'),
+      'the lesson map offers to replay the tour');
+
+    api.handleAction('open-tutorial', { dataset: {} });
+    check(api.APP.screen === 'tutorial' && api.APP.tutorialIndex === 0, 'the map can replay the tour');
+
+    api.handleAction('tutorial-back', { dataset: {} });
+    check(api.APP.tutorialIndex === 0, 'back stays on the first slide');
+
+    api.handleAction('tutorial-finish', { dataset: {} });
+    check(api.APP.screen === 'map', 'finishing a replay returns to the map');
+
+    if (savedInst === undefined) delete store['preludeBandInstrument']; else store['preludeBandInstrument'] = savedInst;
+    if (savedTut === undefined) delete store['preludeBandTutorials']; else store['preludeBandTutorials'] = savedTut;
   }
 
   if (failures.length) console.log(failures.join('\n'));
