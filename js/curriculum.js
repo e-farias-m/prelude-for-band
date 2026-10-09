@@ -529,42 +529,6 @@ const CURRICULUM = {
         prompt: 'Lift every finger and the thumb. The clarinet sings open on G.'
       },
       {
-        id: 'cl-6',
-        noteName: 'A',
-        octave: 4,
-        concertNote: 'G4',
-        staffStep: 3,
-        accidental: null,
-        freq: 392.00,
-        fingeringState: [false, true, false, false, false, false, false, false, false],
-        description: 'A — top A side key with left index.',
-        prompt: 'A key (left index side key). Thumb off. All other keys open.'
-      },
-      {
-        id: 'cl-7',
-        noteName: 'B',
-        octave: 4,
-        concertNote: 'A4',
-        staffStep: 4,
-        accidental: null,
-        freq: 440.00,
-        fingeringState: [true, true, true, true, true, true, true, false, true, true],
-        description: 'B — the clarion register! Thumb hole closed, all fingers down, register key, and the left little-finger E key.',
-        prompt: 'Thumb hole closed + all left and right fingers down + register key. Add the left little-finger E key.'
-      },
-      {
-        id: 'cl-8',
-        noteName: 'C',
-        octave: 5,
-        concertNote: 'B♭4',
-        staffStep: 5,
-        accidental: null,
-        freq: 466.16,
-        fingeringState: [true, true, true, true, true, true, true, true, true, false],
-        description: 'C — same as B but switch to the right little-finger F key. All fingers stay down.',
-        prompt: 'Thumb hole closed + all fingers down + register key. Press the right little-finger F key instead of the left.'
-      },
-      {
         id: 'cl-song-1', type: 'song',
         audioUrl: null,
         bpm: 100,
@@ -1562,39 +1526,6 @@ const CURRICULUM = {
         fingeringState: 1,
         description: 'F — 1st position. Third harmonic of the open horn.',
         prompt: '1st position. F is the 3rd harmonic. Faster air than the low notes.'
-      },
-      {
-        id: 'tb-6',
-        noteName: 'G',
-        octave: 3,
-        staffStep: 7,
-        accidental: null,
-        freq: 196.00,
-        fingeringState: 4,
-        description: 'G — 4th position. Fourth harmonic.',
-        prompt: '4th position. G is the 4th partial. Keep the air speed up.'
-      },
-      {
-        id: 'tb-7',
-        noteName: 'A',
-        octave: 3,
-        staffStep: 8,
-        accidental: null,
-        freq: 220.00,
-        fingeringState: 2,
-        description: 'A — 2nd position. Just past 1st.',
-        prompt: '2nd position (just past 1st). Small precise slide movement.'
-      },
-      {
-        id: 'tb-8',
-        noteName: 'B♭',
-        octave: 3,
-        staffStep: 9,
-        accidental: '♭',
-        freq: 233.08,
-        fingeringState: 1,
-        description: 'Bb — 1st position. An octave above your first note!',
-        prompt: '1st position. Bb is the 4th partial — one octave above the first note. Faster air, firmer buzz.'
       },
       {
         id: 'tb-song-1', type: 'song',
