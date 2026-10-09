@@ -1330,3 +1330,42 @@ button:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2
 .badge-icon { font-size: 22px; }
 .badge-name { font-size: 10px; font-weight: 600; color: var(--text-muted); line-height: 1.2; }
 .badge-earned .badge-name { color: var(--text-primary); }
+
+/* ── RECORDING ──────────────────────────────────────────────────────────── */
+.record-panel {
+  margin-top: 16px;
+  padding: 16px;
+  background: var(--bg-card);
+  border: 1px dashed var(--border);
+  border-radius: var(--r-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.record-status {
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: center;
+}
+.record-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+.record-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-danger {
+  background: var(--error);
+  color: var(--bg-deep);
+  box-shadow: 0 4px 16px rgba(255,90,90,0.3);
+}
+.btn-danger:hover { box-shadow: 0 6px 24px rgba(255,90,90,0.45); transform: translateY(-1px); }

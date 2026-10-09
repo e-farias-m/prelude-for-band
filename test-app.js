@@ -42,7 +42,21 @@ const localStorage = {
   removeItem(k) { delete store[k]; },
 };
 
-const sandbox = new Function('document', 'localStorage', 'window', `
+// Controllable microphone/recorder stubs for the record-and-compare feature.
+const fakeTracks = [];
+const fakeStream = { getTracks: () => fakeTracks };
+const navigator = { mediaDevices: { getUserMedia: () => Promise.resolve(fakeStream) } };
+let revoked = [];
+class FakeMediaRecorder {
+  constructor(stream) { this.stream = stream; this.state = 'inactive'; this.mimeType = 'audio/webm'; FakeMediaRecorder.instance = this; }
+  start() { this.state = 'recording'; }
+  stop() { this.state = 'inactive'; if (this.onstop) this.onstop(); }
+}
+const URL = { createObjectURL: () => 'blob:fake', revokeObjectURL: (u) => revoked.push(u) };
+const Blob = class { constructor(chunks, opts) { this.chunks = chunks; this.opts = opts; } };
+const Audio = class { constructor(src) { this.src = src; Audio.last = this; } play() { return Promise.resolve(); } };
+
+const sandbox = new Function('document', 'localStorage', 'window', 'navigator', 'MediaRecorder', 'URL', 'Blob', 'Audio', `
 ${read('curriculum.js')}
 ${read('graphics.js')}
 ${read('app.js')}
@@ -51,9 +65,10 @@ return { handleAction, renderCompletePhase, CURRICULUM, APP, IMPORTED_SONGS_KEY,
   renderPracticeScreen, getLearnedNotes, SPRINT_MODES,
   getMotivation, addPracticeSeconds, getTotalPracticeSeconds, getCurrentStreak,
   getTotalXp, getLevel, getAvatar, getStats, evaluateBadges, hasBadge, todayKey,
-  endSession, renderStudentCard, renderBadgeShelf, renderSelectScreen, BADGES };
+  endSession, renderStudentCard, renderBadgeShelf, renderSelectScreen, BADGES,
+  canRecord, startRecording, stopRecording, playRecording, cleanupRecording, renderPlayPhase };
 `);
-const api = sandbox(document, localStorage, {});
+const api = sandbox(document, localStorage, {}, navigator, FakeMediaRecorder, URL, Blob, Audio);
 
 let pass = 0;
 let fail = 0;
@@ -296,6 +311,49 @@ api.APP.instrumentId = 'flute';
   check(Object.keys(api.APP.motivation.days).length === 0, 'reset clears practice days');
 }
 
-if (failures.length) console.log(failures.join('\n'));
-console.log(`\n${pass} passed, ${fail} failed`);
-process.exit(fail ? 1 : 0);
+(async () => {
+  // ── 17. The record control only appears when the mic API exists ─────────
+  {
+    api.APP.recorder = null;
+    api.APP.recordingUrl = null;
+    api.APP.instrumentId = 'flute';
+    const note = flute.lessons.find(l => !l.type);
+
+    const withMic = api.renderPlayPhase(flute, note);
+    check(withMic.includes('data-action="record-toggle"'), 'play phase offers a record control with mic support');
+
+    const mediaDevices = navigator.mediaDevices;
+    delete navigator.mediaDevices;
+    check(api.canRecord() === false, 'canRecord is false without mediaDevices');
+    const noMic = api.renderPlayPhase(flute, note);
+    check(!noMic.includes('data-action="record-toggle"'), 'no record control without mic support');
+    navigator.mediaDevices = mediaDevices;
+  }
+
+  // ── 18. Recording round-trip: start then stop yields a playable take ────
+  {
+    api.APP.recorder = null;
+    api.APP.recordingUrl = null;
+    await api.startRecording();
+    check(!!api.APP.recorder, 'startRecording opens a recorder');
+    check(api.APP.recorder.mediaRecorder.state === 'recording', 'the recorder is running');
+    api.APP.recorder.mediaRecorder.ondataavailable({ data: { size: 10 } });
+    api.stopRecording();
+    check(api.APP.recordingUrl === 'blob:fake', 'stopping creates a playback URL');
+    check(api.APP.recorder === null, 'the recorder is cleared after stopping');
+    api.playRecording();
+    check(Audio.last && Audio.last.src === 'blob:fake', 'playRecording plays the captured take');
+  }
+
+  // ── 19. Cleaning up a recording revokes its object URL ──────────────────
+  {
+    revoked = [];
+    api.cleanupRecording();
+    check(api.APP.recordingUrl === null, 'cleanup clears the recording URL');
+    check(revoked.includes('blob:fake'), 'cleanup revokes the object URL');
+  }
+
+  if (failures.length) console.log(failures.join('\n'));
+  console.log(`\n${pass} passed, ${fail} failed`);
+  process.exit(fail ? 1 : 0);
+})();

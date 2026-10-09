@@ -32,6 +32,9 @@ const APP = {
   // Motivation: streaks, minutes and badges
   motivation: null,
   sessionStart: null,
+  // Microphone recording state
+  recorder: null,
+  recordingUrl: null,
 };
 
 const STORAGE_KEY = 'preludeBandProgress';
@@ -306,6 +309,58 @@ function endSession() {
   APP.sessionStart = null;
   if (seconds >= 5) addPracticeSeconds(seconds);
   evaluateBadges({ toast: true });
+}
+
+// ── MICROPHONE RECORDING ────────────────────────────────────────────────────
+// Records the student so they can compare their own sound against the model.
+// Degrades gracefully: if the microphone or MediaRecorder API is unavailable,
+// the record controls simply never render.
+function canRecord() {
+  return !!(typeof navigator !== 'undefined' && navigator.mediaDevices &&
+    typeof navigator.mediaDevices.getUserMedia === 'function' &&
+    typeof MediaRecorder !== 'undefined');
+}
+
+function startRecording() {
+  if (!canRecord() || APP.recorder) return;
+  return navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+    const chunks = [];
+    const mediaRecorder = new MediaRecorder(stream);
+    mediaRecorder.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
+    mediaRecorder.onstop = () => {
+      stream.getTracks().forEach(t => t.stop());
+      if (APP.recordingUrl) URL.revokeObjectURL(APP.recordingUrl);
+      const blob = new Blob(chunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+      APP.recordingUrl = URL.createObjectURL(blob);
+      APP.recorder = null;
+      render();
+    };
+    mediaRecorder.start();
+    APP.recorder = { mediaRecorder, stream };
+    render();
+  }).catch(() => showToast('Microphone unavailable.'));
+}
+
+function stopRecording() {
+  const r = APP.recorder;
+  if (r && r.mediaRecorder.state !== 'inactive') r.mediaRecorder.stop();
+}
+
+function playRecording() {
+  if (!APP.recordingUrl) return;
+  const audio = new Audio(APP.recordingUrl);
+  audio.play().catch(() => showToast('Could not play the recording.'));
+}
+
+function cleanupRecording() {
+  if (APP.recorder) {
+    try { stopRecording(); } catch (e) { /* ignore */ }
+    APP.recorder = null;
+  }
+  if (APP.recordingUrl) {
+    URL.revokeObjectURL(APP.recordingUrl);
+    APP.recordingUrl = null;
+  }
 }
 
 function getLearnedNotes(instrumentId) {
@@ -1216,6 +1271,36 @@ function renderPlayPhase(inst, lesson) {
   const cells = [1, 2, 3, 4].map(n => `<div class="beat-cell count-in" data-beat="${n}"><span class="beat-num">${n}</span></div>`).join('');
   const playCell = `<div class="beat-cell" data-beat="play">♪</div>`;
 
+  let recordPanel = '';
+  if (canRecord()) {
+    const recording = !!APP.recorder;
+    let controls;
+    let status;
+    if (recording) {
+      controls = `<button class="btn btn-secondary btn-wide" data-action="record-toggle">⏹ Stop recording</button>`;
+      status = 'Recording — play now, then tap Stop.';
+    } else if (APP.recordingUrl) {
+      controls = `
+        <div class="record-actions">
+          <button class="btn btn-secondary" data-action="play-recording">▶ My take</button>
+          <button class="btn-hear" data-action="hear-note"><span class="hear-icon">🔊</span> Model</button>
+          <button class="btn btn-ghost" data-action="record-toggle">Re-record</button>
+        </div>
+        <button class="btn-ghost" data-action="discard-recording">Delete recording</button>`;
+      status = 'Listen back, then compare with the model.';
+    } else {
+      controls = `
+        <button class="btn btn-secondary btn-wide" data-action="record-toggle">⏺ Record yourself</button>
+        <button class="btn-hear" data-action="hear-note"><span class="hear-icon">🔊</span> Hear the model</button>`;
+      status = 'Record yourself and compare with the model.';
+    }
+    recordPanel = `
+      <div class="record-panel">
+        <div class="record-status" id="record-status">${status}</div>
+        <div class="record-controls">${controls}</div>
+      </div>`;
+  }
+
   return `
     <div class="lesson-body">
       <div class="lesson-instruction">Play it on your instrument</div>
@@ -1227,6 +1312,7 @@ function renderPlayPhase(inst, lesson) {
         <div class="beat-grid">${cells}${playCell}</div>
         <div class="play-status" id="play-status">Tap Start, then play along on the count.</div>
         <button class="btn btn-secondary" data-action="play-start" id="play-start-btn">▶ Start count-in</button>
+        ${recordPanel}
       </div>
     </div>
     <div class="action-bar">
@@ -1608,6 +1694,7 @@ function handleAction(action, el) {
 
     case 'go-select':
       endSession();
+      cleanupRecording();
       clearInterval(APP.sprintTimer);
       APP.sprintTimer = null;
       APP.sprint = null;
@@ -1735,6 +1822,7 @@ function handleAction(action, el) {
     case 'exit-lesson':
       stopAudioPlayback();
       endSession();
+      cleanupRecording();
       APP.reviewQueue = null;
       APP.reviewIndex = 0;
       APP.reviewCorrect = 0;
@@ -1841,6 +1929,20 @@ function handleAction(action, el) {
       break;
     }
 
+    case 'record-toggle':
+      if (APP.recorder) stopRecording();
+      else startRecording();
+      break;
+
+    case 'play-recording':
+      playRecording();
+      break;
+
+    case 'discard-recording':
+      cleanupRecording();
+      render();
+      break;
+
     case 'play-confirm': {
       const q = APP.quiz;
       const mistakes = q ? q.wrongIds.length : 0;
@@ -1922,6 +2024,7 @@ function handleAction(action, el) {
     case 'finish-lesson':
       stopAudioPlayback();
       endSession();
+      cleanupRecording();
       APP.reviewQueue = null;
       APP.reviewIndex = 0;
       APP.reviewCorrect = 0;
