@@ -72,6 +72,8 @@ return { handleAction, renderCompletePhase, CURRICULUM, APP, IMPORTED_SONGS_KEY,
   renderWeakSpots, earPhraseLength, buildEarPhrase, gradeEarResponse, earScore,
   startEarRound, submitEarPick, finishEarRound, renderEarScreen,
   clampBpm, bpmToIntervalMs, createMetronome, advanceMetronome, tapTempo,
+  bpmToTickMs, metronomeTick, metronomeClickOpts, METRONOME_SUBDIVISIONS,
+  TEMPO_PRESETS, METRONOME_SOUNDS, METRONOME_DEFAULT_VOLUME,
   detectPitch, freqToNoteInfo, centsLabel, getNoteLessons, TIME_SIGNATURES,
   renderMetronomeScreen, renderTunerScreen,
   getInstrumentReport, buildPracticeReport, formatReportText, renderReportScreen,
@@ -540,6 +542,47 @@ const fluteNotes = flute.lessons.filter(l => !l.type);
   check(api.tapTempo([0, 500, 1000, 1500]) === 120, 'even 500ms taps give 120 BPM');
 }
 
+// ── 33b. Subdivisions, presets, count-in, volume and sound ────────────────
+{
+  check(api.bpmToTickMs(120, 1) === 500, 'no subdivision ticks at the beat rate');
+  check(api.bpmToTickMs(120, 2) === 250, 'eighths tick twice per beat');
+  check(api.bpmToTickMs(120, 4) === 125, 'sixteenths tick four times per beat');
+  check(api.bpmToTickMs(120, 3) === 167, 'triplets round to the nearest millisecond');
+
+  const m = api.createMetronome(120, 4);
+  m.subdivision = 2;
+  const t1 = api.metronomeTick(m);
+  const t2 = api.metronomeTick(m);
+  const t3 = api.metronomeTick(m);
+  check(t1.beat === 0 && t1.isBeat === true && t1.accent === true, 'the first tick is an accented downbeat');
+  check(t2.beat === 0 && t2.isBeat === false && t2.sub === 1 && t2.accent === false, 'the subdivision between beats does not accent');
+  check(t3.beat === 1 && t3.isBeat === true, 'the next beat follows the subdivision');
+
+  const trip = api.createMetronome(120, 2);
+  trip.subdivision = 3;
+  api.metronomeTick(trip);
+  api.metronomeTick(trip);
+  const tripThird = api.metronomeTick(trip);
+  const tripNext = api.metronomeTick(trip);
+  check(tripThird.beat === 0 && tripThird.isBeat === false && tripThird.sub === 2, 'triplets place two subdivisions between beats');
+  check(tripNext.beat === 1 && tripNext.isBeat === true, 'the following beat lands after a triplet');
+
+  const vol = api.metronomeClickOpts(m, false).volume;
+  const subVol = api.metronomeClickOpts(m, true).volume;
+  check(Math.abs(vol - api.METRONOME_DEFAULT_VOLUME) < 1e-9, 'beat clicks carry the set volume');
+  check(subVol < vol && subVol > 0, 'subdivisions click softer than the beat');
+  const loud = api.createMetronome();
+  loud.volume = 1; loud.sound = 'wood';
+  check(api.metronomeClickOpts(loud).sound === 'wood' && api.metronomeClickOpts(loud).volume === 1, 'sound choice and full volume pass through');
+
+  const d = api.createMetronome();
+  check(d.subdivision === 1 && d.countIn === false && d.sound === 'click', 'metronome starts on plain beats with no count-in');
+  check(d.volume === api.METRONOME_DEFAULT_VOLUME && d.countInLeft === 0, 'default volume is applied and count-in is idle');
+  check(api.METRONOME_SUBDIVISIONS.map(s => s.value).join(',') === '1,2,3,4', 'four subdivision choices are offered');
+  check(api.TEMPO_PRESETS.map(p => p.bpm).join(',') === '60,80,100,120,160', 'tempo presets run slow to fast');
+  check(api.METRONOME_SOUNDS.map(s => s.value).join(',') === 'click,wood,beep', 'three click sounds are offered');
+}
+
 // ── 34. Pitch detection finds a known sine frequency ──────────────────────
 {
   const sampleRate = 44100;
@@ -575,6 +618,10 @@ const fluteNotes = flute.lessons.filter(l => !l.type);
   const metro = api.renderMetronomeScreen();
   check(metro.includes('BPM') && metro.includes('80'), 'metronome screen shows the tempo');
   check(metro.includes('data-action="metronome-toggle"') && metro.includes('data-action="metronome-tap"'), 'metronome has start and tap controls');
+  check(metro.includes('data-action="metronome-preset"') && metro.includes('data-bpm="120"'), 'metronome offers tempo presets');
+  check(metro.includes('data-action="metronome-subdivision"'), 'metronome offers subdivision choices');
+  check(metro.includes('data-action="metronome-countin"'), 'metronome offers a count-in toggle');
+  check(metro.includes('data-action="metronome-sound"') && metro.includes('id="metronome-volume"'), 'metronome offers sound and volume controls');
   api.APP.instrumentId = 'flute';
   api.APP.tuner = null;
   const tuner = api.renderTunerScreen();

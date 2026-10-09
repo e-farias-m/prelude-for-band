@@ -1683,6 +1683,7 @@ button:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2
 
 /* ── METRONOME ─────────────────────────────────────────────────────────── */
 .metro-screen, .tuner-screen { background: var(--bg-deep); }
+.metro-body { display: flex; flex-direction: column; gap: 4px; }
 .metro-dots {
   display: flex;
   gap: 12px;
@@ -1734,6 +1735,50 @@ button:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2
   gap: 12px;
 }
 .metro-play { min-width: 120px; }
+.metro-section { margin-top: 20px; width: 100%; }
+.metro-section-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+.metro-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.metro-chip {
+  flex: 1 1 auto;
+  min-width: 64px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+.metro-chip span { font-size: 11px; font-weight: 600; color: var(--text-muted); }
+.metro-chip.active { border-color: var(--accent-warm); color: var(--accent-warm); }
+.metro-chip.active span { color: var(--accent-warm); }
+.metro-section-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.metro-section-head .metro-section-label { margin-bottom: 0; }
+.metro-toggle {
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.metro-toggle.active { border-color: var(--accent-warm); background: var(--accent-warm); color: var(--bg-deep); }
+.metro-volume { width: 100%; accent-color: var(--accent-warm); cursor: pointer; }
 .metro-hint {
   margin-top: 24px;
   text-align: center;

@@ -446,8 +446,67 @@ function bpmToIntervalMs(bpm) {
   return Math.round(60000 / clampBpm(bpm));
 }
 
+const METRONOME_SUBDIVISIONS = [
+  { value: 1, label: 'Beats' },
+  { value: 2, label: '8ths' },
+  { value: 3, label: 'Triplets' },
+  { value: 4, label: '16ths' },
+];
+const TEMPO_PRESETS = [
+  { bpm: 60, label: 'Largo' },
+  { bpm: 80, label: 'Andante' },
+  { bpm: 100, label: 'Moderato' },
+  { bpm: 120, label: 'Allegro' },
+  { bpm: 160, label: 'Presto' },
+];
+const METRONOME_SOUNDS = [
+  { value: 'click', label: 'Click' },
+  { value: 'wood', label: 'Wood' },
+  { value: 'beep', label: 'Beep' },
+];
+const METRONOME_DEFAULT_VOLUME = 0.8;
+
 function createMetronome(bpm = 80, beatsPerBar = 4) {
-  return { bpm: clampBpm(bpm), beatsPerBar, beat: -1, running: false, timerId: null, taps: [] };
+  return {
+    bpm: clampBpm(bpm),
+    beatsPerBar,
+    beat: -1,
+    subTick: 0,
+    subdivision: 1,
+    countIn: false,
+    countInLeft: 0,
+    volume: METRONOME_DEFAULT_VOLUME,
+    sound: 'click',
+    running: false,
+    timerId: null,
+    taps: [],
+  };
+}
+
+// Time between sub-ticks: the beat interval split by the subdivision count.
+function bpmToTickMs(bpm, subdivision = 1) {
+  const subs = Math.max(1, subdivision || 1);
+  return Math.round(60000 / (clampBpm(bpm) * subs));
+}
+
+// Advance one tick. Main beats step the bar (accenting the downbeat); the ticks
+// in between are subdivisions that only play, unaccented. Reuses advanceMetronome
+// so the beat/wrap rules stay in one place.
+function metronomeTick(metro) {
+  const subs = Math.max(1, metro.subdivision || 1);
+  if (metro.beat < 0 || metro.subTick >= subs - 1) {
+    const { beat, accent } = advanceMetronome(metro);
+    metro.subTick = 0;
+    return { beat, sub: 0, isBeat: true, accent };
+  }
+  metro.subTick += 1;
+  return { beat: metro.beat, sub: metro.subTick, isBeat: false, accent: false };
+}
+
+// Volume/sound for a click; subdivisions play a touch softer than the beat.
+function metronomeClickOpts(metro, isSub = false) {
+  const base = metro && typeof metro.volume === 'number' ? metro.volume : METRONOME_DEFAULT_VOLUME;
+  return { volume: Math.max(0, Math.min(1, base * (isSub ? 0.7 : 1))), sound: (metro && metro.sound) || 'click' };
 }
 
 // Advances one beat, wrapping at the bar line. Returns the beat that just fired
@@ -1704,23 +1763,55 @@ function renderMetronomeScreen() {
   for (let i = 0; i < m.beatsPerBar; i++) {
     dots.push(`<div class="metro-dot ${i === m.beat ? 'metro-dot-active' : ''} ${i === 0 ? 'metro-dot-downbeat' : ''}"></div>`);
   }
+  const presets = TEMPO_PRESETS.map(p =>
+    `<button class="metro-chip${m.bpm === p.bpm ? ' active' : ''}" data-action="metronome-preset" data-bpm="${p.bpm}">${p.label}<span>${p.bpm}</span></button>`
+  ).join('');
+  const subs = METRONOME_SUBDIVISIONS.map(s =>
+    `<button class="metro-chip${(m.subdivision || 1) === s.value ? ' active' : ''}" data-action="metronome-subdivision" data-value="${s.value}">${s.label}</button>`
+  ).join('');
+  const sounds = METRONOME_SOUNDS.map(s =>
+    `<button class="metro-chip${(m.sound || 'click') === s.value ? ' active' : ''}" data-action="metronome-sound" data-value="${s.value}">${s.label}</button>`
+  ).join('');
+  const vol = Math.round((typeof m.volume === 'number' ? m.volume : METRONOME_DEFAULT_VOLUME) * 100);
   return `
     <div class="screen active metro-screen">
       <div class="app-header">
         <button class="header-back" data-action="close-metronome">←</button>
         <div class="header-title">Metronome</div>
       </div>
-      <div class="lesson-body">
+      <div class="lesson-body metro-body">
         <div class="metro-dots" id="metronome-dots">${dots.join('')}</div>
         <div class="metro-bpm">
-          <button class="metro-step" data-action="metronome-bpm" data-delta="-5">−</button>
+          <button class="metro-step" data-action="metronome-bpm" data-delta="-1" aria-label="Slower">−</button>
           <div class="metro-bpm-value"><span id="metronome-bpm">${m.bpm}</span><span class="metro-bpm-unit">BPM</span></div>
-          <button class="metro-step" data-action="metronome-bpm" data-delta="5">+</button>
+          <button class="metro-step" data-action="metronome-bpm" data-delta="1" aria-label="Faster">+</button>
+        </div>
+        <div class="metro-section">
+          <div class="metro-section-label">Tempo preset</div>
+          <div class="metro-chips">${presets}</div>
+        </div>
+        <div class="metro-section">
+          <div class="metro-section-label">Subdivision</div>
+          <div class="metro-chips">${subs}</div>
         </div>
         <div class="metro-controls">
           <button class="btn btn-secondary" data-action="metronome-time">${m.beatsPerBar}/4</button>
           <button class="btn btn-primary metro-play" data-action="metronome-toggle" id="metronome-toggle">${m.running ? '\u25A0 Stop' : '\u25B6 Start'}</button>
           <button class="btn btn-secondary" data-action="metronome-tap">Tap</button>
+        </div>
+        <div class="metro-section">
+          <div class="metro-section-head">
+            <div class="metro-section-label">Count-in</div>
+            <button class="metro-toggle${m.countIn ? ' active' : ''}" data-action="metronome-countin" role="switch" aria-checked="${m.countIn ? 'true' : 'false'}">${m.countIn ? 'On' : 'Off'}</button>
+          </div>
+        </div>
+        <div class="metro-section">
+          <div class="metro-section-label">Click sound</div>
+          <div class="metro-chips">${sounds}</div>
+        </div>
+        <div class="metro-section">
+          <div class="metro-section-label">Volume</div>
+          <input type="range" id="metronome-volume" class="metro-volume" min="0" max="100" step="5" value="${vol}" aria-label="Metronome volume" />
         </div>
         <div class="metro-hint">Tap in time to set the tempo. The first beat of each bar is accented.</div>
       </div>
@@ -2659,12 +2750,27 @@ function updateMetronomeDots() {
 function startMetronomeTicker() {
   const m = APP.metronome;
   if (!m) return;
-  clearInterval(m.timerId);
-  m.timerId = setInterval(() => {
-    const { accent } = advanceMetronome(m);
-    AudioEngine.playClick(accent);
-    updateMetronomeDots();
-  }, bpmToIntervalMs(m.bpm));
+  clearTimeout(m.timerId);
+  let inCountIn = m.countInLeft > 0;
+  const step = () => {
+    if (!m.running) return;
+    let delay;
+    if (inCountIn) {
+      const { accent } = advanceMetronome(m);
+      AudioEngine.playClick(accent, 0, metronomeClickOpts(m));
+      m.countInLeft -= 1;
+      if (m.countInLeft <= 0) { inCountIn = false; m.beat = -1; m.subTick = 0; }
+      updateMetronomeDots();
+      delay = bpmToIntervalMs(m.bpm);
+    } else {
+      const tick = metronomeTick(m);
+      AudioEngine.playClick(tick.accent, 0, metronomeClickOpts(m, !tick.isBeat));
+      updateMetronomeDots();
+      delay = bpmToTickMs(m.bpm, m.subdivision);
+    }
+    m.timerId = setTimeout(step, delay);
+  };
+  step();
 }
 
 function startMetronome() {
@@ -2672,6 +2778,8 @@ function startMetronome() {
   if (!m) return;
   AudioEngine.unlock();
   m.beat = -1;
+  m.subTick = 0;
+  m.countInLeft = m.countIn ? m.beatsPerBar : 0;
   m.running = true;
   m.taps = [];
   startMetronomeTicker();
@@ -2682,10 +2790,12 @@ function startMetronome() {
 function stopMetronome() {
   const m = APP.metronome;
   if (!m) return;
-  clearInterval(m.timerId);
+  clearTimeout(m.timerId);
   m.timerId = null;
   m.running = false;
   m.beat = -1;
+  m.subTick = 0;
+  m.countInLeft = 0;
 }
 
 // ── TUNER RUNTIME ─────────────────────────────────────────────────────
@@ -3260,6 +3370,7 @@ function handleAction(action, el) {
       const idx = TIME_SIGNATURES.indexOf(m.beatsPerBar);
       m.beatsPerBar = TIME_SIGNATURES[(idx + 1) % TIME_SIGNATURES.length];
       m.beat = -1;
+      m.subTick = 0;
       render();
       break;
     }
@@ -3275,6 +3386,42 @@ function handleAction(action, el) {
         if (m.running) startMetronomeTicker();
         render();
       }
+      break;
+    }
+
+    case 'metronome-preset': {
+      const m = APP.metronome;
+      if (!m) break;
+      m.bpm = clampBpm(parseInt(el.dataset.bpm, 10));
+      if (m.running) startMetronomeTicker();
+      render();
+      break;
+    }
+
+    case 'metronome-subdivision': {
+      const m = APP.metronome;
+      if (!m) break;
+      m.subdivision = parseInt(el.dataset.value, 10) || 1;
+      m.subTick = 0;
+      if (m.running) startMetronomeTicker();
+      render();
+      break;
+    }
+
+    case 'metronome-sound': {
+      const m = APP.metronome;
+      if (!m) break;
+      m.sound = el.dataset.value || 'click';
+      if (m.running) AudioEngine.playClick(false, 0, metronomeClickOpts(m));
+      render();
+      break;
+    }
+
+    case 'metronome-countin': {
+      const m = APP.metronome;
+      if (!m) break;
+      m.countIn = !m.countIn;
+      render();
       break;
     }
 
@@ -3594,6 +3741,10 @@ document.addEventListener('click', (e) => {
 
 document.addEventListener('change', (e) => {
   const input = e.target;
+  if (input.id === 'metronome-volume' && APP.metronome) {
+    APP.metronome.volume = Math.max(0, Math.min(1, Number(input.value) / 100));
+    return;
+  }
   if (input.id !== 'import-file-input' || !input.files || !input.files[0]) return;
   const file = input.files[0];
   const reader = new FileReader();

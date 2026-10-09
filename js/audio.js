@@ -158,14 +158,30 @@ const AudioEngine = (() => {
   }
 
   // ── METRONOME CLICK ──────────────────────────────────────────────────────
-  function playClick(accent = false, when = 0) {
+  // `opts.sound` picks the timbre ('click' | 'wood' | 'beep') and `opts.volume`
+  // scales the level (0…1). Both default so existing callers are unaffected.
+  function playClick(accent = false, when = 0, opts = {}) {
     const c = getCtx();
     const t0 = c.currentTime + when + 0.01;
+    const volume = typeof opts.volume === 'number' ? Math.max(0, Math.min(1, opts.volume)) : 1;
+    const sound = opts.sound || 'click';
     const osc = c.createOscillator();
-    osc.type = 'square';
-    osc.frequency.value = accent ? 1400 : 900;
+    let peak;
+    if (sound === 'wood') {
+      osc.type = 'triangle';
+      osc.frequency.value = accent ? 1000 : 680;
+      peak = accent ? 0.22 : 0.14;
+    } else if (sound === 'beep') {
+      osc.type = 'sine';
+      osc.frequency.value = accent ? 1320 : 880;
+      peak = accent ? 0.16 : 0.1;
+    } else {
+      osc.type = 'square';
+      osc.frequency.value = accent ? 1400 : 900;
+      peak = accent ? 0.18 : 0.11;
+    }
     const g = c.createGain();
-    g.gain.setValueAtTime(accent ? 0.18 : 0.11, t0);
+    g.gain.setValueAtTime(Math.max(0.0001, peak * volume), t0);
     g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.06);
     osc.connect(g).connect(c.destination);
     osc.start(t0);
