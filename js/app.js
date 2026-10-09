@@ -43,6 +43,8 @@ const APP = {
   recordingUrl: null,
   // Home screen: true while the user is choosing a different instrument
   pickingInstrument: false,
+  // Home screen: true once the student hides the weekly progress card for this session
+  digestDismissed: false,
 };
 
 const STORAGE_KEY = 'preludeBandProgress';
@@ -1698,6 +1700,7 @@ function renderReportScreen() {
 }
 
 function renderDigestCard(name, now = new Date()) {
+  if (APP.digestDismissed) return '';
   const d = buildWeeklyDigest(name, now);
   if (d.activeDays === 0) return '';
   const max = Math.max.apply(null, d.days.map(x => x.minutes).concat(1));
@@ -1715,7 +1718,10 @@ function renderDigestCard(name, now = new Date()) {
     <div class="digest-card" data-action="open-digest">
       <div class="digest-card-head">
         <div class="digest-card-title">This week in music ${pill}</div>
-        <div class="digest-card-min">${d.totalMinutes} min</div>
+        <div class="digest-card-head-right">
+          <div class="digest-card-min">${d.totalMinutes} min</div>
+          <button class="digest-dismiss" data-action="dismiss-digest" title="Hide for now" aria-label="Hide weekly progress">\u2715</button>
+        </div>
       </div>
       <div class="digest-card-headline">${escapeHtml(d.headline)}</div>
       <div class="digest-bars">${bars}</div>
@@ -2884,6 +2890,11 @@ function handleAction(action, el) {
       render();
       break;
     }
+
+    case 'dismiss-digest':
+      APP.digestDismissed = true;
+      render();
+      break;
 
     case 'close-digest':
       APP.screen = 'select';
