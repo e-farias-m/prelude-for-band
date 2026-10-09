@@ -14,6 +14,16 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/styles.css" />
+  <script>
+    // Apply the saved theme before first paint to avoid a flash of the wrong palette.
+    (function () {
+      var theme = 'light';
+      try { theme = localStorage.getItem('preludeBandTheme') || 'light'; } catch (e) {}
+      document.documentElement.setAttribute('data-theme', theme);
+      var meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.setAttribute('content', theme === 'light' ? '#F5F4FB' : '#0E0D1C');
+    })();
+  </script>
 </head>
 <body>
   <div id="app">

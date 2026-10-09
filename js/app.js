@@ -29,6 +29,12 @@ const APP = {
   // Timed practice sprint state (null when not in a sprint)
   sprint: null,
   sprintTimer: null,
+  // Ear training (call & response) state
+  ear: null,
+  earTimers: [],
+  // Practice tools
+  metronome: null,
+  tuner: null,
   // Motivation: streaks, minutes and badges
   motivation: null,
   sessionStart: null,
@@ -39,9 +45,29 @@ const APP = {
 
 const STORAGE_KEY = 'preludeBandProgress';
 const NAME_KEY = 'preludeBandName';
+const THEME_KEY = 'preludeBandTheme';
 
 function getStudentName() { return localStorage.getItem(NAME_KEY) || ''; }
 function setStudentName(name) { localStorage.setItem(NAME_KEY, name); }
+
+// ── THEME ──────────────────────────────────────────────────────────────────
+function getTheme() { return localStorage.getItem(THEME_KEY) || 'light'; }
+function applyTheme(theme) {
+  if (typeof document !== 'undefined' && document.documentElement) {
+    document.documentElement.setAttribute('data-theme', theme);
+    const meta = document.querySelector && document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', theme === 'light' ? '#F5F4FB' : '#0E0D1C');
+  }
+}
+function setTheme(theme) {
+  localStorage.setItem(THEME_KEY, theme);
+  applyTheme(theme);
+}
+function toggleTheme() { setTheme(getTheme() === 'light' ? 'dark' : 'light'); }
+
+// Instrument accents resolve to theme-aware CSS variables so noteheads and
+// pressed keys stay legible on both dark and light diagram panels.
+function instAccent(inst) { return `var(--accent-${inst.id})`; }
 
 function escapeHtml(str) {
   const d = document.createElement('div');
@@ -73,7 +99,7 @@ function getMasteryLevel(correctCount) {
 }
 
 function getMasteryColor(level) {
-  return { new: '#524F70', learning: '#FF8C42', practiced: '#8B7BFF', mastered: '#4FD98A' }[level] || '#524F70';
+  return { new: 'var(--mastery-new)', learning: 'var(--mastery-learning)', practiced: 'var(--mastery-practiced)', mastered: 'var(--mastery-mastered)' }[level] || 'var(--mastery-new)';
 }
 
 function getMasteryLabel(level) {
@@ -146,6 +172,531 @@ function setSprintBest(instrumentId, mode, score) {
   return false;
 }
 
+// ── ADAPTIVE PRACTICE PLAN ─────────────────────────────────────────────────
+// Every answered question updates a per-note skill record. The daily plan is
+// regenerated from these skills, prioritising notes with low accuracy and
+// notes that have not been seen for a while (a light spaced-repetition model).
+function getSkill(instrumentId, noteId) {
+  const prog = getInstrumentProgress(instrumentId);
+  if (!prog.skills) prog.skills = {};
+  if (!prog.skills[noteId]) {
+    // Existing students predate skills tracking; seed from quiz mastery so
+    // their accuracy history isn't lost.
+    const mastery = prog.mastery[noteId] || 0;
+    prog.skills[noteId] = { correct: mastery, wrong: 0, streak: 0, lastSeen: 0 };
+  }
+  return prog.skills[noteId];
+}
+
+function recordSkill(instrumentId, noteId, correct) {
+  const s = getSkill(instrumentId, noteId);
+  if (correct) { s.correct++; s.streak = (s.streak || 0) + 1; }
+  else { s.wrong++; s.streak = 0; }
+  s.lastSeen = Date.now();
+  saveProgress();
+  return s;
+}
+
+function noteWeakness(instrumentId, noteId, now = Date.now()) {
+  const s = getSkill(instrumentId, noteId);
+  const attempts = s.correct + s.wrong;
+  const accuracy = attempts ? s.correct / attempts : 0.5;
+  const days = s.lastSeen ? (now - s.lastSeen) / 86400000 : 7;
+  const overdue = Math.min(days, 7) / 7;
+  return (1 - accuracy) * 0.7 + overdue * 0.3;
+}
+
+// Accuracy for display; null until the note has actually been attempted.
+function getNoteAccuracy(instrumentId, noteId) {
+  const s = getSkill(instrumentId, noteId);
+  const attempts = s.correct + s.wrong;
+  return { attempts, accuracy: attempts ? s.correct / attempts : null };
+}
+
+// The learned notes most in need of work, weakest first.
+function getWeakestNotes(instrumentId, count = 3) {
+  const now = Date.now();
+  return getLearnedNotes(instrumentId)
+    .map(l => ({
+      lesson: l,
+      weakness: noteWeakness(instrumentId, l.id, now),
+      ...getNoteAccuracy(instrumentId, l.id),
+    }))
+    .sort((a, b) => b.weakness - a.weakness)
+    .slice(0, count);
+}
+
+// Weighted pick that biases drills toward weaker notes without ever ignoring
+// the others (every note keeps a small floor weight).
+function pickWeightedNote(instrumentId, pool) {
+  if (!pool.length) return null;
+  const now = Date.now();
+  const weights = pool.map(l => 0.2 + noteWeakness(instrumentId, l.id, now));
+  const total = weights.reduce((a, b) => a + b, 0);
+  let r = Math.random() * total;
+  for (let i = 0; i < pool.length; i++) {
+    r -= weights[i];
+    if (r <= 0) return pool[i];
+  }
+  return pool[pool.length - 1];
+}
+
+function generatePlan(instrumentId, now = Date.now()) {
+  const learned = getLearnedNotes(instrumentId);
+  const items = [];
+  if (learned.length === 0) return { date: todayKey(new Date(now)), items };
+
+  const ranked = learned
+    .map(l => ({ l, w: noteWeakness(instrumentId, l.id, now) }))
+    .sort((a, b) => b.w - a.w);
+
+  ranked.slice(0, learned.length >= 3 ? 2 : 1).forEach(({ l, w }) => {
+    items.push({
+      id: 'note:' + l.id,
+      type: 'note',
+      targetId: l.id,
+      reason: w >= 0.55 ? 'Shaky — needs review' : 'Keep it fresh',
+    });
+  });
+
+  if (learned.length >= 2) {
+    const sight = getSprintBest(instrumentId, SPRINT_MODES.SIGHT);
+    const finger = getSprintBest(instrumentId, SPRINT_MODES.FINGER);
+    const mode = finger <= sight ? SPRINT_MODES.FINGER : SPRINT_MODES.SIGHT;
+    items.push({ id: 'sprint:' + mode, type: 'sprint', mode, reason: 'Build speed' });
+  }
+
+  const inst = getInstrument(instrumentId);
+  const prog = getInstrumentProgress(instrumentId);
+  const songs = inst.lessons.filter(s =>
+    isSongLesson(s) && isLessonUnlocked(instrumentId, CURRICULUM[instrumentId].lessons.indexOf(s)));
+  const song = songs.find(s => !prog.completed[s.id]) || songs[0];
+  if (song) {
+    items.push({ id: 'song:' + song.id, type: 'song', targetId: song.id, reason: 'Apply your notes' });
+  }
+
+  return { date: todayKey(new Date(now)), items };
+}
+
+// Today's plan is generated once and then persists for the day, so checkboxes
+// and ordering stay stable across visits.
+function getTodayPlan(instrumentId, now = Date.now()) {
+  const prog = getInstrumentProgress(instrumentId);
+  const key = todayKey(new Date(now));
+  if (!prog.plan || prog.plan.date !== key) {
+    prog.plan = generatePlan(instrumentId, now);
+    saveProgress();
+  }
+  return prog.plan;
+}
+
+function isPlanComplete(instrumentId) {
+  const prog = getInstrumentProgress(instrumentId);
+  const items = prog.plan && prog.plan.items;
+  return !!items && items.length > 0 && items.every(i => i.done);
+}
+
+// Marks matching plan items done; when the whole plan is finished, awards bonus
+// XP and records it for the plan badge.
+function markPlanItemDone(instrumentId, type, target) {
+  const prog = APP.progress[instrumentId];
+  if (!prog || !prog.plan || !prog.plan.items) return;
+  let changed = false;
+  prog.plan.items.forEach(it => {
+    if (it.done) return;
+    const matches = it.type === type &&
+      (it.type === 'sprint' ? it.mode === target : it.targetId === target);
+    if (matches) { it.done = true; changed = true; }
+  });
+  if (!changed) return;
+  saveProgress();
+  if (prog.plan.items.every(i => i.done) && !prog.plan.completed) {
+    completePlan(instrumentId);
+  }
+}
+
+function completePlan(instrumentId) {
+  const prog = getInstrumentProgress(instrumentId);
+  if (!prog.plan || prog.plan.completed) return;
+  prog.plan.completed = true;
+  const bonus = 20;
+  prog.xp += bonus;
+  const m = getMotivation();
+  m.plansCompleted = (m.plansCompleted || 0) + 1;
+  saveMotivation();
+  saveProgress();
+  evaluateBadges({ toast: true });
+  showToast('\u{1F389} Plan complete! +' + bonus + ' XP');
+}
+
+// ── EAR TRAINING (CALL & RESPONSE) ─────────────────────────────────────────
+// The app plays a short phrase ("call"); the student taps the notes they heard,
+// in order ("response"). Phrases are drawn toward weak notes and each answer
+// feeds back into the same skill records used by the adaptive plan.
+const EAR_NOTE_GAP_MS = 620;
+
+function earPhraseLength(instrumentId) {
+  return getLearnedNotes(instrumentId).length >= 5 ? 4 : 3;
+}
+
+function buildEarPhrase(instrumentId, length) {
+  const learned = getLearnedNotes(instrumentId);
+  if (learned.length < 2) return [];
+  const count = length || earPhraseLength(instrumentId);
+  const phrase = [];
+  for (let i = 0; i < count; i++) {
+    // Avoid repeating the previous note so the phrase stays melodic.
+    let pool = phrase.length ? learned.filter(l => l.id !== phrase[phrase.length - 1]) : learned;
+    if (!pool.length) pool = learned;
+    const pick = pickWeightedNote(instrumentId, pool);
+    phrase.push(pick.id);
+  }
+  return phrase;
+}
+
+function gradeEarResponse(phraseIds, picks) {
+  return phraseIds.map((id, i) => picks[i] === id);
+}
+
+function earScore(graded) {
+  return graded ? graded.filter(Boolean).length : 0;
+}
+
+function startEarRound(instrumentId, length) {
+  const phrase = buildEarPhrase(instrumentId, length);
+  if (!phrase.length) { APP.ear = null; return null; }
+  APP.ear = { phrase, picks: [], graded: null, finished: false };
+  return APP.ear;
+}
+
+function submitEarPick(instrumentId, noteId) {
+  const e = APP.ear;
+  if (!e || e.finished) return null;
+  e.picks.push(noteId);
+  if (e.picks.length >= e.phrase.length) {
+    e.graded = gradeEarResponse(e.phrase, e.picks);
+    e.finished = true;
+    finishEarRound(instrumentId);
+  }
+  return e;
+}
+
+function finishEarRound(instrumentId) {
+  const e = APP.ear;
+  if (!e || !e.graded) return null;
+  const total = e.phrase.length;
+  const correct = earScore(e.graded);
+  const perfect = correct === total && total >= 3;
+  const xp = correct * 5 + (perfect ? 5 : 0);
+  const prog = getInstrumentProgress(instrumentId);
+  prog.xp += xp;
+  prog.earBest = Math.max(prog.earBest || 0, correct);
+  e.phrase.forEach((id, i) => recordSkill(instrumentId, id, e.picks[i] === id));
+  if (perfect) {
+    const m = getMotivation();
+    m.earPerfects = (m.earPerfects || 0) + 1;
+    saveMotivation();
+  }
+  saveProgress();
+  evaluateBadges({ toast: true });
+  return { correct, total, perfect, xp };
+}
+
+// ── METRONOME ──────────────────────────────────────────────────────────────
+const MIN_BPM = 30;
+const MAX_BPM = 220;
+const TIME_SIGNATURES = [2, 3, 4, 6];
+
+function clampBpm(bpm) {
+  return Math.max(MIN_BPM, Math.min(MAX_BPM, Math.round(bpm)));
+}
+
+function bpmToIntervalMs(bpm) {
+  return Math.round(60000 / clampBpm(bpm));
+}
+
+function createMetronome(bpm = 80, beatsPerBar = 4) {
+  return { bpm: clampBpm(bpm), beatsPerBar, beat: -1, running: false, timerId: null, taps: [] };
+}
+
+// Advances one beat, wrapping at the bar line. Returns the beat that just fired
+// plus whether it lands on the downbeat (which gets the accented click).
+function advanceMetronome(metro) {
+  metro.beat = (metro.beat + 1) % metro.beatsPerBar;
+  return { beat: metro.beat, accent: metro.beat === 0 };
+}
+
+// Average gap of the most recent taps -> BPM. Null until there are two taps.
+function tapTempo(taps) {
+  if (taps.length < 2) return null;
+  const recent = taps.slice(-6);
+  const spans = [];
+  for (let i = 1; i < recent.length; i++) spans.push(recent[i] - recent[i - 1]);
+  const avg = spans.reduce((a, b) => a + b, 0) / spans.length;
+  if (avg <= 0) return null;
+  return clampBpm(60000 / avg);
+}
+
+// ── TUNER ──────────────────────────────────────────────────────────────────
+// Autocorrelation pitch detection over a time-domain buffer. Returns the
+// detected frequency in Hz, or -1 when the signal is too weak or out of range.
+function detectPitch(buffer, sampleRate) {
+  if (!buffer || buffer.length < 2) return -1;
+  const size = buffer.length;
+  let rms = 0;
+  for (let i = 0; i < size; i++) rms += buffer[i] * buffer[i];
+  rms = Math.sqrt(rms / size);
+  if (rms < 0.01) return -1;
+
+  // Trim trailing silence so the correlation isn't dominated by quiet samples.
+  let end = size - 1;
+  while (end > 0 && Math.abs(buffer[end]) < 0.2) end--;
+  const n = end + 1;
+  if (n < 2) return -1;
+
+  const corr = new Array(n).fill(0);
+  for (let lag = 0; lag < n; lag++) {
+    let sum = 0;
+    for (let i = 0; i < n - lag; i++) sum += buffer[i] * buffer[i + lag];
+    corr[lag] = sum;
+  }
+
+  // Walk off the initial dip before hunting for the first strong peak.
+  let d = 0;
+  while (d < n - 1 && corr[d] > corr[d + 1]) d++;
+  let maxVal = -1;
+  let maxPos = -1;
+  for (let i = d; i < n; i++) {
+    if (corr[i] > maxVal) { maxVal = corr[i]; maxPos = i; }
+  }
+  if (maxPos <= 0) return -1;
+
+  const freq = sampleRate / maxPos;
+  if (freq < 40 || freq > 2000) return -1;
+  return freq;
+}
+
+// Nearest expected note, measured in cents. Positive = sharp, negative = flat.
+function freqToNoteInfo(freq, noteLessons) {
+  if (!freq || freq <= 0 || !noteLessons.length) return null;
+  let best = null;
+  noteLessons.forEach(n => {
+    if (!n.freq) return;
+    const cents = 1200 * Math.log2(freq / n.freq);
+    if (best === null || Math.abs(cents) < Math.abs(best.cents)) best = { note: n, cents };
+  });
+  return best;
+}
+
+function centsLabel(cents) {
+  const r = Math.round(cents);
+  if (Math.abs(r) <= 3) return 'in tune';
+  return (r > 0 ? '+' : '') + r + ' cents ' + (r > 0 ? 'sharp' : 'flat');
+}
+
+// ── TEACHER / PARENT PRACTICE REPORT ───────────────────────────────────────
+// A shareable summary of what a student has learned, how strong each note is,
+// and which notes to watch. Built from the same progress + skill records the
+// rest of the app uses, so it never drifts out of sync.
+function getInstrumentReport(instrumentId) {
+  const inst = getInstrument(instrumentId);
+  const prog = getInstrumentProgress(instrumentId);
+  const noteLessons = getNoteLessons(instrumentId);
+  const songLessons = inst.lessons.filter(isSongLesson);
+  const learned = getLearnedNotes(instrumentId);
+  const mastery = { new: 0, learning: 0, practiced: 0, mastered: 0 };
+  learned.forEach(l => { mastery[getMasteryLevel(getNoteMastery(instrumentId, l.id))]++; });
+  const weak = getWeakestNotes(instrumentId, 3)
+    .filter(w => w.attempts > 0)
+    .map(w => ({ name: w.lesson.noteName, accuracy: Math.round((w.accuracy || 0) * 100) }));
+  return {
+    id: instrumentId,
+    name: inst.name,
+    shortName: inst.shortName,
+    xp: prog.xp || 0,
+    notesLearned: learned.length,
+    notesTotal: noteLessons.length,
+    songsCompleted: songLessons.filter(s => prog.completed[s.id]).length,
+    songsTotal: songLessons.length,
+    mastery,
+    weak,
+  };
+}
+
+function buildPracticeReport(name, now = new Date()) {
+  const instruments = INSTRUMENT_ORDER
+    .map(id => getInstrumentReport(id))
+    .filter(r => r.notesLearned > 0 || r.songsCompleted > 0 || r.xp > 0);
+  const badgeNames = BADGES.filter(b => hasBadge(b.id)).map(b => b.name);
+  return {
+    student: name || 'Student',
+    date: todayKey(now),
+    level: getLevel(),
+    avatar: getAvatar(),
+    xp: getTotalXp(),
+    streak: getCurrentStreak(now),
+    totalMinutes: Math.round(getTotalPracticeSeconds() / 60),
+    notesLearned: instruments.reduce((a, r) => a + r.notesLearned, 0),
+    songsCompleted: instruments.reduce((a, r) => a + r.songsCompleted, 0),
+    badges: badgeNames,
+    badgeTotal: BADGES.length,
+    instruments,
+  };
+}
+
+// Plain-text version for the clipboard / email.
+function formatReportText(report) {
+  const lines = [];
+  lines.push(`Practice report — ${report.student}`);
+  lines.push(report.date);
+  lines.push('');
+  lines.push(`Level ${report.level} · ${report.xp} XP · ${report.streak}-day streak · ${report.totalMinutes} min practiced`);
+  lines.push(`Badges: ${report.badges.length}/${report.badgeTotal}${report.badges.length ? ' — ' + report.badges.join(', ') : ''}`);
+  lines.push('');
+  if (!report.instruments.length) {
+    lines.push('No practice recorded yet.');
+  } else {
+    report.instruments.forEach(r => {
+      lines.push(`${r.name}: ${r.notesLearned}/${r.notesTotal} notes · ${r.songsCompleted}/${r.songsTotal} songs · ${r.xp} XP`);
+      lines.push(`  Mastery: ${r.mastery.mastered} mastered, ${r.mastery.practiced} practiced, ${r.mastery.learning} learning`);
+      if (r.weak.length) {
+        lines.push(`  Focus: ${r.weak.map(w => w.name + ' (' + w.accuracy + '%)').join(', ')}`);
+      }
+    });
+  }
+  return lines.join('\n');
+}
+
+// ── WEEKLY DIGEST ──────────────────────────────────────────────────────────
+// An automatic recap of the current week, generated from the same day-by-day
+// practice history the streak tracker already keeps.
+const DAY_ABBR = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const DEFAULT_WEEKLY_GOAL = 60;
+const WEEKLY_GOAL_OPTIONS = [30, 60, 120, 180];
+
+function getWeeklyGoalMinutes() {
+  const g = Number(getMotivation().weeklyGoalMinutes);
+  return Number.isFinite(g) && g > 0 ? g : DEFAULT_WEEKLY_GOAL;
+}
+
+function setWeeklyGoalMinutes(minutes) {
+  const g = Math.max(10, Math.min(600, Math.round(Number(minutes) || 0)));
+  const m = getMotivation();
+  m.weeklyGoalMinutes = g;
+  saveMotivation();
+  return g;
+}
+
+function getWeekStart(now = new Date()) {
+  const d = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const dow = (d.getDay() + 6) % 7; // Monday = 0 ... Sunday = 6
+  d.setDate(d.getDate() - dow);
+  return d;
+}
+
+function getWeekKey(now = new Date()) {
+  return todayKey(getWeekStart(now));
+}
+
+function getWeekDays(now = new Date()) {
+  const m = getMotivation();
+  const start = getWeekStart(now);
+  const days = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    const key = todayKey(d);
+    days.push({ key, label: DAY_ABBR[i], seconds: m.days[key] || 0 });
+  }
+  return days;
+}
+
+function digestHeadline(activeDays, totalMinutes) {
+  if (activeDays === 0) return 'No practice logged this week — pick a lesson to start.';
+  if (activeDays <= 2) return `Nice start — ${totalMinutes} minute${totalMinutes === 1 ? '' : 's'} this week.`;
+  if (activeDays <= 4) return `Solid week — you practiced ${activeDays} days!`;
+  return `Amazing week — you showed up ${activeDays} days!`;
+}
+
+function buildWeeklyDigest(name, now = new Date()) {
+  const days = getWeekDays(now);
+  const m = getMotivation();
+  const weekSeconds = days.reduce((a, d) => a + d.seconds, 0);
+  const activeDays = days.filter(d => d.seconds > 0).length;
+  const best = days.reduce((b, d) => (d.seconds > b.seconds ? d : b), days[0]);
+  const startMs = getWeekStart(now).getTime();
+  const endMs = startMs + 7 * 86400000;
+  const badges = BADGES.filter(b => {
+    const iso = m.badges[b.id];
+    if (!iso) return false;
+    const t = Date.parse(iso);
+    return t >= startMs && t < endMs;
+  });
+  const weekKey = getWeekKey(now);
+  const totalMinutes = Math.round(weekSeconds / 60);
+  const goalMinutes = getWeeklyGoalMinutes();
+  return {
+    student: name || 'Student',
+    weekKey,
+    seen: m.digestSeen === weekKey,
+    weekStart: days[0].key,
+    weekEnd: days[6].key,
+    days: days.map(d => ({ label: d.label, key: d.key, minutes: Math.round(d.seconds / 60) })),
+    totalMinutes,
+    activeDays,
+    bestDayLabel: best.seconds > 0 ? best.label : null,
+    bestDayMinutes: Math.round(best.seconds / 60),
+    headline: digestHeadline(activeDays, Math.round(weekSeconds / 60)),
+    streak: getCurrentStreak(now),
+    level: getLevel(),
+    badges,
+    badgeTotal: BADGES.length,
+    goalMinutes,
+    goalMet: totalMinutes >= goalMinutes,
+    goalRemaining: Math.max(goalMinutes - totalMinutes, 0),
+    goalPct: goalMinutes ? Math.min(100, Math.round((totalMinutes / goalMinutes) * 100)) : 0,
+  };
+}
+
+// A once-per-week nudge when a fresh week of practice is waiting to be seen.
+function shouldRemindDigest(now = new Date()) {
+  const m = getMotivation();
+  const weekKey = getWeekKey(now);
+  if (m.digestSeen === weekKey || m.digestReminded === weekKey) return false;
+  return getWeekDays(now).some(d => d.seconds > 0);
+}
+
+function markDigestReminded(now = new Date()) {
+  const m = getMotivation();
+  m.digestReminded = getWeekKey(now);
+  saveMotivation();
+}
+
+function maybeRemindDigest(now = new Date()) {
+  if (!shouldRemindDigest(now)) return false;
+  markDigestReminded(now);
+  showToast('\u{1F4C8} Your week in music is ready!');
+  return true;
+}
+
+function formatDigestText(digest) {
+  const lines = [];
+  lines.push(`This week in music — ${digest.student}`);
+  lines.push(`${digest.weekStart} to ${digest.weekEnd}`);
+  lines.push('');
+  lines.push(digest.headline);
+  lines.push(`Level ${digest.level} · ${digest.streak}-day streak · ${digest.totalMinutes} min across ${digest.activeDays} day${digest.activeDays === 1 ? '' : 's'}`);
+  if (digest.bestDayLabel) {
+    lines.push(`Best day: ${digest.bestDayLabel} (${digest.bestDayMinutes} min)`);
+  }
+  lines.push(`Daily: ${digest.days.map(d => d.label + ' ' + d.minutes).join(' · ')}`);
+  lines.push(`Weekly goal: ${digest.totalMinutes}/${digest.goalMinutes} min${digest.goalMet ? ' — met!' : ''}`);
+  if (digest.badges.length) {
+    lines.push(`New badges this week: ${digest.badges.map(b => b.name).join(', ')}`);
+  }
+  return lines.join('\n');
+}
+
 // ── MOTIVATION: STREAKS, MINUTES, BADGES ────────────────────────────────────
 const MOTIVATION_KEY = 'preludeBandMotivation';
 const MAX_SESSION_SECONDS = 30 * 60; // ignore implausible idle stretches
@@ -159,6 +710,9 @@ const BADGES = [
   { id: 'marathon', icon: '\u{23F1}', name: 'Marathon', desc: 'Practice for 30 minutes in total' },
   { id: 'xp-500', icon: '\u{2B50}', name: 'Rising Star', desc: 'Earn 500 XP' },
   { id: 'quick-fingers', icon: '\u{26A1}', name: 'Quick Fingers', desc: 'Score 15 in a Finger gym sprint' },
+  { id: 'plan-complete', icon: '\u{1F3AF}', name: 'Planner', desc: 'Finish a full practice plan' },
+  { id: 'golden-ear', icon: '\u{1F442}', name: 'Golden Ear', desc: 'Echo a phrase by ear, note for note' },
+  { id: 'goal-getter', icon: '\u{1F3C6}', name: 'Goal Getter', desc: 'Reach your weekly practice goal' },
 ];
 
 function pad2(n) { return n < 10 ? '0' + n : '' + n; }
@@ -256,6 +810,9 @@ function getStats() {
     streak: getCurrentStreak(),
     totalSeconds: getTotalPracticeSeconds(),
     xp: getTotalXp(),
+    plansCompleted: getMotivation().plansCompleted || 0,
+    earPerfects: getMotivation().earPerfects || 0,
+    weeklyGoalMet: buildWeeklyDigest(getStudentName()).goalMet,
   };
 }
 
@@ -269,6 +826,9 @@ function badgeEarned(id, stats) {
     case 'marathon': return stats.totalSeconds >= 1800;
     case 'xp-500': return stats.xp >= 500;
     case 'quick-fingers': return stats.bestFinger >= 15;
+    case 'plan-complete': return stats.plansCompleted >= 1;
+    case 'golden-ear': return stats.earPerfects >= 1;
+    case 'goal-getter': return stats.weeklyGoalMet === true;
     default: return false;
   }
 }
@@ -369,6 +929,11 @@ function getLearnedNotes(instrumentId) {
   return inst.lessons.filter(l => prog.completed[l.id] && !isReviewLesson(l) && !isSongLesson(l));
 }
 
+// Every real (playable) note lesson for an instrument — used by the tuner.
+function getNoteLessons(instrumentId) {
+  return getInstrument(instrumentId).lessons.filter(l => !isReviewLesson(l) && !isSongLesson(l));
+}
+
 function getNewestNote(instrumentId) {
   const learned = getLearnedNotes(instrumentId);
   return learned.length > 0 ? learned[learned.length - 1] : null;
@@ -458,6 +1023,28 @@ function showToast(msg) {
   t.classList.add('show');
   clearTimeout(showToast._timer);
   showToast._timer = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+// Copy text to the clipboard, falling back to a hidden textarea when the
+// async Clipboard API is unavailable (older browsers, non-secure contexts).
+function copyText(text) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    return navigator.clipboard.writeText(text).then(() => true).catch(() => false);
+  }
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    return Promise.resolve(true);
+  } catch (e) {
+    return Promise.resolve(false);
+  }
 }
 
 function shuffle(arr) {
@@ -551,7 +1138,7 @@ function renderSelectScreen() {
     const cls = inst.available ? 'instrument-card' : 'instrument-card coming-soon';
     const badge = inst.available ? '' : `<div class="card-badge">Soon</div>`;
     return `
-      <div class="${cls}" data-action="select-instrument" data-id="${id}" style="color:${inst.accentColor}">
+      <div class="${cls}" data-action="select-instrument" data-id="${id}" style="color:${instAccent(inst)}">
         ${badge}
         <div class="card-icon">${icon}</div>
         <div class="card-name" style="color: var(--text-primary)">${inst.shortName}</div>
@@ -560,7 +1147,11 @@ function renderSelectScreen() {
 
   const studentName = getStudentName();
   const motivationHtml = studentName ? renderStudentCard(studentName) : '';
+  const digestHtml = studentName ? renderDigestCard(studentName) : '';
   const badgesHtml = studentName ? renderBadgeShelf() : '';
+  const reportHtml = studentName
+    ? `<button class="btn btn-secondary report-open" data-action="open-report">\u{1F4CB} Progress report</button>`
+    : '';
 
   return `
     <div class="screen active select-screen">
@@ -577,11 +1168,14 @@ function renderSelectScreen() {
         <div class="select-sub">Pick an instrument to start your very first lessons — fingerings, notes, and your first sounds.</div>
       </div>
       <div class="select-hero-settings">
-        <button class="btn-icon settings-gear" data-action="open-settings" title="Settings" style="background:none;border:none;cursor:pointer;font-size:18px;vertical-align:middle;">⚙️</button>
+        <button class="theme-toggle" data-action="toggle-theme" title="Switch to ${getTheme() === 'light' ? 'dark' : 'light'} theme">${getTheme() === 'light' ? '\u{1F319}' : '\u2600\uFE0F'}</button>
+        <button class="theme-toggle settings-gear" data-action="open-settings" title="Settings">\u{2699}\u{FE0F}</button>
       </div>
       ${motivationHtml}
+      ${digestHtml}
       <div class="instrument-grid">${cards}</div>
       ${badgesHtml}
+      ${reportHtml}
       <div class="version-badge" style="cursor:pointer">v2.0.0</div>
     </div>`;
 }
@@ -596,6 +1190,11 @@ function renderSettingsScreen() {
         <h2>Settings</h2>
       </div>
       <div class="settings-body">
+        <div class="settings-section">
+          <label class="settings-label">Appearance</label>
+          <p class="settings-desc">Switch between the light "paper" theme and the dark theme.</p>
+          <button class="btn btn-secondary" data-action="toggle-theme">${getTheme() === 'light' ? '\u{1F319} Dark theme' : '\u2600\uFE0F Light theme'}</button>
+        </div>
         <div class="settings-section">
           <label class="settings-label">Student name</label>
           <div class="settings-row">
@@ -613,6 +1212,47 @@ function renderSettingsScreen() {
 }
 
 // ── RENDER: MAP SCREEN ─────────────────────────────────────────────────────
+function renderPlanCard(instrumentId) {
+  const plan = getTodayPlan(instrumentId);
+  if (!plan.items.length) return '';
+  const done = plan.items.filter(i => i.done).length;
+  const total = plan.items.length;
+  const rows = plan.items.map(it => {
+    let label = 'Practice';
+    if (it.type === 'note') {
+      const n = findLessonById(instrumentId, it.targetId);
+      label = 'Review ' + (n ? n.noteName : 'note');
+    } else if (it.type === 'song') {
+      const s = findLessonById(instrumentId, it.targetId);
+      label = 'Play ' + (s ? s.noteName : 'song');
+    } else if (it.type === 'sprint') {
+      label = (it.mode === SPRINT_MODES.FINGER ? 'Finger gym' : 'Sight-reading') + ' sprint';
+    }
+    const icon = it.type === 'sprint' ? '\u{26A1}' : '\u{1F3B5}';
+    return `
+      <div class="plan-item ${it.done ? 'plan-item-done' : ''}">
+        <div class="plan-item-icon">${it.done ? '\u2713' : icon}</div>
+        <div class="plan-item-text">
+          <div class="plan-item-name">${escapeHtml(label)}</div>
+          <div class="plan-item-reason">${escapeHtml(it.reason || '')}</div>
+        </div>
+        ${it.done
+          ? '<div class="plan-item-tag">Done</div>'
+          : `<button class="btn btn-secondary plan-item-btn" data-action="plan-start" data-item="${it.id}">Start</button>`}
+      </div>`;
+  }).join('');
+  const allDone = done === total;
+  return `
+    <div class="plan-card ${allDone ? 'plan-card-done' : ''}">
+      <div class="plan-header">
+        <div class="plan-title">Today\u2019s Plan</div>
+        <div class="plan-count">${done}/${total}</div>
+      </div>
+      <div class="plan-items">${rows}</div>
+      ${allDone ? '<div class="plan-done-note">\u{1F389} All done — nice work!</div>' : ''}
+    </div>`;
+}
+
 function renderMapScreen() {
   const inst = getInstrument(APP.instrumentId);
   const prog = getInstrumentProgress(APP.instrumentId);
@@ -702,6 +1342,7 @@ function renderMapScreen() {
         </div>
       </div>
       <div class="map-body">
+        ${renderPlanCard(APP.instrumentId)}
         <div class="practice-banner ${practiceReady ? '' : 'practice-banner-locked'}">
           <div class="practice-banner-text">
             <div class="practice-banner-title">Practice drills</div>
@@ -721,6 +1362,34 @@ function renderMapScreen() {
 }
 
 // ── RENDER: PRACTICE (SPRINTS) ─────────────────────────────────────────────
+// A compact read-out of the notes a student gets wrong most often. Drills
+// already favour these notes, so the panel explains why the questions repeat.
+function renderWeakSpots(instrumentId) {
+  const now = Date.now();
+  const attempted = getLearnedNotes(instrumentId)
+    .map(l => ({ lesson: l, ...getNoteAccuracy(instrumentId, l.id) }))
+    .filter(w => w.attempts > 0)
+    .map(w => ({ ...w, weakness: noteWeakness(instrumentId, w.lesson.id, now) }))
+    .sort((a, b) => b.weakness - a.weakness)
+    .slice(0, 3);
+  if (!attempted.length) return '';
+  const rows = attempted.map(w => {
+    const pct = Math.round((w.accuracy || 0) * 100);
+    return `
+      <div class="weak-row">
+        <div class="weak-name">${escapeHtml(w.lesson.noteName)}</div>
+        <div class="weak-bar"><div class="weak-bar-fill" style="width:${pct}%"></div></div>
+        <div class="weak-pct">${pct}%</div>
+      </div>`;
+  }).join('');
+  return `
+    <div class="weak-card">
+      <div class="weak-title">Focus areas</div>
+      <div class="weak-sub">Your drills will favour the notes you miss most.</div>
+      ${rows}
+    </div>`;
+}
+
 function renderPracticeScreen() {
   const inst = getInstrument(APP.instrumentId);
   if (APP.sprint) return renderSprintView(inst);
@@ -740,6 +1409,7 @@ function renderPracticeScreen() {
         <div class="sprint-card-best">${best ? `Best: ${best}` : 'No score yet'}</div>
       </button>`;
   }).join('');
+  const earBest = getInstrumentProgress(APP.instrumentId).earBest || 0;
 
   return `
     <div class="screen active practice-screen">
@@ -752,13 +1422,318 @@ function renderPracticeScreen() {
           ? `${SPRINT_SECONDS} seconds. How many can you get?`
           : 'Finish a couple of lessons to unlock the timed drills.'}</div>
         <div class="sprint-cards">${cards}</div>
+        <button class="sprint-card ear-entry" data-action="open-ear" ${ready ? '' : 'disabled'}>
+          <div class="sprint-card-title">Ear training</div>
+          <div class="sprint-card-sub">Hear a short phrase, then echo it back — by ear.</div>
+          <div class="sprint-card-best">${earBest ? `Best: ${earBest}` : 'No score yet'}</div>
+        </button>
+        ${renderWeakSpots(APP.instrumentId)}
+        ${renderPracticeTools()}
+      </div>
+    </div>`;
+}
+
+function renderPracticeTools() {
+  return `
+    <div class="tools-grid">
+      <button class="tool-card" data-action="open-metronome">
+        <div class="tool-icon">\u{1F3B5}</div>
+        <div class="tool-name">Metronome</div>
+        <div class="tool-sub">Keep a steady beat.</div>
+      </button>
+      <button class="tool-card" data-action="open-tuner">
+        <div class="tool-icon">\u{1F3A4}</div>
+        <div class="tool-name">Tuner</div>
+        <div class="tool-sub">Check your pitch.</div>
+      </button>
+    </div>`;
+}
+
+function renderEarScreen() {
+  const inst = getInstrument(APP.instrumentId);
+  const learned = getLearnedNotes(APP.instrumentId);
+
+  if (learned.length < 2) {
+    return `
+      <div class="screen active ear-screen">
+        <div class="app-header">
+          <button class="header-back" data-action="close-ear">←</button>
+          <div class="header-title">Call & response</div>
+        </div>
+        <div class="lesson-body">
+          <div class="practice-intro">Learn two notes to unlock ear training.</div>
+        </div>
+      </div>`;
+  }
+
+  const e = APP.ear;
+  const phrase = e ? e.phrase : [];
+  const picks = e ? e.picks : [];
+  const slots = phrase.map((id, i) => {
+    const picked = picks[i];
+    let cls = 'ear-slot';
+    let label = String(i + 1);
+    if (picked) {
+      const n = findLessonById(APP.instrumentId, picked);
+      label = n ? n.noteName : '?';
+      if (e.graded) cls += e.graded[i] ? ' ear-slot-ok' : ' ear-slot-bad';
+      else cls += ' ear-slot-filled';
+    } else {
+      cls += ' ear-slot-empty';
+    }
+    return `<div class="${cls}">${escapeHtml(label)}</div>`;
+  }).join('');
+
+  const palette = learned.map(l => {
+    const disabled = e && e.finished ? 'disabled' : '';
+    return `<button class="ear-key" data-action="ear-pick" data-id="${l.id}" ${disabled}>${escapeHtml(l.noteName)}</button>`;
+  }).join('');
+
+  const correct = e && e.graded ? earScore(e.graded) : 0;
+  const total = phrase.length;
+  const perfect = e && e.finished && total > 0 && correct === total;
+  const result = e && e.finished
+    ? `<div class="ear-result ${perfect ? 'ear-result-perfect' : ''}">${correct}/${total} correct${perfect ? ' — golden ear!' : ''}</div>`
+    : '<div class="ear-result ear-result-pending">Tap the notes in the order you heard them.</div>';
+
+  const best = getInstrumentProgress(APP.instrumentId).earBest || 0;
+
+  return `
+    <div class="screen active ear-screen">
+      <div class="app-header">
+        <button class="header-back" data-action="close-ear">←</button>
+        <div class="header-title">Call & response · ${inst.shortName}</div>
+      </div>
+      <div class="lesson-body">
+        <div class="ear-slots">${slots}</div>
+        ${result}
+        <button class="btn btn-primary btn-wide" data-action="ear-play" style="margin-top:12px">\u25B6 ${e && e.finished ? 'Replay the call' : 'Play the call'}</button>
+        <div class="ear-palette-label">Your notes</div>
+        <div class="ear-palette">${palette}</div>
+        <div class="ear-footer">
+          ${best ? `<span class="ear-best">Best: ${best}</span>` : '<span></span>'}
+          <button class="btn btn-secondary" data-action="ear-new">Try another</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderMetronomeScreen() {
+  if (!APP.metronome) APP.metronome = createMetronome();
+  const m = APP.metronome;
+  const dots = [];
+  for (let i = 0; i < m.beatsPerBar; i++) {
+    dots.push(`<div class="metro-dot ${i === m.beat ? 'metro-dot-active' : ''} ${i === 0 ? 'metro-dot-downbeat' : ''}"></div>`);
+  }
+  return `
+    <div class="screen active metro-screen">
+      <div class="app-header">
+        <button class="header-back" data-action="close-metronome">←</button>
+        <div class="header-title">Metronome</div>
+      </div>
+      <div class="lesson-body">
+        <div class="metro-dots" id="metronome-dots">${dots.join('')}</div>
+        <div class="metro-bpm">
+          <button class="metro-step" data-action="metronome-bpm" data-delta="-5">−</button>
+          <div class="metro-bpm-value"><span id="metronome-bpm">${m.bpm}</span><span class="metro-bpm-unit">BPM</span></div>
+          <button class="metro-step" data-action="metronome-bpm" data-delta="5">+</button>
+        </div>
+        <div class="metro-controls">
+          <button class="btn btn-secondary" data-action="metronome-time">${m.beatsPerBar}/4</button>
+          <button class="btn btn-primary metro-play" data-action="metronome-toggle" id="metronome-toggle">${m.running ? '\u25A0 Stop' : '\u25B6 Start'}</button>
+          <button class="btn btn-secondary" data-action="metronome-tap">Tap</button>
+        </div>
+        <div class="metro-hint">Tap in time to set the tempo. The first beat of each bar is accented.</div>
+      </div>
+    </div>`;
+}
+
+function renderTunerScreen() {
+  const noteLessons = getNoteLessons(APP.instrumentId);
+  const t = APP.tuner;
+  const listening = !!(t && t.running);
+  const detected = t && t.freq > 0 ? freqToNoteInfo(t.freq, noteLessons) : null;
+  let noteName = '—';
+  let cents = 'Listening…';
+  let offset = 50;
+  if (detected) {
+    noteName = detected.note.noteName;
+    cents = centsLabel(detected.cents);
+    offset = Math.max(0, Math.min(100, 50 + (detected.cents / 50) * 50));
+  }
+  return `
+    <div class="screen active tuner-screen">
+      <div class="app-header">
+        <button class="header-back" data-action="close-tuner">←</button>
+        <div class="header-title">Tuner · ${getInstrument(APP.instrumentId).shortName}</div>
+      </div>
+      <div class="lesson-body">
+        <div class="tuner-note" id="tuner-note">${escapeHtml(noteName)}</div>
+        <div class="tuner-cents" id="tuner-cents">${escapeHtml(cents)}</div>
+        <div class="tuner-meter">
+          <div class="tuner-needle" id="tuner-needle" style="left:${offset}%"></div>
+          <div class="tuner-center"></div>
+        </div>
+        <button class="btn btn-primary btn-wide" data-action="tuner-toggle" style="margin-top:20px">${listening ? '\u25A0 Stop listening' : '\u25B6 Start listening'}</button>
+        <div class="metro-hint">Play a long, steady tone. The needle centres when you're in tune.</div>
+      </div>
+    </div>`;
+}
+
+function renderReportScreen() {
+  const report = buildPracticeReport(getStudentName());
+  const statChips = `
+    <div class="report-stats">
+      <div class="report-stat"><b>${report.level}</b><span>Level</span></div>
+      <div class="report-stat"><b>${report.xp}</b><span>XP</span></div>
+      <div class="report-stat"><b>${report.streak}</b><span>Day streak</span></div>
+      <div class="report-stat"><b>${report.totalMinutes}</b><span>Minutes</span></div>
+    </div>`;
+
+  const cards = report.instruments.map(r => {
+    const pct = r.notesTotal ? Math.round((r.notesLearned / r.notesTotal) * 100) : 0;
+    const weak = r.weak.length
+      ? `<div class="report-focus">Focus: ${r.weak.map(w => `${escapeHtml(w.name)} (${w.accuracy}%)`).join(', ')}</div>`
+      : '';
+    return `
+      <div class="report-card">
+        <div class="report-card-head">
+          <div class="report-card-name">${escapeHtml(r.name)}</div>
+          <div class="report-card-xp">${r.xp} XP</div>
+        </div>
+        <div class="report-bar-track"><div class="report-bar-fill" style="width:${pct}%"></div></div>
+        <div class="report-card-line">${r.notesLearned}/${r.notesTotal} notes · ${r.songsCompleted}/${r.songsTotal} songs</div>
+        <div class="report-mastery">
+          <span class="report-mastered">${r.mastery.mastered} mastered</span>
+          <span class="report-practiced">${r.mastery.practiced} practiced</span>
+          <span class="report-learning">${r.mastery.learning} learning</span>
+        </div>
+        ${weak}
+      </div>`;
+  }).join('') || '<div class="report-empty">No practice recorded yet — play a lesson to start the report.</div>';
+
+  const badges = report.badges.length
+    ? report.badges.map(b => `<span class="report-badge">${escapeHtml(b)}</span>`).join('')
+    : '<span class="report-badge-empty">No badges yet</span>';
+
+  return `
+    <div class="screen active report-screen">
+      <div class="app-header">
+        <button class="header-back" data-action="close-report">←</button>
+        <div class="header-title">Practice report</div>
+      </div>
+      <div class="lesson-body">
+        <div class="report-hero">
+          <div class="report-avatar">${report.avatar}</div>
+          <div>
+            <div class="report-name">${escapeHtml(report.student)}</div>
+            <div class="report-date">${report.date}</div>
+          </div>
+        </div>
+        ${statChips}
+        <div class="report-section-label">Instruments</div>
+        ${cards}
+        <div class="report-section-label">Badges · ${report.badges.length}/${report.badgeTotal}</div>
+        <div class="report-badges">${badges}</div>
+        <div class="report-actions">
+          <button class="btn btn-primary" data-action="copy-report">Copy summary</button>
+          <button class="btn btn-secondary" data-action="print-report">Print</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderDigestCard(name, now = new Date()) {
+  const d = buildWeeklyDigest(name, now);
+  if (d.activeDays === 0) return '';
+  const max = Math.max.apply(null, d.days.map(x => x.minutes).concat(1));
+  const today = todayKey(now);
+  const bars = d.days.map(x => {
+    const h = x.minutes > 0 ? Math.max(Math.round((x.minutes / max) * 100), 10) : 4;
+    const isToday = x.key === today;
+    return `<div class="digest-col">
+      <div class="digest-bar${isToday ? ' digest-bar-today' : ''}" style="height:${h}%"></div>
+      <span class="digest-col-label${isToday ? ' digest-col-today' : ''}">${x.label[0]}</span>
+    </div>`;
+  }).join('');
+  const pill = d.seen ? '' : '<span class="digest-new">New</span>';
+  return `
+    <div class="digest-card" data-action="open-digest">
+      <div class="digest-card-head">
+        <div class="digest-card-title">This week in music ${pill}</div>
+        <div class="digest-card-min">${d.totalMinutes} min</div>
+      </div>
+      <div class="digest-card-headline">${escapeHtml(d.headline)}</div>
+      <div class="digest-bars">${bars}</div>
+      <div class="digest-goal">
+        <div class="digest-goal-track"><div class="digest-goal-fill${d.goalMet ? ' digest-goal-met' : ''}" style="width:${d.goalPct}%"></div></div>
+        <span class="digest-goal-text">${d.goalMet ? '\u2713 ' : ''}${d.totalMinutes}/${d.goalMinutes} min goal</span>
+      </div>
+    </div>`;
+}
+
+function renderDigestScreen(now = new Date()) {
+  const d = buildWeeklyDigest(getStudentName(), now);
+  const max = Math.max.apply(null, d.days.map(x => x.minutes).concat(1));
+  const today = todayKey(now);
+  const bars = d.days.map(x => {
+    const h = x.minutes > 0 ? Math.max(Math.round((x.minutes / max) * 100), 10) : 4;
+    const isToday = x.key === today;
+    return `<div class="digest-col">
+      <div class="digest-bar${isToday ? ' digest-bar-today' : ''}" style="height:${h}%"></div>
+      <span class="digest-col-label${isToday ? ' digest-col-today' : ''}">${x.label}</span>
+      <span class="digest-col-min">${x.minutes}</span>
+    </div>`;
+  }).join('');
+  const badges = d.badges.length
+    ? d.badges.map(b => `<span class="report-badge">${b.icon} ${escapeHtml(b.name)}</span>`).join('')
+    : '<span class="report-badge-empty">No new badges this week</span>';
+  const goalChips = WEEKLY_GOAL_OPTIONS.map(g =>
+    `<button class="digest-goal-chip${g === d.goalMinutes ? ' active' : ''}" data-action="set-weekly-goal" data-goal="${g}">${g} min</button>`
+  ).join('');
+  const goalStatus = d.goalMet
+    ? `\u2713 Goal met — ${d.totalMinutes} of ${d.goalMinutes} min!`
+    : `${d.goalRemaining} min to reach your ${d.goalMinutes}-minute goal`;
+  return `
+    <div class="screen active digest-screen">
+      <div class="app-header">
+        <button class="header-back" data-action="close-digest">←</button>
+        <div class="header-title">Weekly digest</div>
+      </div>
+      <div class="lesson-body">
+        <div class="report-hero">
+          <div class="report-avatar">${getAvatar()}</div>
+          <div>
+            <div class="report-name">${escapeHtml(d.student)}</div>
+            <div class="report-date">${d.weekStart} → ${d.weekEnd}</div>
+          </div>
+        </div>
+        <div class="digest-headline">${escapeHtml(d.headline)}</div>
+        <div class="report-stats">
+          <div class="report-stat"><b>${d.totalMinutes}</b><span>Minutes</span></div>
+          <div class="report-stat"><b>${d.activeDays}</b><span>Active days</span></div>
+          <div class="report-stat"><b>${d.streak}</b><span>Day streak</span></div>
+          <div class="report-stat"><b>${d.level}</b><span>Level</span></div>
+        </div>
+        <div class="report-section-label">Daily practice (minutes)</div>
+        <div class="digest-bars digest-bars-tall">${bars}</div>
+        ${d.bestDayLabel ? `<div class="digest-best">Best day: ${d.bestDayLabel} · ${d.bestDayMinutes} min</div>` : ''}
+        <div class="report-section-label">Weekly goal</div>
+        <div class="digest-goal-track digest-goal-track-lg"><div class="digest-goal-fill${d.goalMet ? ' digest-goal-met' : ''}" style="width:${d.goalPct}%"></div></div>
+        <div class="digest-goal-status">${goalStatus}</div>
+        <div class="digest-goal-options">${goalChips}</div>
+        <div class="report-section-label">New badges this week</div>
+        <div class="report-badges">${badges}</div>
+        <div class="report-actions">
+          <button class="btn btn-primary" data-action="copy-digest">Copy recap</button>
+          <button class="btn btn-secondary" data-action="print-digest">Print</button>
+        </div>
       </div>
     </div>`;
 }
 
 function renderSprintView(inst) {
   const s = APP.sprint;
-
   if (s.finished) {
     const best = getSprintBest(APP.instrumentId, s.mode);
     const title = s.mode === SPRINT_MODES.SIGHT ? 'Sight-reading' : 'Finger gym';
@@ -783,7 +1758,7 @@ function renderSprintView(inst) {
 
   const q = s.question;
   const promptHtml = q.mode === SPRINT_MODES.SIGHT
-    ? `<div class="quiz-prompt-svg">${Graphics.staffSVG({ pos: q.prompt.staffStep, accidental: q.prompt.accidental, clef: inst.clef, accentColor: inst.accentColor, width: 100 })}</div>`
+    ? `<div class="quiz-prompt-svg">${Graphics.staffSVG({ pos: q.prompt.staffStep, accidental: q.prompt.accidental, clef: inst.clef, accentColor: instAccent(inst), width: 100 })}</div>`
     : `<div class="quiz-prompt-note">${q.prompt.noteName}</div>`;
 
   const optionsHtml = q.options.map(opt => {
@@ -794,7 +1769,7 @@ function renderSprintView(inst) {
       cls += ' text-only';
       content = `<div class="quiz-option-note">${opt.noteName}</div>`;
     } else {
-      content = `<div class="quiz-option-svg">${Graphics.fingeringSVG(inst.fingeringType, opt.fingeringState, inst.accentColor, 72)}</div>`;
+      content = `<div class="quiz-option-svg">${Graphics.fingeringSVG(inst.fingeringType, opt.fingeringState, instAccent(inst), 72)}</div>`;
     }
     return `<div class="${cls}" data-action="sprint-answer" data-id="${opt.id}">${content}</div>`;
   }).join('');
@@ -858,6 +1833,7 @@ function finishSprint() {
     prog.xp += s.xp;
     saveProgress();
   }
+  markPlanItemDone(APP.instrumentId, 'sprint', s.mode);
   evaluateBadges({ toast: true });
   render();
 }
@@ -898,8 +1874,8 @@ function renderLessonScreen() {
 }
 
 function renderPresentPhase(inst, lesson) {
-  const fingeringSvg = Graphics.fingeringSVG(inst.fingeringType, lesson.fingeringState, inst.accentColor, 84);
-  const staffSvg = Graphics.staffSVG({ pos: lesson.staffStep, accidental: lesson.accidental, clef: inst.clef, accentColor: inst.accentColor, width: 96 });
+  const fingeringSvg = Graphics.fingeringSVG(inst.fingeringType, lesson.fingeringState, instAccent(inst), 84);
+  const staffSvg = Graphics.staffSVG({ pos: lesson.staffStep, accidental: lesson.accidental, clef: inst.clef, accentColor: instAccent(inst), width: 96 });
   const transposeNote = inst.isTransposing && lesson.concertNote
     ? `<div class="note-description">Sounds as concert ${lesson.concertNote} (${ inst.transposeSemitones === -9 ? 'E\u266d' : inst.transposeSemitones === -7 ? 'F' : inst.transposeSemitones === -2 ? 'B\u266d' : 'B\u266d' } instrument).</div>` : '';
 
@@ -947,8 +1923,8 @@ function renderSongPresentPhase(inst, lesson) {
   const isLast = APP.songNoteIndex >= totalNotes - 1;
   const hasAudio = !!lesson.audioUrl;
 
-  const fingeringSvg = Graphics.fingeringSVG(inst.fingeringType, note.fingeringState, inst.accentColor, 84);
-  const staffSvg = Graphics.staffSVG({ pos: note.staffStep, accidental: note.accidental, clef: inst.clef, accentColor: inst.accentColor, width: 96 });
+  const fingeringSvg = Graphics.fingeringSVG(inst.fingeringType, note.fingeringState, instAccent(inst), 84);
+  const staffSvg = Graphics.staffSVG({ pos: note.staffStep, accidental: note.accidental, clef: inst.clef, accentColor: instAccent(inst), width: 96 });
 
   let actionButtons;
   if (hasAudio) {
@@ -1102,8 +2078,8 @@ function startSongAudioPlayback(inst, lesson) {
       totalBeats += durations[i];
       const t = setTimeout(() => {
         const note = findLessonById(APP.instrumentId, id);
-        if (fingEl) fingEl.innerHTML = Graphics.fingeringSVG(inst.fingeringType, note.fingeringState, inst.accentColor, 84);
-        if (staffEl) staffEl.innerHTML = Graphics.staffSVG({ pos: note.staffStep, accidental: note.accidental, clef: inst.clef, accentColor: inst.accentColor, width: 96 });
+        if (fingEl) fingEl.innerHTML = Graphics.fingeringSVG(inst.fingeringType, note.fingeringState, instAccent(inst), 84);
+        if (staffEl) staffEl.innerHTML = Graphics.staffSVG({ pos: note.staffStep, accidental: note.accidental, clef: inst.clef, accentColor: instAccent(inst), width: 96 });
         if (nameEl) nameEl.textContent = note.noteName;
         if (progEl) progEl.textContent = `Note ${i + 1} of ${noteIds.length}`;
       }, startBeat * msPerBeat);
@@ -1171,11 +2147,12 @@ function buildQuizOptions(inst, lesson) {
 }
 
 // A sprint question is drawn only from notes the student has completed, so it
-// always tests material they have met. Up to three distractors keep options at
-// four once enough notes are known (sprints require at least two notes).
+// always tests material they have met. The prompt is weighted toward weak
+// notes, while distractors stay random for realistic options. Up to three
+// distractors keep options at four once enough notes are known.
 function buildSprintQuestion(instrumentId, mode) {
   const learned = getLearnedNotes(instrumentId);
-  const prompt = learned[Math.floor(Math.random() * learned.length)];
+  const prompt = pickWeightedNote(instrumentId, learned) || learned[0];
   const distractors = shuffle(learned.filter(l => l.id !== prompt.id)).slice(0, 3);
   return {
     mode,
@@ -1210,11 +2187,11 @@ function renderQuizPhase(inst, lesson) {
   // ── PROMPT ──
   let promptHtml = '';
   if (q.quizType === QUIZ_TYPES.FINGERING_TO_NOTE) {
-    promptHtml = `<div class="quiz-prompt-svg">${Graphics.fingeringSVG(inst.fingeringType, q.prompt.fingeringState, inst.accentColor, 100)}</div>`;
+    promptHtml = `<div class="quiz-prompt-svg">${Graphics.fingeringSVG(inst.fingeringType, q.prompt.fingeringState, instAccent(inst), 100)}</div>`;
   } else if (q.quizType === QUIZ_TYPES.NOTE_TO_FINGERING) {
     promptHtml = `<div class="quiz-prompt-note">${q.prompt.noteName}</div>`;
   } else if (q.quizType === QUIZ_TYPES.STAFF_TO_NOTE) {
-    promptHtml = `<div class="quiz-prompt-svg">${Graphics.staffSVG({ pos: q.prompt.staffStep, accidental: q.prompt.accidental, clef: inst.clef, accentColor: inst.accentColor, width: 100 })}</div>`;
+    promptHtml = `<div class="quiz-prompt-svg">${Graphics.staffSVG({ pos: q.prompt.staffStep, accidental: q.prompt.accidental, clef: inst.clef, accentColor: instAccent(inst), width: 100 })}</div>`;
   } else if (q.quizType === QUIZ_TYPES.NOTE_TO_STAFF) {
     promptHtml = `<div class="quiz-prompt-note">${q.prompt.noteName}</div>`;
   }
@@ -1234,12 +2211,12 @@ function renderQuizPhase(inst, lesson) {
       cls += ' text-only';
       content = `<div class="quiz-option-note">${opt.noteName}</div>`;
     } else if (q.quizType === QUIZ_TYPES.NOTE_TO_FINGERING) {
-      content = `<div class="quiz-option-svg">${Graphics.fingeringSVG(inst.fingeringType, opt.fingeringState, inst.accentColor, 72)}</div>`;
+      content = `<div class="quiz-option-svg">${Graphics.fingeringSVG(inst.fingeringType, opt.fingeringState, instAccent(inst), 72)}</div>`;
     } else if (q.quizType === QUIZ_TYPES.STAFF_TO_NOTE) {
       cls += ' text-only';
       content = `<div class="quiz-option-note">${opt.noteName}</div>`;
     } else if (q.quizType === QUIZ_TYPES.NOTE_TO_STAFF) {
-      content = `<div class="quiz-option-svg">${Graphics.staffSVG({ pos: opt.staffStep, accidental: opt.accidental, clef: inst.clef, accentColor: inst.accentColor, width: 72 })}</div>`;
+      content = `<div class="quiz-option-svg">${Graphics.staffSVG({ pos: opt.staffStep, accidental: opt.accidental, clef: inst.clef, accentColor: instAccent(inst), width: 72 })}</div>`;
     }
 
     return `<div class="${cls}" data-action="quiz-answer" data-id="${opt.id}">${content}</div>`;
@@ -1267,7 +2244,7 @@ function renderQuizPhase(inst, lesson) {
 }
 
 function renderPlayPhase(inst, lesson) {
-  const fingeringSvg = Graphics.fingeringSVG(inst.fingeringType, lesson.fingeringState, inst.accentColor, 120);
+  const fingeringSvg = Graphics.fingeringSVG(inst.fingeringType, lesson.fingeringState, instAccent(inst), 120);
   const cells = [1, 2, 3, 4].map(n => `<div class="beat-cell count-in" data-beat="${n}"><span class="beat-num">${n}</span></div>`).join('');
   const playCell = `<div class="beat-cell" data-beat="play">♪</div>`;
 
@@ -1388,8 +2365,13 @@ function render() {
   const app = document.getElementById('app');
   if (APP.screen === 'select') app.innerHTML = renderSelectScreen();
   else if (APP.screen === 'settings') app.innerHTML = renderSettingsScreen();
+  else if (APP.screen === 'report') app.innerHTML = renderReportScreen();
+  else if (APP.screen === 'digest') app.innerHTML = renderDigestScreen();
   else if (APP.screen === 'map') app.innerHTML = renderMapScreen();
   else if (APP.screen === 'practice') app.innerHTML = renderPracticeScreen();
+  else if (APP.screen === 'ear') app.innerHTML = renderEarScreen();
+  else if (APP.screen === 'metronome') app.innerHTML = renderMetronomeScreen();
+  else if (APP.screen === 'tuner') app.innerHTML = renderTunerScreen();
   else if (APP.screen === 'lesson') app.innerHTML = renderLessonScreen();
 }
 
@@ -1454,6 +2436,139 @@ function runSongSequence(inst, lesson) {
       AudioEngine.playInstrumentNote(note.freq, inst.fingeringType, seconds);
     }, start * msPerBeat);
   });
+}
+
+// ── EAR TRAINING AUDIO ────────────────────────────────────────────────
+function stopEarPlayback() {
+  APP.earTimers.forEach(clearTimeout);
+  APP.earTimers = [];
+}
+
+function playEarPhrase() {
+  const e = APP.ear;
+  if (!e || !e.phrase.length) return;
+  stopEarPlayback();
+  AudioEngine.unlock();
+  const inst = getInstrument(APP.instrumentId);
+  e.phrase.forEach((id, i) => {
+    const note = findLessonById(APP.instrumentId, id);
+    if (!note) return;
+    const t = setTimeout(() => {
+      AudioEngine.playInstrumentNote(note.freq, inst.fingeringType, 0.75);
+    }, 250 + i * EAR_NOTE_GAP_MS);
+    APP.earTimers.push(t);
+  });
+}
+
+// ── METRONOME RUNTIME ─────────────────────────────────────────────────
+function updateMetronomeDots() {
+  const m = APP.metronome;
+  const wrap = document.getElementById('metronome-dots');
+  if (!m || !wrap) return;
+  const dots = [];
+  for (let i = 0; i < m.beatsPerBar; i++) {
+    dots.push(`<div class="metro-dot ${i === m.beat ? 'metro-dot-active' : ''} ${i === 0 ? 'metro-dot-downbeat' : ''}"></div>`);
+  }
+  wrap.innerHTML = dots.join('');
+}
+
+function startMetronomeTicker() {
+  const m = APP.metronome;
+  if (!m) return;
+  clearInterval(m.timerId);
+  m.timerId = setInterval(() => {
+    const { accent } = advanceMetronome(m);
+    AudioEngine.playClick(accent);
+    updateMetronomeDots();
+  }, bpmToIntervalMs(m.bpm));
+}
+
+function startMetronome() {
+  const m = APP.metronome;
+  if (!m) return;
+  AudioEngine.unlock();
+  m.beat = -1;
+  m.running = true;
+  m.taps = [];
+  startMetronomeTicker();
+  render();
+  updateMetronomeDots();
+}
+
+function stopMetronome() {
+  const m = APP.metronome;
+  if (!m) return;
+  clearInterval(m.timerId);
+  m.timerId = null;
+  m.running = false;
+  m.beat = -1;
+}
+
+// ── TUNER RUNTIME ─────────────────────────────────────────────────────
+function stopTuner() {
+  const t = APP.tuner;
+  if (!t) return;
+  if (t.frame) cancelAnimationFrame(t.frame);
+  if (t.stream) t.stream.getTracks().forEach(tr => tr.stop());
+  if (t.ctx && t.ctx.close) t.ctx.close().catch(() => {});
+  t.running = false;
+  t.frame = null;
+  t.stream = null;
+  t.ctx = null;
+}
+
+function startTuner() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    showToast('Microphone not available for tuning.');
+    return;
+  }
+  const Ctx = window.AudioContext || window.webkitAudioContext;
+  if (!Ctx) { showToast('Audio analysis not supported here.'); return; }
+  stopTuner();
+  APP.tuner = { running: true, freq: -1, ctx: null, stream: null, frame: null };
+  const t = APP.tuner;
+  navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+    if (!APP.tuner || !APP.tuner.running) { stream.getTracks().forEach(tr => tr.stop()); return; }
+    t.stream = stream;
+    t.ctx = new Ctx();
+    const source = t.ctx.createMediaStreamSource(stream);
+    const analyser = t.ctx.createAnalyser();
+    analyser.fftSize = 2048;
+    source.connect(analyser);
+    const buf = new Float32Array(analyser.fftSize);
+    const loop = () => {
+      if (!APP.tuner || !APP.tuner.running) return;
+      analyser.getFloatTimeDomainData(buf);
+      const freq = detectPitch(buf, t.ctx.sampleRate);
+      t.freq = freq;
+      updateTunerReadout();
+      APP.tuner.frame = requestAnimationFrame(loop);
+    };
+    loop();
+  }).catch(() => {
+    if (APP.tuner) APP.tuner.running = false;
+    showToast('Could not access the microphone.');
+    render();
+  });
+}
+
+function updateTunerReadout() {
+  const t = APP.tuner;
+  if (!t) return;
+  const noteEl = document.getElementById('tuner-note');
+  const centsEl = document.getElementById('tuner-cents');
+  const needleEl = document.getElementById('tuner-needle');
+  if (!noteEl || !centsEl || !needleEl) return;
+  const detected = t.freq > 0 ? freqToNoteInfo(t.freq, getNoteLessons(APP.instrumentId)) : null;
+  if (!detected) {
+    noteEl.textContent = '—';
+    centsEl.textContent = 'Listening…';
+    needleEl.style.left = '50%';
+    return;
+  }
+  noteEl.textContent = detected.note.noteName;
+  centsEl.textContent = centsLabel(detected.cents);
+  needleEl.style.left = Math.max(0, Math.min(100, 50 + (detected.cents / 50) * 50)) + '%';
 }
 
 // ── MUSICXML ──────────────────────────────────────────────────────────
@@ -1659,6 +2774,11 @@ function handleAction(action, el) {
       render();
       break;
 
+    case 'toggle-theme':
+      toggleTheme();
+      render();
+      break;
+
     case 'save-settings-name': {
       const input = document.getElementById('settings-name-input');
       if (input) {
@@ -1679,6 +2799,59 @@ function handleAction(action, el) {
       APP.screen = 'select';
       render();
       showToast('Progress reset.');
+      break;
+    }
+
+    case 'open-report':
+      APP.screen = 'report';
+      render();
+      break;
+
+    case 'close-report':
+      APP.screen = 'select';
+      render();
+      break;
+
+    case 'copy-report': {
+      const text = formatReportText(buildPracticeReport(getStudentName()));
+      copyText(text).then(ok => showToast(ok ? 'Report copied to clipboard.' : 'Copy failed — try Print instead.'));
+      break;
+    }
+
+    case 'print-report':
+      window.print();
+      break;
+
+    case 'open-digest': {
+      const m = getMotivation();
+      m.digestSeen = getWeekKey();
+      saveMotivation();
+      APP.screen = 'digest';
+      render();
+      break;
+    }
+
+    case 'close-digest':
+      APP.screen = 'select';
+      render();
+      break;
+
+    case 'copy-digest': {
+      const text = formatDigestText(buildWeeklyDigest(getStudentName()));
+      copyText(text).then(ok => showToast(ok ? 'Weekly recap copied.' : 'Copy failed — try Print instead.'));
+      break;
+    }
+
+    case 'print-digest':
+      window.print();
+      break;
+
+    case 'set-weekly-goal': {
+      const g = Number(el.dataset.goal);
+      if (g) {
+        setWeeklyGoalMinutes(g);
+        render();
+      }
       break;
     }
 
@@ -1736,6 +2909,17 @@ function handleAction(action, el) {
       showToast('Finish the previous note first.');
       break;
 
+    case 'plan-start': {
+      const item = getTodayPlan(APP.instrumentId).items.find(i => i.id === el.dataset.item);
+      if (!item) return;
+      if (item.type === 'sprint') { startSprint(item.mode); break; }
+      const idx = CURRICULUM[APP.instrumentId].lessons
+        .indexOf(findLessonById(APP.instrumentId, item.targetId));
+      if (idx < 0) return;
+      handleAction('open-lesson', { dataset: { index: String(idx) } });
+      break;
+    }
+
     case 'open-practice':
       APP.sprint = null;
       startSession();
@@ -1754,14 +2938,130 @@ function handleAction(action, el) {
       startSprint(el.dataset.mode);
       break;
 
+    case 'open-ear': {
+      if (getLearnedNotes(APP.instrumentId).length < 2) {
+        showToast('Learn two notes to unlock ear training.');
+        break;
+      }
+      startEarRound(APP.instrumentId);
+      startSession();
+      APP.screen = 'ear';
+      render();
+      playEarPhrase();
+      break;
+    }
+
+    case 'close-ear':
+      stopEarPlayback();
+      endSession();
+      APP.ear = null;
+      APP.screen = 'practice';
+      render();
+      break;
+
+    case 'ear-play':
+      playEarPhrase();
+      break;
+
+    case 'ear-pick': {
+      const e = APP.ear;
+      if (!e || e.finished) break;
+      submitEarPick(APP.instrumentId, el.dataset.id);
+      render();
+      if (APP.ear && APP.ear.finished && APP.ear.graded && earScore(APP.ear.graded) === APP.ear.phrase.length) {
+        showToast('\u{1F442} Golden ear! Perfect echo.');
+      }
+      break;
+    }
+
+    case 'ear-new':
+      stopEarPlayback();
+      startEarRound(APP.instrumentId);
+      render();
+      playEarPhrase();
+      break;
+
+    case 'open-metronome':
+      if (!APP.metronome) APP.metronome = createMetronome();
+      startSession();
+      APP.screen = 'metronome';
+      render();
+      break;
+
+    case 'close-metronome':
+      stopMetronome();
+      endSession();
+      APP.screen = 'practice';
+      render();
+      break;
+
+    case 'metronome-toggle':
+      if (APP.metronome && APP.metronome.running) { stopMetronome(); render(); }
+      else startMetronome();
+      break;
+
+    case 'metronome-bpm': {
+      const m = APP.metronome;
+      if (!m) break;
+      m.bpm = clampBpm(m.bpm + parseInt(el.dataset.delta, 10));
+      if (m.running) startMetronomeTicker();
+      render();
+      break;
+    }
+
+    case 'metronome-time': {
+      const m = APP.metronome;
+      if (!m) break;
+      const idx = TIME_SIGNATURES.indexOf(m.beatsPerBar);
+      m.beatsPerBar = TIME_SIGNATURES[(idx + 1) % TIME_SIGNATURES.length];
+      m.beat = -1;
+      render();
+      break;
+    }
+
+    case 'metronome-tap': {
+      const m = APP.metronome;
+      if (!m) break;
+      m.taps.push(Date.now());
+      if (m.taps.length > 8) m.taps.shift();
+      const bpm = tapTempo(m.taps);
+      if (bpm) {
+        m.bpm = bpm;
+        if (m.running) startMetronomeTicker();
+        render();
+      }
+      break;
+    }
+
+    case 'open-tuner':
+      startSession();
+      APP.screen = 'tuner';
+      render();
+      break;
+
+    case 'close-tuner':
+      stopTuner();
+      APP.tuner = null;
+      endSession();
+      APP.screen = 'practice';
+      render();
+      break;
+
+    case 'tuner-toggle':
+      if (APP.tuner && APP.tuner.running) { stopTuner(); render(); }
+      else startTuner();
+      break;
+
     case 'sprint-answer': {
       const s = APP.sprint;
       if (!s || s.finished) return;
       const id = el.dataset.id;
       if (id === s.question.correctId) {
+        recordSkill(APP.instrumentId, s.question.correctId, true);
         s.score++;
         s.question = buildSprintQuestion(APP.instrumentId, s.mode);
       } else {
+        if (!s.question.wrongId) recordSkill(APP.instrumentId, s.question.correctId, false);
         s.question.wrongId = id;
       }
       render();
@@ -1863,7 +3163,9 @@ function handleAction(action, el) {
       if (tappedId === q.correctId) {
         q.answeredCorrectly = true;
         addNoteMastery(APP.instrumentId, q.correctId);
+        recordSkill(APP.instrumentId, q.correctId, true);
       } else {
+        if (q.wrongIds.length === 0) recordSkill(APP.instrumentId, q.correctId, false);
         q.wrongIds.push(tappedId);
       }
       render();
@@ -1886,6 +3188,7 @@ function handleAction(action, el) {
         prog.completed[lesson.id] = { stars: Math.max(stars, prevStars) };
         prog.xp += xp;
         saveProgress();
+        markPlanItemDone(APP.instrumentId, 'song', lesson.id);
         APP.phase = 'complete';
         render();
         return;
@@ -1958,6 +3261,7 @@ function handleAction(action, el) {
       prog.completed[lesson.id] = { stars: Math.max(stars, prevStars) };
       prog.xp += xp;
       saveProgress();
+      markPlanItemDone(APP.instrumentId, 'note', lesson.id);
 
       APP.phase = 'complete';
       render();
@@ -2063,7 +3367,9 @@ document.addEventListener('change', (e) => {
 });
 
 // ── INIT ───────────────────────────────────────────────────────────────
+applyTheme(getTheme());
 loadProgress();
 loadMotivation();
 if (!getStudentName()) showNamePrompt();
 render();
+maybeRemindDigest();

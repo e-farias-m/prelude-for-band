@@ -26,7 +26,7 @@ const CURRICULUM = {
     fingeringType: 'trumpet',
     isTransposing: true,
     transposeSemitones: -2,   // Bb instrument: concert = written - M2
-    accentColor: '#D4A017',
+    accentColor: '#F2C24E',
     available: true,
     lessons: [
       {
@@ -193,7 +193,7 @@ const CURRICULUM = {
   // ── FLUTE ────────────────────────────────────────────────────────────────
   'flute': {
     id: 'flute', name: 'Flute', shortName: 'Flute',
-    clef: 'treble', fingeringType: 'flute', isTransposing: false, available: true, accentColor: '#7BAFC0',
+    clef: 'treble', fingeringType: 'flute', isTransposing: false, available: true,     accentColor: '#7ED0E8',
     lessons: [
       {
         id: 'fl-1',
@@ -351,7 +351,7 @@ const CURRICULUM = {
       // ── CLARINET (Bb) ───────────────────────────────────────────────────────
   'clarinet': {
     id: 'clarinet', name: 'Clarinet', shortName: 'Clarinet',
-    clef: 'treble', fingeringType: 'clarinet', isTransposing: true, transposeSemitones: -2, available: true, accentColor: '#4A3826',
+    clef: 'treble', fingeringType: 'clarinet', isTransposing: true, transposeSemitones: -2, available: true,     accentColor: '#E0A868',
     lessons: [
       {
         id: 'cl-1',
@@ -515,7 +515,7 @@ const CURRICULUM = {
   // ── ALTO SAXOPHONE (Eb) ─────────────────────────────────────────────────
   'alto-saxophone': {
     id: 'alto-saxophone', name: 'Alto Saxophone', shortName: 'Alto Sax',
-    clef: 'treble', fingeringType: 'saxophone', isTransposing: true, transposeSemitones: -9, available: true, accentColor: '#B08020',
+    clef: 'treble', fingeringType: 'saxophone', isTransposing: true, transposeSemitones: -9, available: true,     accentColor: '#F0B840',
     lessons: [
       {
         id: 'as-1',
@@ -681,7 +681,7 @@ const CURRICULUM = {
   // ── OBOE ─────────────────────────────────────────────────────────────────
   'oboe': {
     id: 'oboe', name: 'Oboe', shortName: 'Oboe',
-    clef: 'treble', fingeringType: 'oboe', isTransposing: false, available: true, accentColor: '#6B4C2A',
+    clef: 'treble', fingeringType: 'oboe', isTransposing: false, available: true,     accentColor: '#D98C5F',
     lessons: [
       {
         id: 'ob-1',
@@ -839,7 +839,7 @@ const CURRICULUM = {
   // ── BASSOON (bass clef) ─────────────────────────────────────────────────
   'bassoon': {
     id: 'bassoon', name: 'Bassoon', shortName: 'Bassoon',
-    clef: 'bass', fingeringType: 'bassoon', isTransposing: false, available: true, accentColor: '#7A5C30',
+    clef: 'bass', fingeringType: 'bassoon', isTransposing: false, available: true,     accentColor: '#C98A55',
     lessons: [
       {
         id: 'bn-1',
@@ -995,7 +995,7 @@ const CURRICULUM = {
   },
   'trombone': {
     id: 'trombone', name: 'Trombone', shortName: 'Trombone',
-    clef: 'bass', fingeringType: 'trombone', isTransposing: false, available: true, accentColor: '#C0A020',
+    clef: 'bass', fingeringType: 'trombone', isTransposing: false, available: true,     accentColor: '#E8C24A',
     lessons: [
       {
         id: 'tb-1',
@@ -1149,7 +1149,7 @@ const CURRICULUM = {
   },
   'french-horn': {
     id: 'french-horn', name: 'French Horn', shortName: 'Fr. Horn',
-    clef: 'treble', fingeringType: 'horn', isTransposing: true, transposeSemitones: -7, available: true, accentColor: '#C06030',
+    clef: 'treble', fingeringType: 'horn', isTransposing: true, transposeSemitones: -7, available: true,     accentColor: '#E8845A',
     lessons: [
       // ── Note lessons ────────────────────────────────────────────────────
       {
@@ -1315,7 +1315,7 @@ const CURRICULUM = {
   },
   'euphonium': {
     id: 'euphonium', name: 'Euphonium', shortName: 'Euph.',
-    clef: 'bass', fingeringType: 'euphonium', isTransposing: false, available: true, accentColor: '#A09000',
+    clef: 'bass', fingeringType: 'euphonium', isTransposing: false, available: true,     accentColor: '#D8C34A',
     lessons: [
       {
         id: 'eu-1',
@@ -1471,7 +1471,7 @@ const CURRICULUM = {
   },
   'tuba': {
     id: 'tuba', name: 'Tuba', shortName: 'Tuba',
-    clef: 'bass', fingeringType: 'tuba', isTransposing: false, available: true, accentColor: '#B08030',
+    clef: 'bass', fingeringType: 'tuba', isTransposing: false, available: true,     accentColor: '#E0A24E',
     lessons: [
       {
         id: 'tu-1',

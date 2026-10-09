@@ -10,6 +10,14 @@ const Graphics = (() => {
   const STAFF_LEFT_X = 30;
   const STAFF_RIGHT_X = 105;
 
+  // Diagram palette — resolved from CSS custom properties so the same markup
+  // renders as bright ink on dark panels and dark ink on white "paper".
+  const INK = 'var(--dg-ink)';              // staff lines, clef, strong outlines
+  const INK_DIM = 'var(--dg-ink-dim)';      // decorative joints, connectors, labels
+  const HOUSING = 'var(--dg-housing)';      // instrument body / tube / casing fill
+  const HOUSING_EDGE = 'var(--dg-housing-edge)';
+  const OPEN = 'var(--dg-open)';            // open hole / vent interior
+
   function yForPos(pos) { return STAFF_BOTTOM_Y - pos * HALF; }
 
   function ledgerPositions(pos) {
@@ -28,8 +36,8 @@ const Graphics = (() => {
   // Putting the letters inside the button keeps them legible even at the small
   // sizes used by quiz thumbnails, where a caption below would be ~4px tall.
   function labeledKey(cx, cy, r, pressed, accentColor, label) {
-    const fill = pressed ? accentColor : '#161530';
-    const textColor = pressed ? '#161530' : accentColor;
+    const fill = pressed ? accentColor : OPEN;
+    const textColor = pressed ? OPEN : accentColor;
     const fontSize = label.length > 1 ? r * 0.8 : r * 1.15;
     let out = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${fill}" stroke="${accentColor}" stroke-width="2"/>`;
     if (label) {
@@ -39,11 +47,11 @@ const Graphics = (() => {
   }
 
   // ── STAFF NOTATION ──────────────────────────────────────────────────────
-  function staffSVG({ pos, accidental = null, clef = 'treble', accentColor = '#FF8C42', width = 130 }) {
+  function staffSVG({ pos, accidental = null, clef = 'treble', accentColor = 'var(--accent-warm)', width = 130 }) {
     const noteX = (STAFF_LEFT_X + STAFF_RIGHT_X) / 2 + 8;
     const noteY = yForPos(pos);
     const stemUp = pos <= 4;
-    const lineColor = '#524F70';
+    const lineColor = INK;
     const renderH = width * (220 / 130);
 
     let svg = `<svg viewBox="0 0 130 220" width="${width}" height="${renderH}" xmlns="http://www.w3.org/2000/svg">`;
@@ -72,8 +80,9 @@ const Graphics = (() => {
       svg += `<text x="${noteX - 24}" y="${noteY + 6}" font-size="22" fill="${accentColor}" font-family="Georgia, serif">${accidental}</text>`;
     }
 
-    // Notehead (filled ellipse, slightly tilted)
-    svg += `<ellipse cx="${noteX}" cy="${noteY}" rx="7.5" ry="5.5" fill="${accentColor}" transform="rotate(-18 ${noteX} ${noteY})"/>`;
+    // Notehead (filled ellipse, slightly tilted). A dark ring separates it from
+    // the bright staff lines so the pitch still reads at thumbnail sizes.
+    svg += `<ellipse cx="${noteX}" cy="${noteY}" rx="7.5" ry="5.5" fill="${accentColor}" stroke="${OPEN}" stroke-width="1.5" transform="rotate(-18 ${noteX} ${noteY})"/>`;
 
     // Stem
     if (stemUp) {
@@ -87,7 +96,7 @@ const Graphics = (() => {
   }
 
   // ── RECORDER FINGERING DIAGRAM ──────────────────────────────────────────
-  function recorderFingeringSVG(fingeringState, accentColor = '#FF8C42', size = 130) {
+  function recorderFingeringSVG(fingeringState, accentColor = 'var(--accent-warm)', size = 130) {
     const [thumb, h1, h2, h3, h4, h5, h6, h7] = fingeringState;
     const cx = 65;
     const tubeTop = 18, tubeBottom = 215, tubeW = 30;
@@ -97,26 +106,26 @@ const Graphics = (() => {
     let svg = `<svg viewBox="0 0 130 230" width="${size}" height="${size * 230 / 130}" xmlns="http://www.w3.org/2000/svg">`;
 
     // Mouthpiece notch
-    svg += `<path d="M ${cx - 14} ${tubeTop} Q ${cx} ${tubeTop - 10} ${cx + 14} ${tubeTop} L ${cx + 15} ${tubeTop + 14} L ${cx - 15} ${tubeTop + 14} Z" fill="#3A3868" stroke="#524F70" stroke-width="1.5"/>`;
+    svg += `<path d="M ${cx - 14} ${tubeTop} Q ${cx} ${tubeTop - 10} ${cx + 14} ${tubeTop} L ${cx + 15} ${tubeTop + 14} L ${cx - 15} ${tubeTop + 14} Z" fill="${HOUSING}" stroke="${INK_DIM}" stroke-width="1.5"/>`;
 
     // Tube body
-    svg += `<rect x="${cx - tubeW/2}" y="${tubeTop + 12}" width="${tubeW}" height="${tubeBottom - tubeTop - 12}" rx="10" fill="#21204A" stroke="#3A3868" stroke-width="1.5"/>`;
+    svg += `<rect x="${cx - tubeW/2}" y="${tubeTop + 12}" width="${tubeW}" height="${tubeBottom - tubeTop - 12}" rx="10" fill="${HOUSING}" stroke="${HOUSING_EDGE}" stroke-width="1.5"/>`;
 
     // Joint lines (decorative, suggests head/body/foot joints)
-    svg += `<line x1="${cx - tubeW/2}" y1="70" x2="${cx + tubeW/2}" y2="70" stroke="#3A3868" stroke-width="1.5"/>`;
-    svg += `<line x1="${cx - tubeW/2}" y1="188" x2="${cx + tubeW/2}" y2="188" stroke="#3A3868" stroke-width="1.5"/>`;
+    svg += `<line x1="${cx - tubeW/2}" y1="70" x2="${cx + tubeW/2}" y2="70" stroke="${INK_DIM}" stroke-width="1.5"/>`;
+    svg += `<line x1="${cx - tubeW/2}" y1="188" x2="${cx + tubeW/2}" y2="188" stroke="${INK_DIM}" stroke-width="1.5"/>`;
 
     // Thumb hole (back) — offset left with dashed connector + labeled button
     const thumbY = 46;
     const thumbX = cx - tubeW/2 - 22;
-    svg += `<line x1="${cx - tubeW/2 - 2}" y1="${thumbY}" x2="${thumbX + 12}" y2="${thumbY}" stroke="#524F70" stroke-width="1" stroke-dasharray="2,2"/>`;
+    svg += `<line x1="${cx - tubeW/2 - 2}" y1="${thumbY}" x2="${thumbX + 12}" y2="${thumbY}" stroke="${INK_DIM}" stroke-width="1" stroke-dasharray="2,2"/>`;
     svg += labeledKey(thumbX, thumbY, 12, thumb, accentColor, 'TH');
 
     // Finger holes 1-7 down the front
     holes.forEach((covered, i) => {
       const y = holeYs[i];
       const r = i < 3 ? 9 : 7.5;
-      svg += `<circle cx="${cx}" cy="${y}" r="${r}" fill="${covered ? accentColor : '#161530'}" stroke="${accentColor}" stroke-width="2"/>`;
+      svg += `<circle cx="${cx}" cy="${y}" r="${r}" fill="${covered ? accentColor : OPEN}" stroke="${accentColor}" stroke-width="2"/>`;
     });
 
     svg += `</svg>`;
@@ -124,7 +133,7 @@ const Graphics = (() => {
   }
 
   // ── BRASS VALVE FINGERING DIAGRAM (trumpet, euphonium, tuba style) ──────
-  function valveFingeringSVG(fingeringState, accentColor = '#D4A017', size = 130) {
+  function valveFingeringSVG(fingeringState, accentColor = 'var(--accent-trumpet)', size = 130) {
     const [v1, v2, v3] = fingeringState;
     const positions = [v1, v2, v3];
     const casingX = [34, 65, 96];
@@ -133,17 +142,17 @@ const Graphics = (() => {
     let svg = `<svg viewBox="0 0 130 200" width="${size}" height="${size * 200 / 130}" xmlns="http://www.w3.org/2000/svg">`;
 
     // Connecting leadpipe hint
-    svg += `<line x1="10" y1="${casingTop + 14}" x2="120" y2="${casingTop + 14}" stroke="#3A3868" stroke-width="6" stroke-linecap="round"/>`;
+    svg += `<line x1="10" y1="${casingTop + 14}" x2="120" y2="${casingTop + 14}" stroke="${INK_DIM}" stroke-width="6" stroke-linecap="round"/>`;
 
     positions.forEach((pressed, i) => {
       const x = casingX[i];
       // Casing
-      svg += `<rect x="${x - casingW/2}" y="${casingTop}" width="${casingW}" height="${casingH}" rx="13" fill="#21204A" stroke="#3A3868" stroke-width="1.5"/>`;
+      svg += `<rect x="${x - casingW/2}" y="${casingTop}" width="${casingW}" height="${casingH}" rx="13" fill="${HOUSING}" stroke="${HOUSING_EDGE}" stroke-width="1.5"/>`;
       // Button (moves down + fills when pressed)
       const buttonY = pressed ? casingTop + 30 : casingTop + 8;
-      svg += `<circle cx="${x}" cy="${buttonY}" r="13" fill="${pressed ? accentColor : '#161530'}" stroke="${accentColor}" stroke-width="2.5"/>`;
+      svg += `<circle cx="${x}" cy="${buttonY}" r="13" fill="${pressed ? accentColor : OPEN}" stroke="${accentColor}" stroke-width="2.5"/>`;
       // Valve number label
-      svg += `<text x="${x}" y="${casingTop + casingH + 22}" font-size="13" font-weight="700" fill="#8986A8" text-anchor="middle">${i + 1}</text>`;
+      svg += `<text x="${x}" y="${casingTop + casingH + 22}" font-size="13" font-weight="700" fill="${INK_DIM}" text-anchor="middle">${i + 1}</text>`;
     });
 
     svg += `</svg>`;
@@ -153,7 +162,7 @@ const Graphics = (() => {
   // ── WOODWIND KEY DIAGRAM (flute, clarinet, sax, oboe, bassoon) ──────────
   // Simplified key pads on a tube — same visual language as recorder but with
   // a distinct label and smaller "key" circles to suggest pads not holes.
-  function woodwindFingeringSVG(fingeringState, accentColor = '#7BAFC0', size = 130) {
+  function woodwindFingeringSVG(fingeringState, accentColor = 'var(--accent-flute)', size = 130) {
     const [thumb, h1, h2, h3, h4, h5, h6, h7, extra, extra2] = fingeringState;
     const cx = 65;
     const tubeTop = 18, tubeBottom = 215, tubeW = 30;
@@ -163,27 +172,27 @@ const Graphics = (() => {
     let svg = `<svg viewBox="0 0 130 230" width="${size}" height="${size * 230 / 130}" xmlns="http://www.w3.org/2000/svg">`;
 
     // Mouthpiece notch
-    svg += `<path d="M ${cx - 14} ${tubeTop} Q ${cx} ${tubeTop - 10} ${cx + 14} ${tubeTop} L ${cx + 15} ${tubeTop + 14} L ${cx - 15} ${tubeTop + 14} Z" fill="#3A3868" stroke="#524F70" stroke-width="1.5"/>`;
+    svg += `<path d="M ${cx - 14} ${tubeTop} Q ${cx} ${tubeTop - 10} ${cx + 14} ${tubeTop} L ${cx + 15} ${tubeTop + 14} L ${cx - 15} ${tubeTop + 14} Z" fill="${HOUSING}" stroke="${INK_DIM}" stroke-width="1.5"/>`;
 
     // Tube body
-    svg += `<rect x="${cx - tubeW/2}" y="${tubeTop + 12}" width="${tubeW}" height="${tubeBottom - tubeTop - 12}" rx="10" fill="#21204A" stroke="#3A3868" stroke-width="1.5"/>`;
+    svg += `<rect x="${cx - tubeW/2}" y="${tubeTop + 12}" width="${tubeW}" height="${tubeBottom - tubeTop - 12}" rx="10" fill="${HOUSING}" stroke="${HOUSING_EDGE}" stroke-width="1.5"/>`;
 
     // Joint lines (decorative, suggests upper/middle/lower joint)
-    svg += `<line x1="${cx - tubeW/2}" y1="70" x2="${cx + tubeW/2}" y2="70" stroke="#3A3868" stroke-width="1.5"/>`;
-    svg += `<line x1="${cx - tubeW/2}" y1="188" x2="${cx + tubeW/2}" y2="188" stroke="#3A3868" stroke-width="1.5"/>`;
+    svg += `<line x1="${cx - tubeW/2}" y1="70" x2="${cx + tubeW/2}" y2="70" stroke="${INK_DIM}" stroke-width="1.5"/>`;
+    svg += `<line x1="${cx - tubeW/2}" y1="188" x2="${cx + tubeW/2}" y2="188" stroke="${INK_DIM}" stroke-width="1.5"/>`;
 
     // Register / octave key — offset right, mirrored with the thumb so the two
     // side keys read as a pair.
     if (extra !== undefined) {
       const exX = cx + tubeW/2 + 22, exY = 46;
-      svg += `<line x1="${cx + tubeW/2 + 2}" y1="${exY}" x2="${exX - 13}" y2="${exY}" stroke="#524F70" stroke-width="1" stroke-dasharray="2,2"/>`;
+      svg += `<line x1="${cx + tubeW/2 + 2}" y1="${exY}" x2="${exX - 13}" y2="${exY}" stroke="${INK_DIM}" stroke-width="1" stroke-dasharray="2,2"/>`;
       svg += labeledKey(exX, exY, 13, extra, accentColor, 'R');
     }
 
     // Thumb / whisper key (offset left of tube)
     {
       const thX = cx - tubeW/2 - 22, thY = 46;
-      svg += `<line x1="${cx - tubeW/2 - 2}" y1="${thY}" x2="${thX + 13}" y2="${thY}" stroke="#524F70" stroke-width="1" stroke-dasharray="2,2"/>`;
+      svg += `<line x1="${cx - tubeW/2 - 2}" y1="${thY}" x2="${thX + 13}" y2="${thY}" stroke="${INK_DIM}" stroke-width="1" stroke-dasharray="2,2"/>`;
       svg += labeledKey(thX, thY, 13, thumb, accentColor, 'TH');
     }
 
@@ -191,7 +200,7 @@ const Graphics = (() => {
     // Used by clarinet clarion (left little finger) and oboe F4 (resonance key).
     if (extra2 !== undefined) {
       const ex2X = cx + tubeW/2 + 22, ex2Y = keyYs[6];
-      svg += `<line x1="${cx + tubeW/2 + 2}" y1="${ex2Y}" x2="${ex2X - 12}" y2="${ex2Y}" stroke="#524F70" stroke-width="1" stroke-dasharray="2,2"/>`;
+      svg += `<line x1="${cx + tubeW/2 + 2}" y1="${ex2Y}" x2="${ex2X - 12}" y2="${ex2Y}" stroke="${INK_DIM}" stroke-width="1" stroke-dasharray="2,2"/>`;
       svg += labeledKey(ex2X, ex2Y, 12, extra2, accentColor, 'L');
     }
 
@@ -199,7 +208,7 @@ const Graphics = (() => {
     allKeys.forEach((pressed, i) => {
       const y = keyYs[i];
       const r = i < 3 ? 9 : 7.5;
-      svg += `<circle cx="${cx}" cy="${y}" r="${r}" fill="${pressed ? accentColor : '#161530'}" stroke="${accentColor}" stroke-width="2.5"/>`;
+      svg += `<circle cx="${cx}" cy="${y}" r="${r}" fill="${pressed ? accentColor : OPEN}" stroke="${accentColor}" stroke-width="2.5"/>`;
     });
 
     svg += `</svg>`;
@@ -211,7 +220,7 @@ const Graphics = (() => {
   // horizontal: embouchure at the left, keys across the body, thumb Bb lever
   // hanging below. (The flute data never uses the generic register/little-
   // finger slots, so they are not drawn here.)
-  function fluteFingeringSVG(fingeringState, accentColor = '#7BAFC0', size = 130) {
+  function fluteFingeringSVG(fingeringState, accentColor = 'var(--accent-flute)', size = 130) {
     const [thumb, h1, h2, h3, h4, h5, h6, h7] = fingeringState;
     const tubeY = 62, tubeH = 26, tubeLeft = 16, tubeRight = 224;
     const keys = [h1, h2, h3, h4, h5, h6, h7];
@@ -220,31 +229,31 @@ const Graphics = (() => {
     let svg = `<svg viewBox="0 0 240 130" width="${size}" height="${size * 130 / 240}" xmlns="http://www.w3.org/2000/svg">`;
 
     // Body tube
-    svg += `<rect x="${tubeLeft}" y="${tubeY}" width="${tubeRight - tubeLeft}" height="${tubeH}" rx="${tubeH / 2}" fill="#21204A" stroke="#3A3868" stroke-width="1.5"/>`;
+    svg += `<rect x="${tubeLeft}" y="${tubeY}" width="${tubeRight - tubeLeft}" height="${tubeH}" rx="${tubeH / 2}" fill="${HOUSING}" stroke="${HOUSING_EDGE}" stroke-width="1.5"/>`;
 
     // Joint lines (head / body / foot)
-    svg += `<line x1="70" y1="${tubeY}" x2="70" y2="${tubeY + tubeH}" stroke="#3A3868" stroke-width="1.5"/>`;
-    svg += `<line x1="188" y1="${tubeY}" x2="188" y2="${tubeY + tubeH}" stroke="#3A3868" stroke-width="1.5"/>`;
+    svg += `<line x1="70" y1="${tubeY}" x2="70" y2="${tubeY + tubeH}" stroke="${INK_DIM}" stroke-width="1.5"/>`;
+    svg += `<line x1="188" y1="${tubeY}" x2="188" y2="${tubeY + tubeH}" stroke="${INK_DIM}" stroke-width="1.5"/>`;
 
     // Embouchure / lip plate (left end)
-    svg += `<ellipse cx="44" cy="${tubeY + tubeH / 2}" rx="12" ry="9" fill="#3A3868" stroke="#524F70" stroke-width="1.5"/>`;
-    svg += `<ellipse cx="44" cy="${tubeY + tubeH / 2}" rx="5" ry="3.5" fill="#161530"/>`;
+    svg += `<ellipse cx="44" cy="${tubeY + tubeH / 2}" rx="12" ry="9" fill="${HOUSING}" stroke="${INK_DIM}" stroke-width="1.5"/>`;
+    svg += `<ellipse cx="44" cy="${tubeY + tubeH / 2}" rx="5" ry="3.5" fill="${OPEN}"/>`;
 
     // Keys across the body (filled = pressed)
     keys.forEach((pressed, i) => {
       const r = i < 3 ? 10 : 8.5;
-      svg += `<circle cx="${keyXs[i]}" cy="${tubeY + tubeH / 2}" r="${r}" fill="${pressed ? accentColor : '#161530'}" stroke="${accentColor}" stroke-width="2.5"/>`;
+      svg += `<circle cx="${keyXs[i]}" cy="${tubeY + tubeH / 2}" r="${r}" fill="${pressed ? accentColor : OPEN}" stroke="${accentColor}" stroke-width="2.5"/>`;
     });
 
     // Thumb Bb lever (hangs below the left-hand section)
     {
       const thX = keyXs[0], thY = tubeY + tubeH + 26;
-      svg += `<line x1="${thX}" y1="${tubeY + tubeH}" x2="${thX}" y2="${thY - 13}" stroke="#524F70" stroke-width="1" stroke-dasharray="2,2"/>`;
+      svg += `<line x1="${thX}" y1="${tubeY + tubeH}" x2="${thX}" y2="${thY - 13}" stroke="${INK_DIM}" stroke-width="1" stroke-dasharray="2,2"/>`;
       svg += labeledKey(thX, thY, 13, thumb, accentColor, 'TH');
     }
 
     // Foot joint hint (right end)
-    svg += `<path d="M${tubeRight} ${tubeY + 2} Q${tubeRight + 10} ${tubeY + tubeH / 2} ${tubeRight} ${tubeY + tubeH - 2}" stroke="#524F70" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+    svg += `<path d="M${tubeRight} ${tubeY + 2} Q${tubeRight + 10} ${tubeY + tubeH / 2} ${tubeRight} ${tubeY + tubeH - 2}" stroke="${INK_DIM}" stroke-width="3" fill="none" stroke-linecap="round"/>`;
 
     svg += `</svg>`;
     return svg;
@@ -252,7 +261,7 @@ const Graphics = (() => {
 
   // ── TROMBONE SLIDE POSITION DIAGRAM ──────────────────────────────────────
   // Shows a tube with 7 position markers. The current position is highlighted.
-  function tromboneFingeringSVG(position, accentColor = '#C0A020', size = 130) {
+  function tromboneFingeringSVG(position, accentColor = 'var(--accent-trombone)', size = 130) {
     const tubeY = 50;
     const tubeLeft = 20, tubeRight = 110;
     const tubeLen = tubeRight - tubeLeft;
@@ -263,7 +272,7 @@ const Graphics = (() => {
     let svg = `<svg viewBox="0 0 130 100" width="${size}" height="${size * 100 / 130}" xmlns="http://www.w3.org/2000/svg">`;
 
     // Slide tube
-    svg += `<line x1="${tubeLeft}" y1="${tubeY}" x2="${tubeRight}" y2="${tubeY}" stroke="#524F70" stroke-width="4" stroke-linecap="round"/>`;
+    svg += `<line x1="${tubeLeft}" y1="${tubeY}" x2="${tubeRight}" y2="${tubeY}" stroke="${INK_DIM}" stroke-width="4" stroke-linecap="round"/>`;
     // Inner slide (extends out to current position)
     const slideEnd = posStart + (position - 1) * posSpacing;
     svg += `<line x1="${tubeLeft}" y1="${tubeY}" x2="${slideEnd}" y2="${tubeY}" stroke="${accentColor}" stroke-width="6" stroke-linecap="round"/>`;
@@ -272,19 +281,19 @@ const Graphics = (() => {
     for (let i = 1; i <= posCount; i++) {
       const x = posStart + (i - 1) * posSpacing;
       const isActive = i === position;
-      const dotColor = isActive ? accentColor : '#3A3868';
+      const dotColor = isActive ? accentColor : OPEN;
       svg += `<circle cx="${x}" cy="${tubeY}" r="${isActive ? 5 : 3.5}" fill="${dotColor}" stroke="${isActive ? accentColor : 'none'}" stroke-width="2"/>`;
-      svg += `<text x="${x}" y="${tubeY + 20}" font-size="10" font-weight="${isActive ? '800' : '500'}" fill="${isActive ? accentColor : '#524F70'}" text-anchor="middle">${i}</text>`;
+      svg += `<text x="${x}" y="${tubeY + 20}" font-size="10" font-weight="${isActive ? '800' : '500'}" fill="${isActive ? accentColor : INK_DIM}" text-anchor="middle">${i}</text>`;
     }
 
     // Mouthpiece hint
-    svg += `<rect x="${tubeLeft - 8}" y="${tubeY - 3}" width="8" height="6" rx="3" fill="#3A3868"/>`;
+    svg += `<rect x="${tubeLeft - 8}" y="${tubeY - 3}" width="8" height="6" rx="3" fill="${HOUSING_EDGE}"/>`;
 
     // Bell hint
-    svg += `<path d="M${tubeRight} ${tubeY - 8} Q${tubeRight + 12} ${tubeY} ${tubeRight} ${tubeY + 8}" stroke="#524F70" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+    svg += `<path d="M${tubeRight} ${tubeY - 8} Q${tubeRight + 12} ${tubeY} ${tubeRight} ${tubeY + 8}" stroke="${INK_DIM}" stroke-width="3" fill="none" stroke-linecap="round"/>`;
 
     // Label
-    svg += `<text x="65" y="${tubeY + 42}" font-size="9" font-weight="600" fill="#8986A8" text-anchor="middle" letter-spacing="0.15em">POSITION</text>`;
+    svg += `<text x="65" y="${tubeY + 42}" font-size="9" font-weight="600" fill="${INK_DIM}" text-anchor="middle" letter-spacing="0.15em">POSITION</text>`;
 
     svg += `</svg>`;
     return svg;

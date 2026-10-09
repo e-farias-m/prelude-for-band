@@ -66,7 +66,19 @@ return { handleAction, renderCompletePhase, CURRICULUM, APP, IMPORTED_SONGS_KEY,
   getMotivation, addPracticeSeconds, getTotalPracticeSeconds, getCurrentStreak,
   getTotalXp, getLevel, getAvatar, getStats, evaluateBadges, hasBadge, todayKey,
   endSession, renderStudentCard, renderBadgeShelf, renderSelectScreen, BADGES,
-  canRecord, startRecording, stopRecording, playRecording, cleanupRecording, renderPlayPhase };
+  canRecord, startRecording, stopRecording, playRecording, cleanupRecording, renderPlayPhase,
+  getSkill, recordSkill, noteWeakness, generatePlan, getTodayPlan, markPlanItemDone,
+  isPlanComplete, renderPlanCard, getNoteAccuracy, getWeakestNotes, pickWeightedNote,
+  renderWeakSpots, earPhraseLength, buildEarPhrase, gradeEarResponse, earScore,
+  startEarRound, submitEarPick, finishEarRound, renderEarScreen,
+  clampBpm, bpmToIntervalMs, createMetronome, advanceMetronome, tapTempo,
+  detectPitch, freqToNoteInfo, centsLabel, getNoteLessons, TIME_SIGNATURES,
+  renderMetronomeScreen, renderTunerScreen,
+  getInstrumentReport, buildPracticeReport, formatReportText, renderReportScreen,
+  getWeekStart, getWeekKey, getWeekDays, buildWeeklyDigest, formatDigestText,
+  renderDigestCard, renderDigestScreen, DEFAULT_WEEKLY_GOAL, WEEKLY_GOAL_OPTIONS,
+  getWeeklyGoalMinutes, setWeeklyGoalMinutes, shouldRemindDigest, markDigestReminded,
+  maybeRemindDigest, getTheme, setTheme, applyTheme, toggleTheme, instAccent, Graphics };
 `);
 const api = sandbox(document, localStorage, {}, navigator, FakeMediaRecorder, URL, Blob, Audio);
 
@@ -311,8 +323,464 @@ api.APP.instrumentId = 'flute';
   check(Object.keys(api.APP.motivation.days).length === 0, 'reset clears practice days');
 }
 
+// Helper: mark every non-song flute lesson complete.
+function completeFluteNotes() {
+  const prog = { completed: {}, xp: 0, mastery: {}, skills: {} };
+  flute.lessons.forEach(l => {
+    if (!l.type || l.type === 'review') prog.completed[l.id] = { stars: 3 };
+  });
+  api.APP.progress = { flute: prog };
+  api.APP.instrumentId = 'flute';
+  return prog;
+}
+const fluteNotes = flute.lessons.filter(l => !l.type);
+
+// ── 17. Per-note skill tracking records accuracy and streaks ──────────────
+{
+  api.APP.progress = { flute: { completed: {}, xp: 0, mastery: {} } };
+  const ok = api.recordSkill('flute', 'fl-1', true);
+  check(ok.correct === 1 && ok.wrong === 0 && ok.streak === 1, 'recordSkill logs a correct answer');
+  const miss = api.recordSkill('flute', 'fl-1', false);
+  check(miss.correct === 1 && miss.wrong === 1 && miss.streak === 0, 'recordSkill logs a miss and resets the streak');
+  check(api.getSkill('flute', 'fl-2').correct === 0, 'getSkill initialises unseen notes');
+}
+
+// ── 18. Weakness favours low accuracy and long-overdue notes ──────────────
+{
+  const prog = { completed: {}, xp: 0, mastery: {}, skills: {} };
+  api.APP.progress = { flute: prog };
+  api.APP.instrumentId = 'flute';
+  const now = Date.parse('2026-03-01T10:00:00');
+  prog.skills[fluteNotes[0].id] = { correct: 0, wrong: 5, lastSeen: now };
+  prog.skills[fluteNotes[1].id] = { correct: 5, wrong: 0, lastSeen: now };
+  prog.skills[fluteNotes[2].id] = { correct: 5, wrong: 0, lastSeen: now - 30 * 86400000 };
+  check(
+    api.noteWeakness('flute', fluteNotes[0].id, now) > api.noteWeakness('flute', fluteNotes[1].id, now),
+    'a low-accuracy note scores weaker than an accurate one'
+  );
+  check(
+    api.noteWeakness('flute', fluteNotes[2].id, now) > api.noteWeakness('flute', fluteNotes[1].id, now),
+    'a long-unseen note scores weaker than a fresh one'
+  );
+}
+
+// ── 19. Generated plan prioritises the weakest note, then a sprint and song
+{
+  const prog = completeFluteNotes();
+  const now = Date.parse('2026-03-01T10:00:00');
+  prog.skills[fluteNotes[0].id] = { correct: 0, wrong: 5, lastSeen: now };
+  fluteNotes.slice(1).forEach(n => { prog.skills[n.id] = { correct: 9, wrong: 0, lastSeen: now }; });
+  const plan = api.generatePlan('flute', now);
+  check(plan.items[0].type === 'note' && plan.items[0].targetId === fluteNotes[0].id, 'plan starts with the weakest note');
+  check(plan.items.some(i => i.type === 'sprint'), 'plan includes a sprint');
+  check(plan.items.some(i => i.type === 'song'), 'plan includes an unlocked song');
+}
+
+// ── 20. Today's plan persists, then regenerates on a new day ──────────────
+{
+  completeFluteNotes();
+  const day1 = Date.parse('2026-03-01T10:00:00');
+  const p1 = api.getTodayPlan('flute', day1);
+  p1.items[0].done = true;
+  const p2 = api.getTodayPlan('flute', day1);
+  check(p2.items[0].done === true, 'plan progress persists within the same day');
+  const day2 = Date.parse('2026-03-02T10:00:00');
+  const p3 = api.getTodayPlan('flute', day2);
+  check(p3.items.every(i => !i.done), 'a fresh plan is generated on a new day');
+  check(p3.date === api.todayKey(new Date(day2)), 'the regenerated plan is dated for the new day');
+}
+
+// ── 21. Completing every plan item awards bonus XP and the badge once ─────
+{
+  completeFluteNotes();
+  api.APP.motivation = { days: {}, badges: {} };
+  const plan = api.getTodayPlan('flute');
+  plan.items.forEach(it => {
+    if (it.type === 'sprint') api.markPlanItemDone('flute', 'sprint', it.mode);
+    else api.markPlanItemDone('flute', it.type, it.targetId);
+  });
+  check(api.isPlanComplete('flute'), 'the plan reads complete once all items are done');
+  check(api.APP.progress.flute.xp >= 20, 'completing the plan awards bonus XP');
+  check(api.hasBadge('plan-complete'), 'completing the plan earns the Planner badge');
+  const xpAfter = api.APP.progress.flute.xp;
+  api.markPlanItemDone('flute', 'note', plan.items[0].targetId);
+  check(api.APP.progress.flute.xp === xpAfter, 'the plan bonus is only awarded once');
+}
+
+// ── 22. The plan card renders items with start controls ──────────────────
+{
+  completeFluteNotes();
+  const html = api.renderPlanCard('flute');
+  check(html.includes('Today') && html.includes('plan-item'), 'plan card renders a headed item list');
+  check(html.includes('data-action="plan-start"'), 'plan card offers a start control');
+}
+
+// ── 23. Accuracy is null until a note is attempted ────────────────────────
+{
+  api.APP.progress = { flute: { completed: {}, xp: 0, mastery: {} } };
+  check(api.getNoteAccuracy('flute', 'fl-1').accuracy === null, 'accuracy is null with no attempts');
+  api.recordSkill('flute', 'fl-1', true);
+  api.recordSkill('flute', 'fl-1', false);
+  const acc = api.getNoteAccuracy('flute', 'fl-1');
+  check(acc.attempts === 2 && acc.accuracy === 0.5, 'accuracy reflects correct over attempts');
+}
+
+// ── 24. Weakest-notes list is ordered by weakness ─────────────────────────
+{
+  const prog = completeFluteNotes();
+  const now = Date.now();
+  prog.skills[fluteNotes[0].id] = { correct: 0, wrong: 6, lastSeen: now };
+  fluteNotes.slice(1).forEach(n => { prog.skills[n.id] = { correct: 6, wrong: 0, lastSeen: now }; });
+  const weak = api.getWeakestNotes('flute', 3);
+  check(weak.length === 3, 'weakest-notes list is capped at the requested count');
+  check(weak[0].lesson.id === fluteNotes[0].id, 'the weakest note is listed first');
+}
+
+// ── 25. Weighted picking favours weak notes ───────────────────────────────
+{
+  const prog = completeFluteNotes();
+  const now = Date.now();
+  const weakId = fluteNotes[0].id;
+  prog.skills[weakId] = { correct: 0, wrong: 10, lastSeen: now - 30 * 86400000 };
+  fluteNotes.slice(1).forEach(n => { prog.skills[n.id] = { correct: 8, wrong: 0, lastSeen: now }; });
+  const pool = api.getLearnedNotes('flute');
+  let weakPicked = 0;
+  for (let i = 0; i < 200; i++) {
+    if (api.pickWeightedNote('flute', pool).id === weakId) weakPicked++;
+  }
+  check(weakPicked > 80, 'a weak note is chosen far more often than strong ones');
+  check(api.pickWeightedNote('flute', pool.slice(0, 1)).id === weakId, 'picking from a single-note pool is safe');
+}
+
+// ── 26. Focus-areas panel shows weak notes with accuracy ──────────────────
+{
+  const prog = completeFluteNotes();
+  const now = Date.now();
+  prog.skills[fluteNotes[0].id] = { correct: 1, wrong: 3, lastSeen: now };
+  const html = api.renderWeakSpots('flute');
+  check(html.includes('Focus areas'), 'focus-areas panel renders a heading');
+  check(html.includes(fluteNotes[0].noteName), 'focus-areas panel names a weak note');
+  check(html.includes('25%'), 'focus-areas panel shows the accuracy percentage');
+}
+
+// ── 27. Ear phrases are the right length and avoid repeats ────────────────
+{
+  completeFluteNotes();
+  const phrase = api.buildEarPhrase('flute');
+  check(phrase.length === api.earPhraseLength('flute'), 'phrase length matches the learned-note tier');
+  check(phrase.every(id => api.getLearnedNotes('flute').some(l => l.id === id)), 'phrase draws only from learned notes');
+  let repeats = 0;
+  for (let i = 1; i < phrase.length; i++) if (phrase[i] === phrase[i - 1]) repeats++;
+  check(repeats === 0, 'phrase does not repeat a note back-to-back');
+  api.APP.progress = { flute: { completed: {}, xp: 0, mastery: {} } };
+  check(api.buildEarPhrase('flute').length === 0, 'no phrase is built without two learned notes');
+}
+
+// ── 28. Grading scores each position correctly ────────────────────────────
+{
+  const graded = api.gradeEarResponse(['a', 'b', 'c'], ['a', 'x', 'c']);
+  check(graded.length === 3 && graded[0] && !graded[1] && graded[2], 'grading flags each position');
+  check(api.earScore(graded) === 2, 'score counts correct positions');
+}
+
+// ── 29. A perfect echo awards XP and the Golden Ear badge ─────────────────
+{
+  completeFluteNotes();
+  api.APP.motivation = { days: {}, badges: {} };
+  const e = api.startEarRound('flute');
+  const xpBefore = api.APP.progress.flute.xp;
+  e.phrase.forEach(id => api.submitEarPick('flute', id));
+  check(api.APP.ear.finished === true, 'the round finishes once every slot is filled');
+  check(api.earScore(api.APP.ear.graded) === e.phrase.length, 'echoing the exact phrase scores full marks');
+  check(api.APP.progress.flute.xp > xpBefore, 'a completed round awards XP');
+  check(api.hasBadge('golden-ear'), 'a perfect phrase earns the Golden Ear badge');
+  check(api.APP.progress.flute.earBest === e.phrase.length, 'the best score is recorded');
+}
+
+// ── 30. Ear screen renders slots and a note palette ───────────────────────
+{
+  completeFluteNotes();
+  api.startEarRound('flute');
+  const html = api.renderEarScreen();
+  check(html.includes('ear-slot') && html.includes('ear-key'), 'ear screen renders slots and note keys');
+  check(html.includes('data-action="ear-pick"'), 'ear keys are interactive');
+  check(html.includes(fluteNotes[0].noteName), 'the palette names learned notes');
+  api.APP.progress = { flute: { completed: {}, xp: 0, mastery: {} } };
+  const locked = api.renderEarScreen();
+  check(locked.includes('unlock ear training'), 'ear screen shows a locked message with too few notes');
+}
+
+// ── 31. Tempo helpers clamp and convert sensibly ──────────────────────────
+{
+  check(api.clampBpm(5) === 30 && api.clampBpm(999) === 220, 'BPM clamps to the allowed range');
+  check(api.clampBpm(80.6) === 81, 'BPM rounds to a whole number');
+  check(api.bpmToIntervalMs(60) === 1000, '60 BPM is one beat per second');
+  check(api.bpmToIntervalMs(120) === 500, '120 BPM is two beats per second');
+}
+
+// ── 32. Beats advance, wrap, and accent the downbeat ──────────────────────
+{
+  const m = api.createMetronome(90, 4);
+  const first = api.advanceMetronome(m);
+  check(first.beat === 0 && first.accent === true, 'the first beat of a bar is accented');
+  api.advanceMetronome(m);
+  api.advanceMetronome(m);
+  const fourth = api.advanceMetronome(m);
+  check(fourth.beat === 3 && fourth.accent === false, 'beats count up within the bar');
+  const wrap = api.advanceMetronome(m);
+  check(wrap.beat === 0 && wrap.accent === true, 'the bar wraps back to an accented downbeat');
+}
+
+// ── 33. Tap tempo averages recent taps ────────────────────────────────────
+{
+  check(api.tapTempo([1000]) === null, 'tap tempo needs at least two taps');
+  check(api.tapTempo([0, 500, 1000, 1500]) === 120, 'even 500ms taps give 120 BPM');
+}
+
+// ── 34. Pitch detection finds a known sine frequency ──────────────────────
+{
+  const sampleRate = 44100;
+  const n = 2048;
+  function sine(freq) {
+    const b = new Float32Array(n);
+    for (let i = 0; i < n; i++) b[i] = 0.6 * Math.sin(2 * Math.PI * freq * i / sampleRate);
+    return b;
+  }
+  const a4 = api.detectPitch(sine(440), sampleRate);
+  check(Math.abs(a4 - 440) < 15, 'detects A4 near 440 Hz');
+  const d4 = api.detectPitch(sine(293.66), sampleRate);
+  check(Math.abs(d4 - 293.66) < 15, 'detects D4 near 293.66 Hz');
+  const silence = new Float32Array(n);
+  check(api.detectPitch(silence, sampleRate) === -1, 'silence yields no pitch');
+}
+
+// ── 35. Frequency maps to the nearest note and cents ──────────────────────
+{
+  const notes = api.getNoteLessons('flute');
+  const exact = api.freqToNoteInfo(293.66, notes);
+  check(exact.note.id === 'fl-1' && Math.abs(exact.cents) < 1, 'an exact frequency maps to its note, in tune');
+  const sharp = api.freqToNoteInfo(293.66 * Math.pow(2, 10 / 1200), notes);
+  check(sharp.note.id === 'fl-1' && Math.abs(sharp.cents - 10) < 1, 'a sharp frequency reports positive cents');
+  check(api.centsLabel(0) === 'in tune', 'near-zero cents reads as in tune');
+  check(api.centsLabel(12) === '+12 cents sharp', 'positive cents label as sharp');
+  check(api.centsLabel(-18) === '-18 cents flat', 'negative cents label as flat');
+}
+
+// ── 36. Metronome and tuner screens render their controls ─────────────────
+{
+  api.APP.metronome = null;
+  const metro = api.renderMetronomeScreen();
+  check(metro.includes('BPM') && metro.includes('80'), 'metronome screen shows the tempo');
+  check(metro.includes('data-action="metronome-toggle"') && metro.includes('data-action="metronome-tap"'), 'metronome has start and tap controls');
+  api.APP.instrumentId = 'flute';
+  api.APP.tuner = null;
+  const tuner = api.renderTunerScreen();
+  check(tuner.includes('Tuner') && tuner.includes('data-action="tuner-toggle"'), 'tuner screen shows a listening control');
+}
+
+// ── 37–40. Teacher / parent practice report ───────────────────────────────
+{
+  const savedProgress = JSON.parse(JSON.stringify(api.APP.progress));
+  const savedMotivation = JSON.parse(JSON.stringify(api.APP.motivation));
+  api.APP.progress = {
+    flute: {
+      completed: { 'fl-1': { stars: 3 }, 'fl-2': { stars: 1 } },
+      xp: 120,
+      mastery: { 'fl-1': 7, 'fl-2': 3 },
+      skills: {
+        'fl-1': { correct: 9, wrong: 1, streak: 3, lastSeen: Date.now() },
+        'fl-2': { correct: 2, wrong: 8, streak: 0, lastSeen: Date.now() },
+      },
+    },
+  };
+  api.APP.motivation = { days: { [api.todayKey()]: 600 }, badges: { 'first-steps': 'x' } };
+
+  // 37. A single-instrument report summarizes notes, XP and focus.
+  const ir = api.getInstrumentReport('flute');
+  check(ir.notesLearned === 2 && ir.xp === 120, 'instrument report counts learned notes and XP');
+  check(ir.notesTotal > 2 && ir.songsTotal >= 1, 'instrument report knows the totals');
+  check(ir.mastery.mastered === 1 && ir.mastery.practiced === 1, 'mastery buckets use quiz counts');
+  check(ir.weak.length >= 1 && ir.weak[0].name === 'E' && ir.weak[0].accuracy === 20, 'the weakest note is surfaced first');
+
+  // 38. The whole report aggregates time, level and badges.
+  const rep = api.buildPracticeReport('Test');
+  check(rep.student === 'Test' && rep.totalMinutes === 10, 'report totals practice minutes');
+  check(rep.xp === 120 && rep.level === 2, 'report reports XP and level');
+  check(rep.notesLearned === 2, 'report sums learned notes');
+  check(rep.badges.length === 1 && rep.badgeTotal === api.BADGES.length, 'report lists earned badges');
+
+  // 39. The copyable text version is plain, readable English.
+  const text = api.formatReportText(rep);
+  check(text.includes('Practice report — Test'), 'text report has a title');
+  check(text.includes('10 min practiced'), 'text report shows minutes');
+  check(text.includes('2/' + rep.instruments[0].notesTotal + ' notes'), 'text report lists instrument progress');
+  check(text.includes('Focus: E (20%)'), 'text report names the focus note');
+
+  // 40. The report screen renders and the select screen links to it.
+  const html = api.renderReportScreen();
+  check(html.includes('Practice report') && html.includes('Test'), 'report screen shows the student');
+  check(html.includes('data-action="copy-report"') && html.includes('data-action="print-report"'), 'report screen has share actions');
+  check(html.includes('data-action="close-report"') && html.includes('Flute'), 'report screen lists instruments and can go back');
+  check(api.renderSelectScreen().includes('data-action="open-report"'), 'select screen offers the report');
+
+  api.APP.progress = savedProgress;
+  api.APP.motivation = savedMotivation;
+}
+
+// ── 41–44. Auto-generated weekly digest ───────────────────────────────────
+{
+  const savedProgress = JSON.parse(JSON.stringify(api.APP.progress));
+  const savedMotivation = JSON.parse(JSON.stringify(api.APP.motivation));
+  const now = new Date('2024-03-06T12:00:00'); // a Wednesday
+  api.APP.progress = { flute: { completed: {}, xp: 40, mastery: {} } };
+  api.APP.motivation = {
+    days: { '2024-03-04': 120, '2024-03-06': 600, '2024-03-07': 60 },
+    badges: { 'first-steps': '2024-03-05T10:00:00Z', 'first-song': '2023-01-01T00:00:00Z' },
+  };
+
+  // 41. The week runs Monday to Sunday.
+  const start = api.getWeekStart(now);
+  check(start.getDay() === 1, 'the week starts on Monday');
+  check(api.getWeekKey(now) === '2024-03-04', 'the week key is the Monday date');
+  const days = api.getWeekDays(now);
+  check(days.length === 7 && days[0].label === 'Mon' && days[6].label === 'Sun', 'seven labelled days, Mon–Sun');
+  check(days[0].key === '2024-03-04' && days[6].key === '2024-03-10', 'the week spans Monday to Sunday');
+
+  // 42. The digest aggregates the stored day history.
+  const d = api.buildWeeklyDigest('Test', now);
+  check(d.weekKey === '2024-03-04' && d.totalMinutes === 13, 'digest totals the week minutes');
+  check(d.activeDays === 3, 'digest counts active days');
+  check(d.bestDayLabel === 'Wed' && d.bestDayMinutes === 10, 'digest finds the best day');
+  check(d.headline.includes('3 days'), 'digest writes a headline for the week');
+  check(d.badges.length === 1 && d.badges[0].id === 'first-steps', 'digest lists only badges earned this week');
+
+  // 43. The recap text is plain, readable English.
+  const text = api.formatDigestText(d);
+  check(text.includes('This week in music — Test'), 'digest text has a title');
+  check(text.includes('13 min across 3 days'), 'digest text summarizes minutes and days');
+  check(text.includes('Best day: Wed (10 min)'), 'digest text names the best day');
+  check(text.includes('Daily: Mon 2') && text.includes('Wed 10'), 'digest text shows the daily values');
+  check(text.includes('First Steps'), 'digest text lists new badges');
+
+  // 44. The card and screen render, and opening marks the week seen.
+  const card = api.renderDigestCard('Test', now);
+  check(card.includes('This week in music') && card.includes('data-action="open-digest"'), 'select card links to the digest');
+  check(card.includes('13 min') && card.includes('digest-new'), 'the card shows minutes and a New pill');
+  const screen = api.renderDigestScreen(now);
+  check(screen.includes('Weekly digest') && screen.includes('data-action="close-digest"'), 'digest screen renders with a back button');
+  check(screen.includes('data-action="copy-digest"') && screen.includes('data-action="print-digest"'), 'digest screen has share actions');
+  check(screen.includes('Active days'), 'digest screen shows activity stats');
+  api.APP.motivation.digestSeen = '2024-03-04';
+  check(!api.renderDigestCard('Test', now).includes('digest-new'), 'a seen digest drops the New pill');
+  api.APP.motivation.digestSeen = undefined;
+  api.APP.screen = 'select';
+  api.handleAction('open-digest');
+  check(api.APP.motivation.digestSeen === api.getWeekKey(), 'opening the digest marks this week seen');
+  api.APP.screen = 'select';
+
+  api.APP.progress = savedProgress;
+  api.APP.motivation = savedMotivation;
+}
+
+// ── 45. Weekly goal progress and the once-a-week reminder ─────────────────
+{
+  const savedMotivation = JSON.parse(JSON.stringify(api.APP.motivation));
+  const now = new Date('2024-03-06T12:00:00');
+  api.APP.motivation = { days: { '2024-03-04': 120, '2024-03-06': 600, '2024-03-07': 60 }, badges: {} };
+
+  check(api.getWeeklyGoalMinutes() === 60 && api.DEFAULT_WEEKLY_GOAL === 60, 'weekly goal defaults to 60 minutes');
+  check(api.setWeeklyGoalMinutes(5) === 10, 'goal clamps to a sensible minimum');
+  check(api.setWeeklyGoalMinutes(9999) === 600, 'goal clamps to a sensible maximum');
+  api.setWeeklyGoalMinutes(60);
+
+  const d = api.buildWeeklyDigest('Test', now);
+  check(d.goalMinutes === 60 && d.totalMinutes === 13, 'digest carries the goal and the week total');
+  check(d.goalMet === false && d.goalRemaining === 47, 'an unfinished goal reports the minutes remaining');
+  check(d.goalPct === 22, 'goal progress is a percentage of the target');
+
+  api.setWeeklyGoalMinutes(10);
+  const hit = api.buildWeeklyDigest('Test', now);
+  check(hit.goalMet === true && hit.goalRemaining === 0 && hit.goalPct === 100, 'a met goal caps at 100% and reports success');
+
+  const screen = api.renderDigestScreen(now);
+  check(screen.includes('Weekly goal') && screen.includes('data-action="set-weekly-goal"'), 'digest screen offers goal controls');
+  check(screen.includes('data-goal="120"'), 'goal options are selectable');
+  check(api.renderDigestCard('Test', now).includes('min goal'), 'the select card shows goal progress');
+
+  api.setWeeklyGoalMinutes(60);
+  api.APP.motivation.digestSeen = undefined;
+  api.APP.motivation.digestReminded = undefined;
+  check(api.shouldRemindDigest(now) === true, 'an unseen active week wants a reminder');
+  check(api.maybeRemindDigest(now) === true, 'the weekly reminder fires');
+  check(api.shouldRemindDigest(now) === false, 'the reminder does not fire twice');
+  api.APP.motivation.digestSeen = '2024-03-04';
+  check(api.shouldRemindDigest(now) === false, 'a week already seen needs no reminder');
+
+  api.APP.motivation = savedMotivation;
+}
+
+// ── 46. Reaching the weekly goal unlocks a badge ──────────────────────────
+{
+  const savedProgress = JSON.parse(JSON.stringify(api.APP.progress));
+  const savedMotivation = JSON.parse(JSON.stringify(api.APP.motivation));
+  const today = api.todayKey();
+  api.APP.progress = { flute: { completed: {}, xp: 0, mastery: {} } };
+
+  api.APP.motivation = { days: { [today]: 20 * 60 }, badges: {} };
+  api.setWeeklyGoalMinutes(15);
+  const won = api.evaluateBadges();
+  check(won.some(b => b.id === 'goal-getter'), 'meeting the weekly goal unlocks Goal Getter');
+  check(api.hasBadge('goal-getter'), 'the Goal Getter badge is recorded');
+
+  api.APP.motivation = { days: { [today]: 5 * 60 }, badges: {} };
+  api.setWeeklyGoalMinutes(30);
+  const none = api.evaluateBadges();
+  check(!none.some(b => b.id === 'goal-getter'), 'falling short of the goal awards no badge');
+
+  api.APP.progress = savedProgress;
+  api.APP.motivation = savedMotivation;
+}
+
+// ── 50. Theme preference defaults to light and toggles ───────────────────
+{
+  const saved = store['preludeBandTheme'];
+  delete store['preludeBandTheme'];
+  check(api.getTheme() === 'light', 'theme defaults to light');
+  api.setTheme('dark');
+  check(store['preludeBandTheme'] === 'dark', 'setTheme persists the choice');
+  check(api.getTheme() === 'dark', 'getTheme reads the saved choice');
+  api.toggleTheme();
+  check(api.getTheme() === 'light', 'toggleTheme flips dark back to light');
+  api.toggleTheme();
+  check(api.getTheme() === 'dark', 'toggleTheme flips light to dark');
+
+  api.APP.screen = 'select';
+  api.setTheme('light');
+  api.handleAction('toggle-theme', { dataset: {} });
+  check(api.getTheme() === 'dark', 'the toggle-theme action flips the theme');
+
+  // Instrument accents resolve to theme variables, not baked hex
+  const fluteAccent = api.instAccent(flute);
+  check(fluteAccent === 'var(--accent-flute)', 'instrument accent resolves to a CSS variable');
+  check(!/#/.test(fluteAccent), 'accent is not a hard-coded hex');
+
+  const staff = api.Graphics.staffSVG({ pos: 0, clef: 'treble', accentColor: api.instAccent(flute), width: 96 });
+  check(staff.includes('var(--dg-ink)'), 'staff ink uses a theme variable');
+  check(staff.includes('var(--dg-open)'), 'notehead halo uses a theme variable');
+
+  const fing = api.Graphics.fingeringSVG('flute', flute.lessons.find(l => !l.type).fingeringState, api.instAccent(flute), 84);
+  check(fing.includes('var(--dg-housing)'), 'instrument body uses the theme housing variable');
+  check(!/#[0-9A-Fa-f]{6}/.test(fing), 'fingering SVG has no baked hex colors');
+
+  api.getMotivation();
+  check(api.renderSelectScreen().includes('data-action="toggle-theme"'),
+    'the home screen exposes a theme toggle');
+
+  if (saved === undefined) delete store['preludeBandTheme']; else store['preludeBandTheme'] = saved;
+}
+
 (async () => {
-  // ── 17. The record control only appears when the mic API exists ─────────
+  // ── 47. The record control only appears when the mic API exists ─────────
   {
     api.APP.recorder = null;
     api.APP.recordingUrl = null;
@@ -330,7 +798,7 @@ api.APP.instrumentId = 'flute';
     navigator.mediaDevices = mediaDevices;
   }
 
-  // ── 18. Recording round-trip: start then stop yields a playable take ────
+  // ── 48. Recording round-trip: start then stop yields a playable take ────
   {
     api.APP.recorder = null;
     api.APP.recordingUrl = null;
@@ -345,7 +813,7 @@ api.APP.instrumentId = 'flute';
     check(Audio.last && Audio.last.src === 'blob:fake', 'playRecording plays the captured take');
   }
 
-  // ── 19. Cleaning up a recording revokes its object URL ──────────────────
+  // ── 49. Cleaning up a recording revokes its object URL ──────────────────
   {
     revoked = [];
     api.cleanupRecording();
