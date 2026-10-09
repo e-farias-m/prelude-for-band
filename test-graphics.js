@@ -68,6 +68,8 @@ check(diagrams > 0, 'no fingering diagrams rendered');
   check(svg.includes('viewBox="0 0 240 130"'), 'flute diagram should use a horizontal viewBox');
   check(svg.includes('<ellipse'), 'flute diagram should show an embouchure');
   check(svg.includes('>TH<'), 'flute diagram should label the thumb Bb lever');
+  check(svg.includes('data-action="fingering-key"') && svg.includes('data-key="TH"'),
+    'the labelled thumb key should be tappable for an explanation');
 }
 
 // ── Generic woodwinds label their side keys on the button ──────────────────
@@ -78,6 +80,8 @@ check(diagrams > 0, 'no fingering diagrams rendered');
   check(svg.includes('>R<'), 'clarinet register key should be labelled R');
   check(svg.includes('>TH<'), 'clarinet thumb key should be labelled TH');
   check(svg.includes('>L<'), 'clarinet little-finger key should be labelled L');
+  check(svg.includes('data-key="R"') && svg.includes('data-key="L"'),
+    'clarinet side keys should be tappable for explanations');
 }
 
 // ── Brass keeps numbered valve buttons ─────────────────────────────────────

@@ -79,7 +79,8 @@ return { handleAction, renderCompletePhase, CURRICULUM, APP, IMPORTED_SONGS_KEY,
   renderDigestCard, renderDigestScreen, DEFAULT_WEEKLY_GOAL, WEEKLY_GOAL_OPTIONS,
   getWeeklyGoalMinutes, setWeeklyGoalMinutes, shouldRemindDigest, markDigestReminded,
   maybeRemindDigest, getTheme, setTheme, applyTheme, toggleTheme, instAccent, Graphics,
-  getSavedInstrument, setSavedInstrument, clearSavedInstrument, renderFocusCard, renderInstrumentGrid };
+  getSavedInstrument, setSavedInstrument, clearSavedInstrument, renderFocusCard, renderInstrumentGrid,
+  showFingeringHelp, hideFingeringHelp, FINGERING_HELP };
 `);
 const api = sandbox(document, localStorage, {}, navigator, FakeMediaRecorder, URL, Blob, Audio);
 
@@ -870,6 +871,21 @@ const fluteNotes = flute.lessons.filter(l => !l.type);
     check(api.renderSelectScreen().includes('focus-card'), 'the focused view is restored after cancel');
 
     if (saved === undefined) delete store['preludeBandInstrument']; else store['preludeBandInstrument'] = saved;
+  }
+
+  // ── 52. Fingering-chart abbreviations open an explainer ─────────────────
+  {
+    check(api.FINGERING_HELP.TH && api.FINGERING_HELP.TH.label.toLowerCase().includes('thumb'),
+      'TH is explained as the thumb key');
+    check(!!api.FINGERING_HELP.R && !!api.FINGERING_HELP.L,
+      'register and little-finger keys each have an explanation');
+
+    api.APP.fingeringHelp = null;
+    api.handleAction('fingering-key', { dataset: { key: 'TH' } });
+    check(api.APP.fingeringHelp === 'TH', 'tapping a labelled key opens its explanation');
+
+    api.handleAction('close-fingering-help', { dataset: {} });
+    check(api.APP.fingeringHelp === null, 'the explainer can be dismissed');
   }
 
   if (failures.length) console.log(failures.join('\n'));

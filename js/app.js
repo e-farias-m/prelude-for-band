@@ -45,6 +45,8 @@ const APP = {
   pickingInstrument: false,
   // Home screen: true once the student hides the weekly progress card for this session
   digestDismissed: false,
+  // Fingering-chart abbreviation currently being explained (TH, R, L), or null
+  fingeringHelp: null,
 };
 
 const STORAGE_KEY = 'preludeBandProgress';
@@ -1034,6 +1036,32 @@ function showToast(msg) {
   t.classList.add('show');
   clearTimeout(showToast._timer);
   showToast._timer = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+// Plain-language meanings for the abbreviations printed on fingering charts.
+const FINGERING_HELP = {
+  TH: { label: 'Thumb', text: 'Your left thumb. It covers the back hole on recorder, works the thumb key on other woodwinds, or the Bb lever on flute.' },
+  R:  { label: 'Register key', text: 'The octave (speaker) key just above the thumb \u2014 press it to jump up into the higher register.' },
+  L:  { label: 'Left little finger', text: 'An auxiliary key worked by your left pinky. On some notes it doubles as a resonance key.' },
+};
+
+// Show a tap-away explainer for a fingering abbreviation (works on click and tap).
+function showFingeringHelp(key) {
+  const info = FINGERING_HELP[key];
+  if (!info) return;
+  APP.fingeringHelp = key;
+  const el = document.getElementById('fingering-help');
+  if (!el) return;
+  el.innerHTML = `<span class="fingering-help-key">${key}</span><span class="fingering-help-text"><strong>${info.label}</strong> — ${info.text}</span>`;
+  el.classList.add('show');
+  clearTimeout(showFingeringHelp._timer);
+  showFingeringHelp._timer = setTimeout(hideFingeringHelp, 7000);
+}
+
+function hideFingeringHelp() {
+  APP.fingeringHelp = null;
+  const el = document.getElementById('fingering-help');
+  if (el) el.classList.remove('show');
 }
 
 // Copy text to the clipboard, falling back to a hidden textarea when the
@@ -2894,6 +2922,14 @@ function handleAction(action, el) {
     case 'dismiss-digest':
       APP.digestDismissed = true;
       render();
+      break;
+
+    case 'fingering-key':
+      if (el.dataset.key) showFingeringHelp(el.dataset.key);
+      break;
+
+    case 'close-fingering-help':
+      hideFingeringHelp();
       break;
 
     case 'close-digest':

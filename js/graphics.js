@@ -35,14 +35,18 @@ const Graphics = (() => {
   // A single key/lever drawn as a button with a short label centred on it.
   // Putting the letters inside the button keeps them legible even at the small
   // sizes used by quiz thumbnails, where a caption below would be ~4px tall.
+  // Labelled keys are tappable so the app can explain abbreviations (TH, R, L).
   function labeledKey(cx, cy, r, pressed, accentColor, label) {
     const fill = pressed ? accentColor : OPEN;
     const textColor = pressed ? OPEN : accentColor;
     const fontSize = label.length > 1 ? r * 0.8 : r * 1.15;
-    let out = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${fill}" stroke="${accentColor}" stroke-width="2"/>`;
+    const attrs = label ? ` class="fingering-key" data-action="fingering-key" data-key="${label}"` : '';
+    let out = `<g${attrs}>`;
+    out += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${fill}" stroke="${accentColor}" stroke-width="2"/>`;
     if (label) {
       out += `<text x="${cx}" y="${(cy + fontSize * 0.35).toFixed(1)}" text-anchor="middle" font-size="${fontSize.toFixed(1)}" font-weight="700" fill="${textColor}">${label}</text>`;
     }
+    out += `</g>`;
     return out;
   }
 

@@ -1039,6 +1039,60 @@ button:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2
   transform: translateX(-50%) translateY(0);
 }
 
+/* ── FINGERING-ABBREVIATION EXPLAINER ───────────────────────────────────── */
+.fingering-key { cursor: pointer; }
+.fingering-key:hover circle { stroke-width: 3; }
+
+.fingering-help {
+  position: fixed;
+  bottom: calc(96px + env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%) translateY(16px);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: calc(100% - 32px);
+  max-width: 420px;
+  background: var(--bg-elevated);
+  border: 1.5px solid var(--accent-warm);
+  border-radius: var(--r-lg);
+  padding: 12px 16px;
+  box-shadow: var(--shadow-glow);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+  z-index: 110;
+  cursor: pointer;
+}
+.fingering-help.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
+}
+.fingering-help-key {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--accent-warm);
+  color: var(--bg-deep);
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.fingering-help-text {
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--text-muted);
+}
+.fingering-help-text strong {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
 /* ── DIVIDER ────────────────────────────────────────────────────────────── */
 .divider {
   height: 1px;
