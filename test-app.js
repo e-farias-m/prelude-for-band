@@ -603,9 +603,9 @@ const fluteNotes = flute.lessons.filter(l => !l.type);
 // ── 35. Frequency maps to the nearest note and cents ──────────────────────
 {
   const notes = api.getNoteLessons('flute');
-  const exact = api.freqToNoteInfo(293.66, notes);
+  const exact = api.freqToNoteInfo(261.63, notes);
   check(exact.note.id === 'fl-1' && Math.abs(exact.cents) < 1, 'an exact frequency maps to its note, in tune');
-  const sharp = api.freqToNoteInfo(293.66 * Math.pow(2, 10 / 1200), notes);
+  const sharp = api.freqToNoteInfo(261.63 * Math.pow(2, 10 / 1200), notes);
   check(sharp.note.id === 'fl-1' && Math.abs(sharp.cents - 10) < 1, 'a sharp frequency reports positive cents');
   check(api.centsLabel(0) === 'in tune', 'near-zero cents reads as in tune');
   check(api.centsLabel(12) === '+12 cents sharp', 'positive cents label as sharp');
@@ -653,7 +653,7 @@ const fluteNotes = flute.lessons.filter(l => !l.type);
   check(ir.notesLearned === 2 && ir.xp === 120, 'instrument report counts learned notes and XP');
   check(ir.notesTotal > 2 && ir.songsTotal >= 1, 'instrument report knows the totals');
   check(ir.mastery.mastered === 1 && ir.mastery.practiced === 1, 'mastery buckets use quiz counts');
-  check(ir.weak.length >= 1 && ir.weak[0].name === 'E' && ir.weak[0].accuracy === 20, 'the weakest note is surfaced first');
+  check(ir.weak.length >= 1 && ir.weak[0].name === 'D' && ir.weak[0].accuracy === 20, 'the weakest note is surfaced first');
 
   // 38. The whole report aggregates time, level and badges.
   const rep = api.buildPracticeReport('Test');
@@ -667,7 +667,7 @@ const fluteNotes = flute.lessons.filter(l => !l.type);
   check(text.includes('Practice report — Test'), 'text report has a title');
   check(text.includes('10 min practiced'), 'text report shows minutes');
   check(text.includes('2/' + rep.instruments[0].notesTotal + ' notes'), 'text report lists instrument progress');
-  check(text.includes('Focus: E (20%)'), 'text report names the focus note');
+  check(text.includes('Focus: D (20%)'), 'text report names the focus note');
 
   // 40. The report screen renders and the select screen links to it.
   const html = api.renderReportScreen();

@@ -194,6 +194,17 @@ const CURRICULUM = {
     lessons: [
       {
         id: 'fl-1',
+        noteName: 'C',
+        octave: 4,
+        staffStep: -2,
+        accidental: null,
+        freq: 261.63,
+        fingeringState: [true, true, true, true, true, true, true, true, false],
+        description: 'Low C — the bottom of the flute. Every main key covered, plus the little-finger C key.',
+        prompt: 'Left thumb + all three left fingers + all three right fingers, plus the footjoint C key with your right pinky. Warm, supported air.'
+      },
+      {
+        id: 'fl-2',
         noteName: 'D',
         octave: 4,
         staffStep: -1,
@@ -204,7 +215,7 @@ const CURRICULUM = {
         prompt: 'Left thumb + all three left fingers + all three right fingers. Right pinky up. Blow across the embouchure hole.'
       },
       {
-        id: 'fl-2',
+        id: 'fl-3',
         noteName: 'E',
         octave: 4,
         staffStep: 0,
@@ -215,7 +226,15 @@ const CURRICULUM = {
         prompt: 'Same as D4 but lift right ring finger and add the Eb key with right pinky.'
       },
       {
-        id: 'fl-3',
+        id: 'fl-song-1', type: 'song',
+        audioUrl: null,
+        bpm: 100,
+        noteName: 'Hot Cross Buns',
+        description: 'A classic English nursery rhyme using E, D, and C — your first three flute notes.',
+        prompt: 'Step through each note slowly. Notice how your right hand alternates between keys!',
+      },
+      {
+        id: 'fl-4',
         noteName: 'F',
         octave: 4,
         staffStep: 1,
@@ -226,15 +245,7 @@ const CURRICULUM = {
         prompt: 'Left thumb + all three left fingers + right index. Add the Eb key with your right pinky.'
       },
       {
-        id: 'fl-song-1', type: 'song',
-        audioUrl: 'audio/flute-hot-cross-buns.mp3',
-        bpm: 100,
-        noteName: 'Hot Cross Buns',
-        description: 'A classic English nursery rhyme using F, E, and D — your first three flute notes.',
-        prompt: 'Step through each note slowly. Notice how your right hand alternates between keys!',
-      },
-      {
-        id: 'fl-4',
+        id: 'fl-5',
         noteName: 'G',
         octave: 4,
         staffStep: 2,
@@ -245,7 +256,27 @@ const CURRICULUM = {
         prompt: 'Left thumb + all three left fingers. Right pinky on the Eb key. Right index, middle, ring up.'
       },
       {
-        id: 'fl-5',
+        id: 'fl-song-2', type: 'song',
+        audioUrl: null,
+        bpm: 100,
+        noteName: 'Merrily We Roll Along',
+        prerequisiteIds: ['fl-1', 'fl-2', 'fl-3', 'fl-4'],
+        description: 'A classic tune using F, E, D, and C — four notes descending through your first octave.',
+        prompt: 'This song moves stepwise through F, E, D, and C. Listen for the repeating pattern!',
+        noteIds: ['fl-4', 'fl-3', 'fl-2', 'fl-1', 'fl-4', 'fl-4', 'fl-4', 'fl-3', 'fl-3', 'fl-3', 'fl-4', 'fl-4', 'fl-4', 'fl-4', 'fl-3', 'fl-2', 'fl-1'],
+        durations: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      },
+      // ── Review 1 ────────────────────────────────────────────────────────
+      {
+        id: 'fl-review-1',
+        type: 'review',
+        reviewLessonIds: ['fl-1', 'fl-2', 'fl-3', 'fl-4', 'fl-5', 'fl-song-1', 'fl-song-2'],
+        noteName: 'Review 1',
+        description: 'Mix up your first five notes and songs — C, D, E, F, and G.',
+        prompt: '',
+      },
+      {
+        id: 'fl-6',
         noteName: 'A',
         octave: 4,
         staffStep: 3,
@@ -256,27 +287,7 @@ const CURRICULUM = {
         prompt: 'Left thumb + left index + left middle. Left ring up. Right pinky on Eb key.'
       },
       {
-        id: 'fl-song-2', type: 'song',
-        audioUrl: null,
-        bpm: 100,
-        noteName: 'Merrily We Roll Along',
-        prerequisiteIds: ['fl-1', 'fl-2', 'fl-3', 'fl-4'],
-        description: 'A classic tune using G, F, E, and D — four notes descending through your first octave.',
-        prompt: 'This song moves stepwise through G, F, E, and D. Listen for the repeating pattern!',
-        noteIds: ['fl-4', 'fl-3', 'fl-2', 'fl-1', 'fl-4', 'fl-4', 'fl-4', 'fl-3', 'fl-3', 'fl-3', 'fl-4', 'fl-4', 'fl-4', 'fl-4', 'fl-3', 'fl-2', 'fl-1'],
-        durations: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      },
-      // ── Review 1 ────────────────────────────────────────────────────────
-      {
-        id: 'fl-review-1',
-        type: 'review',
-        reviewLessonIds: ['fl-1', 'fl-2', 'fl-3', 'fl-4', 'fl-5', 'fl-song-1', 'fl-song-2'],
-        noteName: 'Review 1',
-        description: 'Mix up your first five notes and songs — D, E, F, G, and A.',
-        prompt: '',
-      },
-      {
-        id: 'fl-6',
+        id: 'fl-7',
         noteName: 'B',
         octave: 4,
         staffStep: 4,
@@ -287,7 +298,7 @@ const CURRICULUM = {
         prompt: 'Left thumb + left index only. Add the Eb key with your right pinky.'
       },
       {
-        id: 'fl-7',
+        id: 'fl-8',
         noteName: 'C',
         octave: 5,
         staffStep: 5,
@@ -298,24 +309,13 @@ const CURRICULUM = {
         prompt: 'Left index only, thumb off. Keep the Eb key down with your right pinky.'
       },
       {
-        id: 'fl-8',
-        noteName: 'D',
-        octave: 5,
-        staffStep: 6,
-        accidental: null,
-        freq: 587.33,
-        fingeringState: [true, false, true, true, true, true, true, false, false],
-        description: 'D — left thumb with left middle and ring fingers, right hand down. A special overblown fingering.',
-        prompt: 'Left thumb + left middle and ring fingers (left index open) + all three right fingers. No Eb key. Faster air!'
-      },
-      {
         id: 'fl-song-3', type: 'song',
         audioUrl: null,
         bpm: 100,
         noteName: 'Lightly Row',
         prerequisiteIds: ['fl-1', 'fl-2', 'fl-3', 'fl-4', 'fl-5', 'fl-6', 'fl-7', 'fl-8'],
-        description: 'A folk melody climbing up and down the full D octave.',
-        prompt: 'This song takes you from D4 up to D5 and back. Listen for the stepwise motion!',
+        description: 'A folk melody climbing up and down the full C octave.',
+        prompt: 'This song takes you from C4 up to C5 and back. Listen for the stepwise motion!',
         noteIds: ['fl-1', 'fl-2', 'fl-3', 'fl-4', 'fl-5', 'fl-6', 'fl-7', 'fl-8', 'fl-8', 'fl-7', 'fl-6', 'fl-5', 'fl-4', 'fl-3', 'fl-2', 'fl-1'],
         durations: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
       },
@@ -336,7 +336,7 @@ const CURRICULUM = {
         type: 'review',
         reviewLessonIds: ['fl-1', 'fl-2', 'fl-3', 'fl-4', 'fl-5', 'fl-6', 'fl-7', 'fl-8', 'fl-song-3', 'fl-song-4'],
         noteName: 'Review 2',
-        description: 'Review all flute notes and songs together — the full D4 to D5 octave.',
+        description: 'Review all flute notes and songs together — the full C4 to C5 octave.',
         prompt: '',
       },
     ]
@@ -673,17 +673,28 @@ const CURRICULUM = {
     lessons: [
       {
         id: 'ob-1',
+        noteName: 'C',
+        octave: 4,
+        staffStep: -2,
+        accidental: null,
+        freq: 261.63,
+        fingeringState: [false, true, true, true, true, true, true, true, false],
+        description: 'Low C — the bottom of the oboe. All six main fingers down plus the low C key.',
+        prompt: 'No octave key. All three left fingers + all three right fingers, plus the low C key with your right pinky. Focused, steady air through the reed.'
+      },
+      {
+        id: 'ob-2',
         noteName: 'D',
         octave: 4,
         staffStep: -1,
         accidental: null,
         freq: 293.66,
         fingeringState: [false, true, true, true, true, true, true, false, false],
-        description: 'D — first oboe note. All main keys covered, no octave key needed.',
+        description: 'D — all main keys covered, no octave key needed.',
         prompt: 'No octave key. All three left-hand and all three right-hand fingers down. Firm embouchure corners, focused air through the reed.'
       },
       {
-        id: 'ob-2',
+        id: 'ob-3',
         noteName: 'E',
         octave: 4,
         staffStep: 0,
@@ -694,7 +705,15 @@ const CURRICULUM = {
         prompt: 'No octave key. Same as D4 but lift right ring finger.'
       },
       {
-        id: 'ob-3',
+        id: 'ob-song-1', type: 'song',
+        audioUrl: null,
+        bpm: 100,
+        noteName: 'Hot Cross Buns',
+        description: 'A classic English nursery rhyme using E, D, and C — your first three oboe notes.',
+        prompt: 'Step through each note. Feel the right fingers lifting one at a time!',
+      },
+      {
+        id: 'ob-4',
         noteName: 'F',
         octave: 4,
         staffStep: 1,
@@ -705,15 +724,7 @@ const CURRICULUM = {
         prompt: 'No octave key. All three left fingers + right index + right middle. Press the F resonance key with your right hand.'
       },
       {
-        id: 'ob-song-1', type: 'song',
-        audioUrl: null,
-        bpm: 100,
-        noteName: 'Hot Cross Buns',
-        description: 'A classic English nursery rhyme using F, E, and D — your first three oboe notes.',
-        prompt: 'Step through each note. Feel the right fingers lifting one at a time!',
-      },
-      {
-        id: 'ob-4',
+        id: 'ob-5',
         noteName: 'G',
         octave: 4,
         staffStep: 2,
@@ -724,7 +735,27 @@ const CURRICULUM = {
         prompt: 'No octave key. All three left fingers down. Right hand open.'
       },
       {
-        id: 'ob-5',
+        id: 'ob-song-2', type: 'song',
+        audioUrl: null,
+        bpm: 100,
+        noteName: 'Merrily We Roll Along',
+        prerequisiteIds: ['ob-1', 'ob-2', 'ob-3', 'ob-4'],
+        description: 'A classic tune using F, E, D, and C — four notes descending through your first notes.',
+        prompt: 'This song moves stepwise through F, E, D, and C. Keep the air steady!',
+        noteIds: ['ob-4', 'ob-3', 'ob-2', 'ob-1', 'ob-4', 'ob-4', 'ob-4', 'ob-3', 'ob-3', 'ob-3', 'ob-4', 'ob-4', 'ob-4', 'ob-4', 'ob-3', 'ob-2', 'ob-1'],
+        durations: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      },
+      // ── Review 1 ────────────────────────────────────────────────────────
+      {
+        id: 'ob-review-1',
+        type: 'review',
+        reviewLessonIds: ['ob-1', 'ob-2', 'ob-3', 'ob-4', 'ob-5', 'ob-song-1', 'ob-song-2'],
+        noteName: 'Review 1',
+        description: 'Mix up your first five notes and songs — C, D, E, F, and G.',
+        prompt: '',
+      },
+      {
+        id: 'ob-6',
         noteName: 'A',
         octave: 4,
         staffStep: 3,
@@ -735,27 +766,7 @@ const CURRICULUM = {
         prompt: 'No octave key. Left index + left middle only. Left ring up. Right hand open.'
       },
       {
-        id: 'ob-song-2', type: 'song',
-        audioUrl: null,
-        bpm: 100,
-        noteName: 'Merrily We Roll Along',
-        prerequisiteIds: ['ob-1', 'ob-2', 'ob-3', 'ob-4'],
-        description: 'A classic tune using G, F, E, and D — four notes descending through your first notes.',
-        prompt: 'This song moves stepwise through G, F, E, and D. Keep the air steady!',
-        noteIds: ['ob-4', 'ob-3', 'ob-2', 'ob-1', 'ob-4', 'ob-4', 'ob-4', 'ob-3', 'ob-3', 'ob-3', 'ob-4', 'ob-4', 'ob-4', 'ob-4', 'ob-3', 'ob-2', 'ob-1'],
-        durations: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      },
-      // ── Review 1 ────────────────────────────────────────────────────────
-      {
-        id: 'ob-review-1',
-        type: 'review',
-        reviewLessonIds: ['ob-1', 'ob-2', 'ob-3', 'ob-4', 'ob-5', 'ob-song-1', 'ob-song-2'],
-        noteName: 'Review 1',
-        description: 'Mix up your first five notes and songs — D, E, F, G, and A.',
-        prompt: '',
-      },
-      {
-        id: 'ob-6',
+        id: 'ob-7',
         noteName: 'B',
         octave: 4,
         staffStep: 4,
@@ -766,7 +777,7 @@ const CURRICULUM = {
         prompt: 'No octave key. Left index only. Thumb and all other fingers open.'
       },
       {
-        id: 'ob-7',
+        id: 'ob-8',
         noteName: 'C',
         octave: 5,
         staffStep: 5,
@@ -777,24 +788,13 @@ const CURRICULUM = {
         prompt: 'No octave key. Left index + right index. Thumb and other fingers open.'
       },
       {
-        id: 'ob-8',
-        noteName: 'D',
-        octave: 5,
-        staffStep: 6,
-        accidental: null,
-        freq: 587.33,
-        fingeringState: [true, false, true, true, true, true, true, false, false],
-        description: 'D — octave key with the left index half-open (half-hole), all other fingers down.',
-        prompt: 'Octave key on. Left index half-hole (cracked open), left middle + ring down, all three right fingers down.'
-      },
-      {
         id: 'ob-song-3', type: 'song',
         audioUrl: null,
         bpm: 100,
         noteName: 'Lightly Row',
         prerequisiteIds: ['ob-1', 'ob-2', 'ob-3', 'ob-4', 'ob-5', 'ob-6', 'ob-7', 'ob-8'],
-        description: 'A folk melody climbing up and down the full D octave.',
-        prompt: 'This song takes you from D4 up to D5 and back. Keep the embouchure steady!',
+        description: 'A folk melody climbing up and down the full C octave.',
+        prompt: 'This song takes you from C4 up to C5 and back. Keep the embouchure steady!',
         noteIds: ['ob-1', 'ob-2', 'ob-3', 'ob-4', 'ob-5', 'ob-6', 'ob-7', 'ob-8', 'ob-8', 'ob-7', 'ob-6', 'ob-5', 'ob-4', 'ob-3', 'ob-2', 'ob-1'],
         durations: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
       },
@@ -815,7 +815,7 @@ const CURRICULUM = {
         type: 'review',
         reviewLessonIds: ['ob-1', 'ob-2', 'ob-3', 'ob-4', 'ob-5', 'ob-6', 'ob-7', 'ob-8', 'ob-song-3', 'ob-song-4'],
         noteName: 'Review 2',
-        description: 'Review all oboe notes and songs together — the full D4 to D5 octave.',
+        description: 'Review all oboe notes and songs together — the full C4 to C5 octave.',
         prompt: '',
       },
     ]
@@ -828,6 +828,17 @@ const CURRICULUM = {
     lessons: [
       {
         id: 'bn-1',
+        noteName: 'C',
+        octave: 3,
+        staffStep: 3,
+        accidental: null,
+        freq: 130.81,
+        fingeringState: [true, true, true, true, false, false, false, false, false],
+        description: 'Low C — the bottom of the bassoon. Whisper key with all three left fingers down.',
+        prompt: 'Left thumb on the whisper key. Left index, middle, and ring down. Right hand open. Slow, warm, steady air.'
+      },
+      {
+        id: 'bn-2',
         noteName: 'D',
         octave: 3,
         staffStep: 4,
@@ -838,7 +849,7 @@ const CURRICULUM = {
         prompt: 'Whisper key on. Left index + left middle down, left ring up. Right hand open.'
       },
       {
-        id: 'bn-2',
+        id: 'bn-3',
         noteName: 'E',
         octave: 3,
         staffStep: 5,
@@ -849,7 +860,15 @@ const CURRICULUM = {
         prompt: 'Whisper key on. Left index only. Left middle and ring up. Right hand open.'
       },
       {
-        id: 'bn-3',
+        id: 'bn-song-1', type: 'song',
+        audioUrl: null,
+        bpm: 100,
+        noteName: 'Hot Cross Buns',
+        description: 'A classic English nursery rhyme using E, D, and C — your first three bassoon notes.',
+        prompt: 'Step through each note with warm, supported air. The whisper key stays on for these notes!',
+      },
+      {
+        id: 'bn-4',
         noteName: 'F',
         octave: 3,
         staffStep: 6,
@@ -860,15 +879,7 @@ const CURRICULUM = {
         prompt: 'Whisper key on. No fingers down at all. Open throat, slow air.'
       },
       {
-        id: 'bn-song-1', type: 'song',
-        audioUrl: null,
-        bpm: 100,
-        noteName: 'Hot Cross Buns',
-        description: 'A classic English nursery rhyme using F, E, and D — your first three bassoon notes.',
-        prompt: 'Step through each note with warm, supported air. The whisper key stays on for these notes!',
-      },
-      {
-        id: 'bn-4',
+        id: 'bn-5',
         noteName: 'G',
         octave: 3,
         staffStep: 7,
@@ -879,7 +890,27 @@ const CURRICULUM = {
         prompt: 'Whisper key on. Left index half-hole (cracked open), left middle + ring down, all three right fingers down.'
       },
       {
-        id: 'bn-5',
+        id: 'bn-song-2', type: 'song',
+        audioUrl: null,
+        bpm: 100,
+        noteName: 'Merrily We Roll Along',
+        prerequisiteIds: ['bn-1', 'bn-2', 'bn-3', 'bn-4'],
+        description: 'A classic tune using F, E, D, and C — four notes descending through your first notes.',
+        prompt: 'This song moves stepwise through F, E, D, and C. Warm, supported air!',
+        noteIds: ['bn-4', 'bn-3', 'bn-2', 'bn-1', 'bn-4', 'bn-4', 'bn-4', 'bn-3', 'bn-3', 'bn-3', 'bn-4', 'bn-4', 'bn-4', 'bn-4', 'bn-3', 'bn-2', 'bn-1'],
+        durations: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      },
+      // ── Review 1 ────────────────────────────────────────────────────────
+      {
+        id: 'bn-review-1',
+        type: 'review',
+        reviewLessonIds: ['bn-1', 'bn-2', 'bn-3', 'bn-4', 'bn-5', 'bn-song-1', 'bn-song-2'],
+        noteName: 'Review 1',
+        description: 'Mix up your first five notes and songs — C, D, E, F, and G.',
+        prompt: '',
+      },
+      {
+        id: 'bn-6',
         noteName: 'A',
         octave: 3,
         staffStep: 8,
@@ -890,27 +921,7 @@ const CURRICULUM = {
         prompt: 'Whisper key off. Left hand down + right index + right middle.'
       },
       {
-        id: 'bn-song-2', type: 'song',
-        audioUrl: null,
-        bpm: 100,
-        noteName: 'Merrily We Roll Along',
-        prerequisiteIds: ['bn-1', 'bn-2', 'bn-3', 'bn-4'],
-        description: 'A classic tune using G, F, E, and D — four notes descending through your first notes.',
-        prompt: 'This song moves stepwise through G, F, E, and D. Warm, supported air!',
-        noteIds: ['bn-4', 'bn-3', 'bn-2', 'bn-1', 'bn-4', 'bn-4', 'bn-4', 'bn-3', 'bn-3', 'bn-3', 'bn-4', 'bn-4', 'bn-4', 'bn-4', 'bn-3', 'bn-2', 'bn-1'],
-        durations: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      },
-      // ── Review 1 ────────────────────────────────────────────────────────
-      {
-        id: 'bn-review-1',
-        type: 'review',
-        reviewLessonIds: ['bn-1', 'bn-2', 'bn-3', 'bn-4', 'bn-5', 'bn-song-1', 'bn-song-2'],
-        noteName: 'Review 1',
-        description: 'Mix up your first five notes and songs — D, E, F, G, and A.',
-        prompt: '',
-      },
-      {
-        id: 'bn-6',
+        id: 'bn-7',
         noteName: 'B',
         octave: 3,
         staffStep: 9,
@@ -921,7 +932,7 @@ const CURRICULUM = {
         prompt: 'Whisper key off. All three left fingers + right index.'
       },
       {
-        id: 'bn-7',
+        id: 'bn-8',
         noteName: 'C',
         octave: 4,
         staffStep: 10,
@@ -932,24 +943,13 @@ const CURRICULUM = {
         prompt: 'Whisper key off. All three left fingers only. Right hand open.'
       },
       {
-        id: 'bn-8',
-        noteName: 'D',
-        octave: 4,
-        staffStep: 11,
-        accidental: null,
-        freq: 293.66,
-        fingeringState: [false, true, true, false, false, false, false, false, false],
-        description: 'D — whisper key off, left index and middle fingers.',
-        prompt: 'Whisper key off. Left index + left middle only. Right hand open. Faster air.'
-      },
-      {
         id: 'bn-song-3', type: 'song',
         audioUrl: null,
         bpm: 100,
         noteName: 'Lightly Row',
         prerequisiteIds: ['bn-1', 'bn-2', 'bn-3', 'bn-4', 'bn-5', 'bn-6', 'bn-7', 'bn-8'],
-        description: 'A folk melody travelling up and down the full D octave.',
-        prompt: 'This song climbs from D3 up to D4 and back. Let the reed sing!',
+        description: 'A folk melody travelling up and down the full C octave.',
+        prompt: 'This song climbs from C3 up to C4 and back. Let the reed sing!',
         noteIds: ['bn-1', 'bn-2', 'bn-3', 'bn-4', 'bn-5', 'bn-6', 'bn-7', 'bn-8', 'bn-8', 'bn-7', 'bn-6', 'bn-5', 'bn-4', 'bn-3', 'bn-2', 'bn-1'],
         durations: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
       },
@@ -970,7 +970,7 @@ const CURRICULUM = {
         type: 'review',
         reviewLessonIds: ['bn-1', 'bn-2', 'bn-3', 'bn-4', 'bn-5', 'bn-6', 'bn-7', 'bn-8', 'bn-song-3', 'bn-song-4'],
         noteName: 'Review 2',
-        description: 'Review all bassoon notes and songs together — the full D3 to D4 octave.',
+        description: 'Review all bassoon notes and songs together — the full C3 to C4 octave.',
         prompt: '',
       },
     ]

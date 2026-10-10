@@ -55,14 +55,14 @@ function freqFor(name, octave, accidental, transpose) {
 const T = true, F = false;
 const REF = {
   flute: {
-    'fl-1': [T, T, T, T, T, T, T, F, F], // D4  T 123|123
-    'fl-2': [T, T, T, T, T, T, F, T, F], // E4  T 123|12- Eb
-    'fl-3': [T, T, T, T, T, F, F, T, F], // F4  T 123|1-- Eb
-    'fl-4': [T, T, T, T, F, F, F, T, F], // G4  T 123|--- Eb
-    'fl-5': [T, T, T, F, F, F, F, T, F], // A4  T 12-|--- Eb
-    'fl-6': [T, T, F, F, F, F, F, T, F], // B4  T 1--|--- Eb
-    'fl-7': [F, T, F, F, F, F, F, T, F], // C5  1--|--- (thumb off) Eb
-    'fl-8': [T, F, T, T, T, T, T, F, F], // D5  T 023|123
+    'fl-1': [T, T, T, T, T, T, T, T, F], // C4  T 123|123 C
+    'fl-2': [T, T, T, T, T, T, T, F, F], // D4  T 123|123
+    'fl-3': [T, T, T, T, T, T, F, T, F], // E4  T 123|12- Eb
+    'fl-4': [T, T, T, T, T, F, F, T, F], // F4  T 123|1-- Eb
+    'fl-5': [T, T, T, T, F, F, F, T, F], // G4  T 123|--- Eb
+    'fl-6': [T, T, T, F, F, F, F, T, F], // A4  T 12-|--- Eb
+    'fl-7': [T, T, F, F, F, F, F, T, F], // B4  T 1--|--- Eb
+    'fl-8': [F, T, F, F, F, F, F, T, F], // C5  1--|--- (thumb off) Eb
   },
   clarinet: {
     'cl-1': [T, T, T, T, F, F, F, F, F], // C4  T 123|---
@@ -85,24 +85,24 @@ const REF = {
     'as-8': [F, F, T, F, F, F, F, F, F], // C5  -2-|---
   },
   oboe: {
-    'ob-1': [F, T, T, T, T, T, T, F, F], // D4  123|123
-    'ob-2': [F, T, T, T, T, T, F, F, F], // E4  123|12-
-    'ob-3': [F, T, T, T, T, T, F, F, F, T], // F4  123|12 + F resonance key
-    'ob-4': [F, T, T, T, F, F, F, F, F], // G4  123|---
-    'ob-5': [F, T, T, F, F, F, F, F, F], // A4  12-|---
-    'ob-6': [F, T, F, F, F, F, F, F, F], // B4  1--|--- (no octave key)
-    'ob-7': [F, T, F, F, T, F, F, F, F], // C5  1--|1-- (no octave key)
-    'ob-8': [T, F, T, T, T, T, T, F, F], // D5  (I) 023|123
+    'ob-1': [F, T, T, T, T, T, T, T, F], // C4  123|123 C
+    'ob-2': [F, T, T, T, T, T, T, F, F], // D4  123|123
+    'ob-3': [F, T, T, T, T, T, F, F, F], // E4  123|12-
+    'ob-4': [F, T, T, T, T, T, F, F, F, T], // F4  123|12 + F resonance key
+    'ob-5': [F, T, T, T, F, F, F, F, F], // G4  123|---
+    'ob-6': [F, T, T, F, F, F, F, F, F], // A4  12-|---
+    'ob-7': [F, T, F, F, F, F, F, F, F], // B4  1--|--- (no octave key)
+    'ob-8': [F, T, F, F, T, F, F, F, F], // C5  1--|1-- (no octave key)
   },
   bassoon: {
-    'bn-1': [T, T, T, F, F, F, F, F, F], // D3  W 12-|---
-    'bn-2': [T, T, F, F, F, F, F, F, F], // E3  W 1--|---
-    'bn-3': [T, F, F, F, F, F, F, F, F], // F3  W ---|---
-    'bn-4': [T, F, T, T, T, T, T, F, F], // G3  W (~)23|123 (half-hole shown open)
-    'bn-5': [F, T, T, T, T, T, F, F, F], // A3  123|12-
-    'bn-6': [F, T, T, T, T, F, F, F, F], // B3  123|1--
-    'bn-7': [F, T, T, T, F, F, F, F, F], // C4  123|---
-    'bn-8': [F, T, T, F, F, F, F, F, F], // D4  12-|---
+    'bn-1': [T, T, T, T, F, F, F, F, F], // C3  W 123|---
+    'bn-2': [T, T, T, F, F, F, F, F, F], // D3  W 12-|---
+    'bn-3': [T, T, F, F, F, F, F, F, F], // E3  W 1--|---
+    'bn-4': [T, F, F, F, F, F, F, F, F], // F3  W ---|---
+    'bn-5': [T, F, T, T, T, T, T, F, F], // G3  W (~)23|123 (half-hole shown open)
+    'bn-6': [F, T, T, T, T, T, F, F, F], // A3  123|12-
+    'bn-7': [F, T, T, T, T, F, F, F, F], // B3  123|1--
+    'bn-8': [F, T, T, T, F, F, F, F, F], // C4  123|---
   },
   trumpet: {
     'tr-1': [F, F, F], 'tr-2': [T, F, T], 'tr-3': [T, T, F], 'tr-4': [T, F, F],
@@ -225,6 +225,39 @@ for (const inst of Object.values(CURRICULUM)) {
   }
 }
 
+// Canonical table locks (guard against accidental edits to the single source).
+check(CANONICAL_SONGS['Hot Cross Buns'].degrees.length === 17,
+  'Hot Cross Buns must be 17 notes');
+check(CANONICAL_SONGS['Hot Cross Buns'].degrees.join(',').includes('1,1,1,1,2,2,2,2'),
+  'Hot Cross Buns "one a penny / two a penny" must be four repeated notes each');
+
+// Independent musical check: a shared song must sound like the canonical
+// major-scale shape in CONCERT pitch, not merely in written degrees. This uses
+// each lesson's own pitch plus the instrument's transposition, then compares
+// against the major scale (an external reference). A mode error such as
+// D-Dorian therefore cannot hide behind self-consistent written data.
+const MAJOR = { 1: 0, 2: 2, 3: 4, 4: 5, 5: 7, 6: 9, 7: 11, 8: 12 };
+for (const inst of Object.values(CURRICULUM)) {
+  const byId = {};
+  for (const l of inst.lessons || []) byId[l.id] = l;
+  for (const lesson of inst.lessons || []) {
+    if (lesson.type !== 'song') continue;
+    const song = CANONICAL_SONGS[lesson.noteName];
+    if (!song) continue;
+    const prefix = lesson.id.replace(/-song-\d+$/, '');
+    const tonic = byId[`${prefix}-1`];
+    if (!tonic) { check(false, `${inst.id}/${lesson.id} has no ${prefix}-1 tonic`); continue; }
+    const tonicConcert = midiFor(tonic.noteName, tonic.octave, tonic.accidental) + (inst.transposeSemitones || 0);
+    lesson.noteIds.forEach((nid, i) => {
+      const n = byId[nid];
+      if (!n) return; // unknown note id already reported above
+      const concert = midiFor(n.noteName, n.octave, n.accidental) + (inst.transposeSemitones || 0);
+      const want = tonicConcert + MAJOR[song.degrees[i]];
+      check(concert === want,
+        `${inst.id}/${lesson.id} note ${i} (${nid}) sounds concert MIDI ${concert}, expected ${want} for degree ${song.degrees[i]}`);
+    });
+  }
+}
 if (failures.length) console.log(failures.join('\n'));
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
