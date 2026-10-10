@@ -130,11 +130,8 @@ const CURRICULUM = {
         audioUrl: null,
         bpm: 100,
         noteName: 'Hot Cross Buns',
-        prerequisiteIds: ['tr-3', 'tr-4', 'tr-5'],
-        description: 'A classic English nursery rhyme using G, F, and E — your first three valve combinations.',
+        description: 'A classic English nursery rhyme using E, D, and C — your first three notes.',
         prompt: 'Step through each note. The pattern repeats. Feel how the valves move in sequence!',
-        noteIds: ['tr-5', 'tr-4', 'tr-3', 'tr-5', 'tr-4', 'tr-3', 'tr-3', 'tr-3', 'tr-3', 'tr-3', 'tr-4', 'tr-4', 'tr-4', 'tr-4', 'tr-5', 'tr-4', 'tr-3'],
-        durations: [1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2],
       },
       {
         id: 'tr-song-2', type: 'song',
@@ -233,11 +230,8 @@ const CURRICULUM = {
         audioUrl: 'audio/flute-hot-cross-buns.mp3',
         bpm: 100,
         noteName: 'Hot Cross Buns',
-        prerequisiteIds: ['fl-1', 'fl-2', 'fl-3'],
         description: 'A classic English nursery rhyme using F, E, and D — your first three flute notes.',
         prompt: 'Step through each note slowly. Notice how your right hand alternates between keys!',
-        noteIds: ['fl-3', 'fl-2', 'fl-1', 'fl-3', 'fl-2', 'fl-1', 'fl-1', 'fl-1', 'fl-1', 'fl-1', 'fl-2', 'fl-2', 'fl-2', 'fl-2', 'fl-3', 'fl-2', 'fl-1'],
-        durations: [1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2],
       },
       {
         id: 'fl-4',
@@ -418,11 +412,8 @@ const CURRICULUM = {
         audioUrl: null,
         bpm: 100,
         noteName: 'Hot Cross Buns',
-        prerequisiteIds: ['cl-1', 'cl-2', 'cl-3'],
         description: 'A classic English nursery rhyme using C, D, and E — your first three chalumeau notes.',
         prompt: 'Step through each note carefully. Feel how the rings seal with your fingertips!',
-        noteIds: ['cl-3', 'cl-2', 'cl-1', 'cl-3', 'cl-2', 'cl-1', 'cl-1', 'cl-1', 'cl-1', 'cl-1', 'cl-2', 'cl-2', 'cl-2', 'cl-2', 'cl-3', 'cl-2', 'cl-1'],
-        durations: [1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2],
       },
       {
         id: 'cl-song-2', type: 'song',
@@ -558,11 +549,8 @@ const CURRICULUM = {
         audioUrl: null,
         bpm: 100,
         noteName: 'Hot Cross Buns',
-        prerequisiteIds: ['as-1', 'as-2', 'as-3'],
         description: 'A classic English nursery rhyme using E, D, and C — your first three alto sax notes.',
         prompt: 'Step through each note from E down to C. Feel the right hand lifting!',
-        noteIds: ['as-3', 'as-2', 'as-1', 'as-3', 'as-2', 'as-1', 'as-1', 'as-1', 'as-1', 'as-1', 'as-2', 'as-2', 'as-2', 'as-2', 'as-3', 'as-2', 'as-1'],
-        durations: [1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2],
       },
       {
         id: 'as-4',
@@ -721,11 +709,8 @@ const CURRICULUM = {
         audioUrl: null,
         bpm: 100,
         noteName: 'Hot Cross Buns',
-        prerequisiteIds: ['ob-1', 'ob-2', 'ob-3'],
         description: 'A classic English nursery rhyme using F, E, and D — your first three oboe notes.',
         prompt: 'Step through each note. Feel the right fingers lifting one at a time!',
-        noteIds: ['ob-3', 'ob-2', 'ob-1', 'ob-3', 'ob-2', 'ob-1', 'ob-1', 'ob-1', 'ob-1', 'ob-1', 'ob-2', 'ob-2', 'ob-2', 'ob-2', 'ob-3', 'ob-2', 'ob-1'],
-        durations: [1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2],
       },
       {
         id: 'ob-4',
@@ -879,11 +864,8 @@ const CURRICULUM = {
         audioUrl: null,
         bpm: 100,
         noteName: 'Hot Cross Buns',
-        prerequisiteIds: ['bn-1', 'bn-2', 'bn-3'],
         description: 'A classic English nursery rhyme using F, E, and D — your first three bassoon notes.',
         prompt: 'Step through each note with warm, supported air. The whisper key stays on for these notes!',
-        noteIds: ['bn-3', 'bn-2', 'bn-1', 'bn-3', 'bn-2', 'bn-1', 'bn-1', 'bn-1', 'bn-1', 'bn-1', 'bn-2', 'bn-2', 'bn-2', 'bn-2', 'bn-3', 'bn-2', 'bn-1'],
-        durations: [1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2],
       },
       {
         id: 'bn-4',
@@ -1057,11 +1039,8 @@ const CURRICULUM = {
         audioUrl: null,
         bpm: 100,
         noteName: 'Hot Cross Buns',
-        prerequisiteIds: ['tb-3', 'tb-4', 'tb-5'],
-        description: 'A classic English nursery rhyme using F, Eb, and D — your first three slide positions.',
-        prompt: 'Step through each note carefully. Feel the slide moving between 1st, 3rd, and 4th positions!',
-        noteIds: ['tb-5', 'tb-4', 'tb-3', 'tb-5', 'tb-4', 'tb-3', 'tb-3', 'tb-3', 'tb-3', 'tb-3', 'tb-4', 'tb-4', 'tb-4', 'tb-4', 'tb-5', 'tb-4', 'tb-3'],
-        durations: [1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2],
+        description: 'A classic English nursery rhyme using D, C, and Bb — sliding between 4th, 6th, and 1st positions.',
+        prompt: 'Step through each note carefully. Feel the slide moving between 4th, 6th, and 1st positions!',
       },
       {
         id: 'tb-song-2', type: 'song',
@@ -1254,11 +1233,8 @@ const CURRICULUM = {
         audioUrl: null,
         bpm: 100,
         noteName: 'Hot Cross Buns',
-        prerequisiteIds: ['fh-3', 'fh-4', 'fh-5'],
-        description: 'A classic melody using E, F, and G — your first three notes with valves.',
+        description: 'A classic melody using E, D, and C — your first three notes with valves.',
         prompt: 'Step through each note. The pattern repeats. Feel how the valves move!',
-        noteIds: ['fh-5', 'fh-4', 'fh-3', 'fh-5', 'fh-4', 'fh-3', 'fh-3', 'fh-3', 'fh-3', 'fh-3', 'fh-4', 'fh-4', 'fh-4', 'fh-4', 'fh-5', 'fh-4', 'fh-3'],
-        durations: [1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2],
       },
       {
         id: 'fh-song-2', type: 'song',
@@ -1410,11 +1386,8 @@ const CURRICULUM = {
         audioUrl: null,
         bpm: 100,
         noteName: 'Hot Cross Buns',
-        prerequisiteIds: ['eu-3', 'eu-4', 'eu-5'],
-        description: 'A classic English nursery rhyme using F3, Eb3, and D3 — your first three valve combinations.',
+        description: 'A classic English nursery rhyme using D, C, and Bb — your first three notes.',
         prompt: 'Step through each note. Feel the valves changing between combinations!',
-        noteIds: ['eu-5', 'eu-4', 'eu-3', 'eu-5', 'eu-4', 'eu-3', 'eu-3', 'eu-3', 'eu-3', 'eu-3', 'eu-4', 'eu-4', 'eu-4', 'eu-4', 'eu-5', 'eu-4', 'eu-3'],
-        durations: [1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2],
       },
       {
         id: 'eu-song-2', type: 'song',
@@ -1566,11 +1539,8 @@ const CURRICULUM = {
         audioUrl: null,
         bpm: 100,
         noteName: 'Hot Cross Buns',
-        prerequisiteIds: ['tu-3', 'tu-4', 'tu-5'],
-        description: 'A classic English nursery rhyme using F2, Eb2, and D2 — your first three notes below the staff.',
+        description: 'A classic English nursery rhyme using D, C, and Bb — your first three notes below the staff.',
         prompt: 'Step through each note. Feel the valves changing between combinations below the staff!',
-        noteIds: ['tu-5', 'tu-4', 'tu-3', 'tu-5', 'tu-4', 'tu-3', 'tu-3', 'tu-3', 'tu-3', 'tu-3', 'tu-4', 'tu-4', 'tu-4', 'tu-4', 'tu-5', 'tu-4', 'tu-3'],
-        durations: [1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2],
       },
       {
         id: 'tu-song-2', type: 'song',
@@ -1627,6 +1597,32 @@ const CURRICULUM = {
   },
 
 };
+
+// ── Shared songs ────────────────────────────────────────────────────────────
+// The shared tunes are defined once here, as scale degrees relative to each
+// instrument's own notes (degree 1 = that instrument's first note lesson).
+// The loop below expands them into every instrument's noteIds/durations, so
+// the melodies cannot drift apart the way hand-entered note lists did.
+const CANONICAL_SONGS = {
+  'Hot Cross Buns': {
+    degrees:   [3, 2, 1,  3, 2, 1,  1, 1, 1, 1,  2, 2, 2, 2,  3, 2, 1],
+    durations: [1, 1, 2,  1, 1, 2,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 2],
+  },
+};
+
+for (const inst of Object.values(CURRICULUM)) {
+  for (const lesson of inst.lessons) {
+    if (lesson.type !== 'song') continue;
+    const song = CANONICAL_SONGS[lesson.noteName];
+    if (!song) continue;
+    const prefix = lesson.id.replace(/-song-\d+$/, '');
+    lesson.noteIds = song.degrees.map(d => `${prefix}-${d}`);
+    lesson.durations = song.durations.slice();
+    lesson.prerequisiteIds = [...new Set(song.degrees)]
+      .sort((a, b) => a - b)
+      .map(d => `${prefix}-${d}`);
+  }
+}
 
 // Ordered list for the home screen
 const INSTRUMENT_ORDER = [

@@ -19,7 +19,7 @@ const fs = require('fs');
 const path = require('path');
 
 const src = fs.readFileSync(path.join(__dirname, 'js', 'curriculum.js'), 'utf8');
-const CURRICULUM = new Function(src + '\nreturn CURRICULUM;')();
+const { CURRICULUM, CANONICAL_SONGS } = new Function(src + '\nreturn { CURRICULUM, CANONICAL_SONGS };')();
 
 let pass = 0;
 let fail = 0;
@@ -177,6 +177,51 @@ for (const inst of Object.values(CURRICULUM)) {
     // accompaniment is derived from the melody, so no stored chords
     check(lesson.chordIds === undefined,
       `${inst.id}/${lesson.id} should not define chordIds (derived at runtime)`);
+  }
+}
+
+// No lesson id may repeat, within or across instruments.
+const seenIds = new Set();
+for (const inst of Object.values(CURRICULUM)) {
+  for (const lesson of inst.lessons || []) {
+    check(!seenIds.has(lesson.id), `duplicate lesson id ${lesson.id}`);
+    seenIds.add(lesson.id);
+  }
+}
+
+// Every cross-reference must point at a real lesson, and a song must own the
+// notes it plays (each played note must be listed among its prerequisites).
+for (const inst of Object.values(CURRICULUM)) {
+  const ids = new Set((inst.lessons || []).map(l => l.id));
+  for (const lesson of inst.lessons || []) {
+    for (const rid of lesson.reviewLessonIds || []) {
+      check(ids.has(rid), `${inst.id}/${lesson.id} unknown reviewLessonId ${rid}`);
+    }
+    for (const pid of lesson.prerequisiteIds || []) {
+      check(ids.has(pid), `${inst.id}/${lesson.id} unknown prerequisiteId ${pid}`);
+    }
+    if (lesson.type === 'song' && Array.isArray(lesson.prerequisiteIds)) {
+      const listed = new Set(lesson.prerequisiteIds);
+      for (const nid of lesson.noteIds || []) {
+        check(listed.has(nid), `${inst.id}/${lesson.id} plays ${nid} but does not list it as a prerequisite`);
+      }
+    }
+  }
+}
+
+// Shared songs must match the single canonical scale-degree definition, so
+// hand-entered variants cannot creep back in.
+for (const inst of Object.values(CURRICULUM)) {
+  for (const lesson of inst.lessons || []) {
+    if (lesson.type !== 'song') continue;
+    const song = CANONICAL_SONGS[lesson.noteName];
+    if (!song) continue;
+    const prefix = lesson.id.replace(/-song-\d+$/, '');
+    const expected = song.degrees.map(d => `${prefix}-${d}`);
+    check(Array.isArray(lesson.noteIds) && lesson.noteIds.join(',') === expected.join(','),
+      `${inst.id}/${lesson.id} noteIds do not match canonical "${lesson.noteName}"`);
+    check(JSON.stringify(lesson.durations) === JSON.stringify(song.durations),
+      `${inst.id}/${lesson.id} durations do not match canonical "${lesson.noteName}"`);
   }
 }
 
