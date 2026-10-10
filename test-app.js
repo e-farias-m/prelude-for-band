@@ -75,7 +75,7 @@ return { handleAction, renderCompletePhase, CURRICULUM, APP, IMPORTED_SONGS_KEY,
   bpmToTickMs, metronomeTick, metronomeClickOpts, METRONOME_SUBDIVISIONS,
   TEMPO_PRESETS, METRONOME_SOUNDS, METRONOME_DEFAULT_VOLUME,
   detectPitch, freqToNoteInfo, centsLabel, getNoteLessons, TIME_SIGNATURES,
-  renderMetronomeScreen, renderTunerScreen,
+  renderMetronomePanel, renderTunerPanel, renderToolWidget,
   getInstrumentReport, buildPracticeReport, formatReportText, renderReportScreen,
   getWeekStart, getWeekKey, getWeekDays, buildWeeklyDigest, formatDigestText,
   renderDigestCard, renderDigestScreen, DEFAULT_WEEKLY_GOAL, WEEKLY_GOAL_OPTIONS,
@@ -612,21 +612,24 @@ const fluteNotes = flute.lessons.filter(l => !l.type);
   check(api.centsLabel(-18) === '-18 cents flat', 'negative cents label as flat');
 }
 
-// ── 36. Metronome and tuner screens render their controls ─────────────────
+// ── 36. Metronome and tuner panels render their controls ──────────────────
 {
   api.APP.metronome = null;
-  const metro = api.renderMetronomeScreen();
-  check(metro.includes('BPM') && metro.includes('80'), 'metronome screen shows the tempo');
-  check(metro.includes('data-action="metronome-toggle"') && metro.includes('data-action="metronome-tap"'), 'metronome has start and tap controls');
-  check(metro.includes('data-action="metronome-preset"') && metro.includes('data-bpm="120"'), 'metronome offers tempo presets');
-  check(metro.includes('data-action="metronome-subdivision"'), 'metronome offers subdivision choices');
-  check(metro.includes('data-action="metronome-countin"'), 'metronome offers a count-in toggle');
-  check(metro.includes('data-action="metronome-sound"') && metro.includes('id="metronome-volume"'), 'metronome offers sound and volume controls');
+  const metro = api.renderMetronomePanel();
+  check(metro.includes('BPM') && metro.includes('80'), 'metronome panel shows the tempo');
+  check(metro.includes('data-action="metronome-toggle"') && metro.includes('data-action="metronome-tap"'), 'metronome panel has play and tap controls');
+  check(metro.includes('id="tool-preset"') && metro.includes('id="tool-timesig"'), 'metronome panel has preset and time-signature selects');
+  check(metro.includes('id="tool-subdivision"') && metro.includes('id="tool-sound"'), 'metronome panel has subdivision and sound selects');
+  check(metro.includes('data-action="metronome-countin"') && metro.includes('id="metronome-volume"'), 'metronome panel has count-in and volume controls');
   api.APP.instrumentId = 'flute';
   api.APP.tuner = null;
-  const tuner = api.renderTunerScreen();
-  check(tuner.includes('Tuner') && tuner.includes('data-action="tuner-toggle"'), 'tuner screen shows a listening control');
+  const tuner = api.renderTunerPanel();
+  check(tuner.includes('data-action="tuner-toggle"'), 'tuner panel shows a listening control');
+
+  const widget = api.renderToolWidget();
+  check(typeof widget === 'undefined', 'renderToolWidget tolerates a missing host');
 }
+
 
 // ── 37–40. Teacher / parent practice report ───────────────────────────────
 {
@@ -988,26 +991,24 @@ const fluteNotes = flute.lessons.filter(l => !l.type);
     if (savedTut === undefined) delete store['preludeBandTutorials']; else store['preludeBandTutorials'] = savedTut;
   }
 
-// ── 55. Practice tools stay reachable from the map, whatever the lock ─────
+// ── 55. Floating metronome/tuner widget works from every screen ───────────
 {
   const savedInst = store['preludeBandInstrument'];
   api.APP.instrumentId = 'flute';
   store['preludeBandInstrument'] = 'flute';
 
-  const map = api.renderMapScreen();
-  check(map.includes('data-action="open-metronome"'), 'the map offers the metronome even before drills unlock');
-  check(map.includes('data-action="open-tuner"'), 'the map offers the tuner too');
-
   api.APP.screen = 'map';
-  api.handleAction('open-metronome', { dataset: {} });
-  check(api.APP.screen === 'metronome', 'the metronome opens from the map');
-  api.handleAction('close-metronome', { dataset: {} });
-  check(api.APP.screen === 'map', 'closing the metronome returns to where it was opened');
+  check(api.APP.toolsOpen === false, 'the widget starts collapsed');
 
-  api.handleAction('open-tuner', { dataset: {} });
-  check(api.APP.screen === 'tuner', 'the tuner opens from the map');
-  api.handleAction('close-tuner', { dataset: {} });
-  check(api.APP.screen === 'map', 'closing the tuner returns to the map');
+  api.handleAction('toggle-tools', { dataset: {} });
+  check(api.APP.toolsOpen === true, 'tapping the launcher opens the widget');
+
+  api.handleAction('tools-tab', { dataset: { tab: 'tuner' } });
+  check(api.APP.toolTab === 'tuner', 'the tuner tab can be selected');
+  check(api.APP.toolsOpen === true, 'selecting a tab keeps the widget open');
+
+  api.handleAction('close-tools', { dataset: {} });
+  check(api.APP.toolsOpen === false, 'closing collapses the widget');
 
   if (savedInst === undefined) delete store['preludeBandInstrument']; else store['preludeBandInstrument'] = savedInst;
 }

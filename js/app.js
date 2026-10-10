@@ -49,6 +49,9 @@ const APP = {
   fingeringHelp: null,
   // Slide index while the per-instrument "how to use the app" tour is open
   tutorialIndex: 0,
+  // Floating metronome/tuner widget: whether it's expanded, and which tab shows
+  toolsOpen: false,
+  toolTab: 'metronome',
 };
 
 const STORAGE_KEY = 'preludeBandProgress';
@@ -1586,8 +1589,6 @@ function renderMapScreen() {
           </div>
           <button class="btn btn-primary" data-action="open-practice" ${practiceReady ? '' : 'disabled'}>Practice</button>
         </div>
-        <div class="map-unit-label">Tools</div>
-        ${renderPracticeTools()}
         <div class="map-unit-label">Unit 1 · First Notes</div>
         <div class="map-path">${nodes}${importedNodes}</div>
         <div class="import-section" style="margin-top:20px;text-align:center">
@@ -1676,15 +1677,15 @@ function renderPracticeScreen() {
 function renderPracticeTools() {
   return `
     <div class="tools-grid">
-      <button class="tool-card" data-action="open-metronome">
+      <button class="tool-card" data-action="tools-tab" data-tab="metronome">
         <div class="tool-icon">\u{1F3B5}</div>
-        <div class="tool-name">Metronome</div>
-        <div class="tool-sub">Keep a steady beat.</div>
+        <div class="tool-name">Metronome / Tuner</div>
+        <div class="tool-sub">Open the floating metronome and tuner.</div>
       </button>
-      <button class="tool-card" data-action="open-tuner">
+      <button class="tool-card" data-action="tools-tab" data-tab="tuner">
         <div class="tool-icon">\u{1F3A4}</div>
         <div class="tool-name">Tuner</div>
-        <div class="tool-sub">Check your pitch.</div>
+        <div class="tool-sub">Check your pitch against the floating tuner.</div>
       </button>
     </div>`;
 }
@@ -1758,75 +1759,60 @@ function renderEarScreen() {
     </div>`;
 }
 
-function renderMetronomeScreen() {
+function renderMetronomePanel() {
   if (!APP.metronome) APP.metronome = createMetronome();
   const m = APP.metronome;
   const dots = [];
   for (let i = 0; i < m.beatsPerBar; i++) {
     dots.push(`<div class="metro-dot ${i === m.beat ? 'metro-dot-active' : ''} ${i === 0 ? 'metro-dot-downbeat' : ''}"></div>`);
   }
-  const presets = TEMPO_PRESETS.map(p =>
-    `<button class="metro-chip${m.bpm === p.bpm ? ' active' : ''}" data-action="metronome-preset" data-bpm="${p.bpm}">${p.label}<span>${p.bpm}</span></button>`
+  const presetOpts = TEMPO_PRESETS.map(p =>
+    `<option value="${p.bpm}"${m.bpm === p.bpm ? ' selected' : ''}>${p.label} · ${p.bpm}</option>`
   ).join('');
-  const subs = METRONOME_SUBDIVISIONS.map(s =>
-    `<button class="metro-chip${(m.subdivision || 1) === s.value ? ' active' : ''}" data-action="metronome-subdivision" data-value="${s.value}">${s.label}</button>`
+  const timeOpts = TIME_SIGNATURES.map(t =>
+    `<option value="${t}"${m.beatsPerBar === t ? ' selected' : ''}>${t}/4</option>`
   ).join('');
-  const sounds = METRONOME_SOUNDS.map(s =>
-    `<button class="metro-chip${(m.sound || 'click') === s.value ? ' active' : ''}" data-action="metronome-sound" data-value="${s.value}">${s.label}</button>`
+  const subOpts = METRONOME_SUBDIVISIONS.map(s =>
+    `<option value="${s.value}"${(m.subdivision || 1) === s.value ? ' selected' : ''}>${s.label}</option>`
+  ).join('');
+  const soundOpts = METRONOME_SOUNDS.map(s =>
+    `<option value="${s.value}"${(m.sound || 'click') === s.value ? ' selected' : ''}>${s.label}</option>`
   ).join('');
   const vol = Math.round((typeof m.volume === 'number' ? m.volume : METRONOME_DEFAULT_VOLUME) * 100);
   return `
-    <div class="screen active metro-screen">
-      <div class="app-header">
-        <button class="header-back" data-action="close-metronome">←</button>
-        <div class="header-title">Metronome</div>
+    <div class="tool-metro">
+      <div class="metro-dots" id="metronome-dots">${dots.join('')}</div>
+      <div class="tool-bpm">
+        <button class="tool-step" data-action="metronome-bpm" data-delta="-1" aria-label="Slower">−</button>
+        <div class="tool-bpm-value"><span id="metronome-bpm">${m.bpm}</span><small>BPM</small></div>
+        <button class="tool-step" data-action="metronome-bpm" data-delta="1" aria-label="Faster">+</button>
       </div>
-      <div class="lesson-body metro-body">
-        <div class="metro-dots" id="metronome-dots">${dots.join('')}</div>
-        <div class="metro-bpm">
-          <button class="metro-step" data-action="metronome-bpm" data-delta="-1" aria-label="Slower">−</button>
-          <div class="metro-bpm-value"><span id="metronome-bpm">${m.bpm}</span><span class="metro-bpm-unit">BPM</span></div>
-          <button class="metro-step" data-action="metronome-bpm" data-delta="1" aria-label="Faster">+</button>
-        </div>
-        <div class="metro-section">
-          <div class="metro-section-label">Tempo preset</div>
-          <div class="metro-chips">${presets}</div>
-        </div>
-        <div class="metro-section">
-          <div class="metro-section-label">Subdivision</div>
-          <div class="metro-chips">${subs}</div>
-        </div>
-        <div class="metro-controls">
-          <button class="btn btn-secondary" data-action="metronome-time">${m.beatsPerBar}/4</button>
-          <button class="btn btn-primary metro-play" data-action="metronome-toggle" id="metronome-toggle">${m.running ? '\u25A0 Stop' : '\u25B6 Start'}</button>
-          <button class="btn btn-secondary" data-action="metronome-tap">Tap</button>
-        </div>
-        <div class="metro-section">
-          <div class="metro-section-head">
-            <div class="metro-section-label">Count-in</div>
-            <button class="metro-toggle${m.countIn ? ' active' : ''}" data-action="metronome-countin" role="switch" aria-checked="${m.countIn ? 'true' : 'false'}">${m.countIn ? 'On' : 'Off'}</button>
-          </div>
-        </div>
-        <div class="metro-section">
-          <div class="metro-section-label">Click sound</div>
-          <div class="metro-chips">${sounds}</div>
-        </div>
-        <div class="metro-section">
-          <div class="metro-section-label">Volume</div>
-          <input type="range" id="metronome-volume" class="metro-volume" min="0" max="100" step="5" value="${vol}" aria-label="Metronome volume" />
-        </div>
-        <div class="metro-hint">Tap in time to set the tempo. The first beat of each bar is accented.</div>
+      <div class="tool-row">
+        <select id="tool-preset" class="tool-select" aria-label="Tempo preset"><option value="">Preset…</option>${presetOpts}</select>
+        <select id="tool-timesig" class="tool-select" aria-label="Time signature">${timeOpts}</select>
+      </div>
+      <div class="tool-row">
+        <select id="tool-subdivision" class="tool-select" aria-label="Subdivision">${subOpts}</select>
+        <select id="tool-sound" class="tool-select" aria-label="Click sound">${soundOpts}</select>
+      </div>
+      <div class="tool-row tool-row-between">
+        <button class="tool-pill${m.countIn ? ' active' : ''}" data-action="metronome-countin" role="switch" aria-checked="${m.countIn ? 'true' : 'false'}">Count-in</button>
+        <input type="range" id="metronome-volume" class="tool-volume" min="0" max="100" step="5" value="${vol}" aria-label="Metronome volume" />
+      </div>
+      <div class="tool-actions">
+        <button class="btn btn-secondary" data-action="metronome-tap">Tap</button>
+        <button class="btn btn-primary tool-play" data-action="metronome-toggle" id="metronome-toggle">${m.running ? '\u25A0 Stop' : '\u25B6 Start'}</button>
       </div>
     </div>`;
 }
 
-function renderTunerScreen() {
+function renderTunerPanel() {
   const noteLessons = getNoteLessons(APP.instrumentId);
   const t = APP.tuner;
   const listening = !!(t && t.running);
   const detected = t && t.freq > 0 ? freqToNoteInfo(t.freq, noteLessons) : null;
   let noteName = '—';
-  let cents = 'Listening…';
+  let cents = listening ? 'Listening…' : 'Press Tune';
   let offset = 50;
   if (detected) {
     noteName = detected.note.noteName;
@@ -1834,22 +1820,39 @@ function renderTunerScreen() {
     offset = Math.max(0, Math.min(100, 50 + (detected.cents / 50) * 50));
   }
   return `
-    <div class="screen active tuner-screen">
-      <div class="app-header">
-        <button class="header-back" data-action="close-tuner">←</button>
-        <div class="header-title">Tuner · ${getInstrument(APP.instrumentId).shortName}</div>
+    <div class="tool-tuner">
+      <div class="tuner-note" id="tuner-note">${escapeHtml(noteName)}</div>
+      <div class="tuner-cents" id="tuner-cents">${escapeHtml(cents)}</div>
+      <div class="tuner-meter">
+        <div class="tuner-needle" id="tuner-needle" style="left:${offset}%"></div>
+        <div class="tuner-center"></div>
       </div>
-      <div class="lesson-body">
-        <div class="tuner-note" id="tuner-note">${escapeHtml(noteName)}</div>
-        <div class="tuner-cents" id="tuner-cents">${escapeHtml(cents)}</div>
-        <div class="tuner-meter">
-          <div class="tuner-needle" id="tuner-needle" style="left:${offset}%"></div>
-          <div class="tuner-center"></div>
-        </div>
-        <button class="btn btn-primary btn-wide" data-action="tuner-toggle" style="margin-top:20px">${listening ? '\u25A0 Stop listening' : '\u25B6 Start listening'}</button>
-        <div class="metro-hint">Play a long, steady tone. The needle centres when you're in tune.</div>
-      </div>
+      <button class="btn btn-primary btn-wide" data-action="tuner-toggle" style="margin-top:12px">${listening ? '\u25A0 Stop' : '\u25B6 Tune'}</button>
     </div>`;
+}
+
+// The floating "chat-style" launcher. It lives outside #app so it survives every
+// screen render, and collapses to a small button until tapped.
+function renderToolWidget() {
+  const host = document.getElementById('tool-widget');
+  if (!host) return;
+  const open = !!APP.toolsOpen;
+  const tab = APP.toolTab === 'tuner' ? 'tuner' : 'metronome';
+  const body = tab === 'tuner' ? renderTunerPanel() : renderMetronomePanel();
+  host.innerHTML = `
+    <div class="tool-panel${open ? ' open' : ''}" role="dialog" aria-label="Metronome and tuner" aria-hidden="${open ? 'false' : 'true'}">
+      <div class="tool-panel-head">
+        <div class="tool-tabs">
+          <button class="tool-tab${tab === 'metronome' ? ' active' : ''}" data-action="tools-tab" data-tab="metronome">Metronome</button>
+          <button class="tool-tab${tab === 'tuner' ? ' active' : ''}" data-action="tools-tab" data-tab="tuner">Tuner</button>
+        </div>
+        <button class="tool-close" data-action="close-tools" aria-label="Close">\u2715</button>
+      </div>
+      <div class="tool-panel-body">${body}</div>
+    </div>
+    <button class="tool-fab${open ? ' active' : ''}" data-action="toggle-tools" aria-label="Metronome / tuner" title="Metronome / Tuner" aria-expanded="${open ? 'true' : 'false'}">
+      <span class="tool-fab-icon">\u{1F3B5}</span>
+    </button>`;
 }
 
 function renderReportScreen() {
@@ -2647,9 +2650,8 @@ function render() {
   else if (APP.screen === 'map') app.innerHTML = renderMapScreen();
   else if (APP.screen === 'practice') app.innerHTML = renderPracticeScreen();
   else if (APP.screen === 'ear') app.innerHTML = renderEarScreen();
-  else if (APP.screen === 'metronome') app.innerHTML = renderMetronomeScreen();
-  else if (APP.screen === 'tuner') app.innerHTML = renderTunerScreen();
   else if (APP.screen === 'lesson') app.innerHTML = renderLessonScreen();
+  renderToolWidget();
 }
 
 // ── PLAY PHASE SEQUENCE ─────────────────────────────────────────────────
@@ -2785,7 +2787,7 @@ function startMetronome() {
   m.running = true;
   m.taps = [];
   startMetronomeTicker();
-  render();
+  renderToolWidget();
   updateMetronomeDots();
 }
 
@@ -2844,7 +2846,7 @@ function startTuner() {
   }).catch(() => {
     if (APP.tuner) APP.tuner.running = false;
     showToast('Could not access the microphone.');
-    render();
+    renderToolWidget();
   });
 }
 
@@ -3338,23 +3340,29 @@ function handleAction(action, el) {
       playEarPhrase();
       break;
 
-    case 'open-metronome':
-      if (!APP.metronome) APP.metronome = createMetronome();
-      APP.toolReturnScreen = APP.screen;
-      startSession();
-      APP.screen = 'metronome';
-      render();
+    case 'toggle-tools':
+      APP.toolsOpen = !APP.toolsOpen;
+      if (!APP.toolsOpen) { stopMetronome(); stopTuner(); }
+      renderToolWidget();
       break;
 
-    case 'close-metronome':
+    case 'close-tools':
+      APP.toolsOpen = false;
       stopMetronome();
-      endSession();
-      APP.screen = APP.toolReturnScreen || 'practice';
-      render();
+      stopTuner();
+      renderToolWidget();
+      break;
+
+    case 'tools-tab':
+      APP.toolTab = el.dataset.tab === 'tuner' ? 'tuner' : 'metronome';
+      APP.toolsOpen = true;
+      if (APP.toolTab === 'tuner') stopMetronome();
+      else stopTuner();
+      renderToolWidget();
       break;
 
     case 'metronome-toggle':
-      if (APP.metronome && APP.metronome.running) { stopMetronome(); render(); }
+      if (APP.metronome && APP.metronome.running) { stopMetronome(); renderToolWidget(); }
       else startMetronome();
       break;
 
@@ -3363,18 +3371,7 @@ function handleAction(action, el) {
       if (!m) break;
       m.bpm = clampBpm(m.bpm + parseInt(el.dataset.delta, 10));
       if (m.running) startMetronomeTicker();
-      render();
-      break;
-    }
-
-    case 'metronome-time': {
-      const m = APP.metronome;
-      if (!m) break;
-      const idx = TIME_SIGNATURES.indexOf(m.beatsPerBar);
-      m.beatsPerBar = TIME_SIGNATURES[(idx + 1) % TIME_SIGNATURES.length];
-      m.beat = -1;
-      m.subTick = 0;
-      render();
+      renderToolWidget();
       break;
     }
 
@@ -3387,36 +3384,8 @@ function handleAction(action, el) {
       if (bpm) {
         m.bpm = bpm;
         if (m.running) startMetronomeTicker();
-        render();
+        renderToolWidget();
       }
-      break;
-    }
-
-    case 'metronome-preset': {
-      const m = APP.metronome;
-      if (!m) break;
-      m.bpm = clampBpm(parseInt(el.dataset.bpm, 10));
-      if (m.running) startMetronomeTicker();
-      render();
-      break;
-    }
-
-    case 'metronome-subdivision': {
-      const m = APP.metronome;
-      if (!m) break;
-      m.subdivision = parseInt(el.dataset.value, 10) || 1;
-      m.subTick = 0;
-      if (m.running) startMetronomeTicker();
-      render();
-      break;
-    }
-
-    case 'metronome-sound': {
-      const m = APP.metronome;
-      if (!m) break;
-      m.sound = el.dataset.value || 'click';
-      if (m.running) AudioEngine.playClick(false, 0, metronomeClickOpts(m));
-      render();
       break;
     }
 
@@ -3424,28 +3393,13 @@ function handleAction(action, el) {
       const m = APP.metronome;
       if (!m) break;
       m.countIn = !m.countIn;
-      render();
+      renderToolWidget();
       break;
     }
 
-    case 'open-tuner':
-      APP.toolReturnScreen = APP.screen;
-      startSession();
-      APP.screen = 'tuner';
-      render();
-      break;
-
-    case 'close-tuner':
-      stopTuner();
-      APP.tuner = null;
-      endSession();
-      APP.screen = APP.toolReturnScreen || 'practice';
-      render();
-      break;
-
     case 'tuner-toggle':
-      if (APP.tuner && APP.tuner.running) { stopTuner(); render(); }
-      else startTuner();
+      if (APP.tuner && APP.tuner.running) { stopTuner(); renderToolWidget(); }
+      else { startTuner(); renderToolWidget(); }
       break;
 
     case 'sprint-answer': {
@@ -3745,8 +3699,39 @@ document.addEventListener('click', (e) => {
 
 document.addEventListener('change', (e) => {
   const input = e.target;
-  if (input.id === 'metronome-volume' && APP.metronome) {
-    APP.metronome.volume = Math.max(0, Math.min(1, Number(input.value) / 100));
+  if (!input || !input.id) return;
+  const m = APP.metronome;
+  if (m && input.id === 'metronome-volume') {
+    m.volume = Math.max(0, Math.min(1, Number(input.value) / 100));
+    return;
+  }
+  if (m && input.id === 'tool-preset') {
+    if (input.value) {
+      m.bpm = clampBpm(parseInt(input.value, 10));
+      if (m.running) startMetronomeTicker();
+    }
+    renderToolWidget();
+    return;
+  }
+  if (m && input.id === 'tool-timesig') {
+    m.beatsPerBar = parseInt(input.value, 10) || 4;
+    m.beat = -1;
+    m.subTick = 0;
+    if (m.running) startMetronomeTicker();
+    renderToolWidget();
+    return;
+  }
+  if (m && input.id === 'tool-subdivision') {
+    m.subdivision = parseInt(input.value, 10) || 1;
+    m.subTick = 0;
+    if (m.running) startMetronomeTicker();
+    renderToolWidget();
+    return;
+  }
+  if (m && input.id === 'tool-sound') {
+    m.sound = input.value || 'click';
+    if (m.running) AudioEngine.playClick(false, 0, metronomeClickOpts(m));
+    renderToolWidget();
     return;
   }
   if (input.id !== 'import-file-input' || !input.files || !input.files[0]) return;
