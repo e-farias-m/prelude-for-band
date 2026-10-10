@@ -2394,6 +2394,13 @@ function buildSongQuizOptions(inst, song) {
   return buildQuizOptions(inst, noteLesson);
 }
 
+// A review item may be a plain note or a whole song. Songs have no fingering or
+// notation of their own, so reviewing one asks about a note drawn from it.
+function buildReviewQuiz(inst, id) {
+  const lesson = findLessonById(APP.instrumentId, id);
+  return isSongLesson(lesson) ? buildSongQuizOptions(inst, lesson) : buildQuizOptions(inst, lesson);
+}
+
 function buildQuizOptions(inst, lesson, forcedType) {
   const completedCount = getLearnedNotes(APP.instrumentId).length;
   const alreadyCompleted = !!getInstrumentProgress(APP.instrumentId).completed[lesson.id];
@@ -3291,8 +3298,7 @@ function handleAction(action, el) {
         APP.reviewIndex = 0;
         APP.reviewCorrect = 0;
         APP.reviewTotal = lesson.reviewLessonIds.length;
-        const firstNote = findLessonById(APP.instrumentId, APP.reviewQueue[0]);
-        APP.quiz = buildQuizOptions(inst, firstNote);
+        APP.quiz = buildReviewQuiz(inst, APP.reviewQueue[0]);
       } else {
         APP.phase = 'present';
         APP.quiz = null;
@@ -3599,8 +3605,7 @@ function handleAction(action, el) {
           APP.phase = 'complete';
         } else {
           const inst = getInstrument(APP.instrumentId);
-          const nextNote = findLessonById(APP.instrumentId, APP.reviewQueue[APP.reviewIndex]);
-          APP.quiz = buildQuizOptions(inst, nextNote);
+          APP.quiz = buildReviewQuiz(inst, APP.reviewQueue[APP.reviewIndex]);
           APP.phase = 'quiz';
         }
         render();

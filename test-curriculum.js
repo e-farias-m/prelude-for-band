@@ -257,6 +257,41 @@ for (const [name, song] of Object.entries(CANONICAL_SONGS)) {
     `Canonical "${name}" durations (${song.durations.length}) must match its ${song.degrees.length} notes`);
 }
 
+// The two early practice songs give a brand-new student something to play the
+// moment they learn their first note(s). They must stay inside the notes they
+// teach.
+check(CANONICAL_SONGS['My First Note'].degrees.length === 6 &&
+  CANONICAL_SONGS['My First Note'].degrees.every(d => d === 1),
+  'My First Note must use only the first note');
+check(CANONICAL_SONGS['Step Up and Down'].degrees.length === 11,
+  'Step Up and Down must be 11 notes');
+check(CANONICAL_SONGS['Step Up and Down'].degrees.every(d => d === 1 || d === 2),
+  'Step Up and Down must use only the first two notes');
+check(CANONICAL_SONGS['Step Up and Down'].degrees.includes(1) &&
+  CANONICAL_SONGS['Step Up and Down'].degrees.includes(2),
+  'Step Up and Down must use both of the first two notes');
+
+// Every instrument must present a practice song right after note 1 and note 2,
+// so the newest notes are immediately heard in a tune, and the first review
+// must bring those songs back.
+for (const inst of Object.values(CURRICULUM)) {
+  const lessons = inst.lessons || [];
+  const first = lessons[0];
+  if (!first) continue;
+  const prefix = first.id.replace(/-\d+$/, '');
+  check(first.id === `${prefix}-1`, `${inst.id} must start with its first note (${prefix}-1)`);
+  check(lessons[1] && lessons[1].type === 'song' && lessons[1].noteName === 'My First Note',
+    `${inst.id} must place the "My First Note" practice song right after note 1`);
+  check(lessons[2] && lessons[2].id === `${prefix}-2` &&
+    lessons[3] && lessons[3].type === 'song' && lessons[3].noteName === 'Step Up and Down',
+    `${inst.id} must place the "Step Up and Down" practice song right after note 2`);
+
+  const review = lessons.find(l => l.id === `${prefix}-review-1`);
+  check(review && review.reviewLessonIds.includes(`${prefix}-song-1`) &&
+    review.reviewLessonIds.includes(`${prefix}-song-2`),
+    `${inst.id} review 1 must include both practice songs`);
+}
+
 // Independent musical check: a shared song must sound like the canonical
 // major-scale shape in CONCERT pitch, not merely in written degrees. This uses
 // each lesson's own pitch plus the instrument's transposition, then compares

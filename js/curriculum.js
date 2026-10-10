@@ -42,6 +42,15 @@ const CURRICULUM = {
         prompt: 'No valves. C is the 4th partial of the Bb bugle. Buzz a firm middle-register pitch.'
       },
       {
+        id: 'tr-song-1',
+        type: 'song',
+        audioUrl: null,
+        bpm: 100,
+        noteName: 'My First Note',
+        description: 'A short warm-up on your very first note. Relax and keep the tone steady!',
+        prompt: 'Play the note a few times, long and even. Listen for a clear, centred sound.',
+      },
+      {
         id: 'tr-2',
         noteName: 'D',
         octave: 4,
@@ -52,6 +61,15 @@ const CURRICULUM = {
         fingeringState: [true, false, true],
         description: 'Valves 1 and 3 together — your first valve combination.',
         prompt: 'Valves 1 and 3. Keep the buzz centred and the air fast.'
+      },
+      {
+        id: 'tr-song-2',
+        type: 'song',
+        audioUrl: null,
+        bpm: 100,
+        noteName: 'Step Up and Down',
+        description: 'A two-note song that steps from your first note to your second and back.',
+        prompt: 'Move smoothly between just two notes. Keep each pitch centred!',
       },
       {
         id: 'tr-3',
@@ -126,7 +144,7 @@ const CURRICULUM = {
         prompt: 'No valves. Tighten the embouchure. Fast, supported air.'
       },
       {
-        id: 'tr-song-1', type: 'song',
+        id: 'tr-song-3', type: 'song',
         audioUrl: null,
         bpm: 100,
         noteName: 'Hot Cross Buns',
@@ -134,7 +152,7 @@ const CURRICULUM = {
         prompt: 'Step through each note. The pattern repeats. Feel how the valves move in sequence!',
       },
       {
-        id: 'tr-song-2', type: 'song',
+        id: 'tr-song-4', type: 'song',
         audioUrl: null,
         bpm: 100,
         noteName: 'Merrily We Roll Along',
@@ -148,13 +166,13 @@ const CURRICULUM = {
       {
         id: 'tr-review-1',
         type: 'review',
-        reviewLessonIds: ['tr-1', 'tr-2', 'tr-3', 'tr-4', 'tr-5', 'tr-song-1', 'tr-song-2'],
+        reviewLessonIds: ['tr-song-1', 'tr-song-2', 'tr-1', 'tr-2', 'tr-3', 'tr-4', 'tr-5', 'tr-song-3', 'tr-song-4'],
         noteName: 'Review 1',
         description: 'Mix up your first five notes and songs — C, D, E, F, and G.',
         prompt: '',
       },
       {
-        id: 'tr-song-3', type: 'song',
+        id: 'tr-song-5', type: 'song',
         audioUrl: null,
         bpm: 100,
         noteName: 'Lightly Row',
@@ -165,7 +183,7 @@ const CURRICULUM = {
         durations: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
       },
       {
-        id: 'tr-song-4', type: 'song',
+        id: 'tr-song-6', type: 'song',
         audioUrl: null,
         bpm: 100,
         noteName: 'Trumpet Tune',
@@ -179,7 +197,7 @@ const CURRICULUM = {
       {
         id: 'tr-review-2',
         type: 'review',
-        reviewLessonIds: ['tr-1', 'tr-2', 'tr-3', 'tr-4', 'tr-5', 'tr-6', 'tr-7', 'tr-8', 'tr-song-3', 'tr-song-4'],
+        reviewLessonIds: ['tr-1', 'tr-2', 'tr-3', 'tr-4', 'tr-5', 'tr-6', 'tr-7', 'tr-8', 'tr-song-5', 'tr-song-6'],
         noteName: 'Review 2',
         description: 'Review all trumpet notes and songs together — the full C4 to C5 octave.',
         prompt: '',
@@ -204,6 +222,15 @@ const CURRICULUM = {
         prompt: 'Left thumb + all three left fingers + all three right fingers, plus the footjoint C key with your right pinky. Warm, supported air.'
       },
       {
+        id: 'fl-song-1',
+        type: 'song',
+        audioUrl: null,
+        bpm: 100,
+        noteName: 'My First Note',
+        description: 'A short warm-up on your very first note. Relax and keep the tone steady!',
+        prompt: 'Play the note a few times, long and even. Listen for a clear, centred sound.',
+      },
+      {
         id: 'fl-2',
         noteName: 'D',
         octave: 4,
@@ -213,6 +240,15 @@ const CURRICULUM = {
         fingeringState: [true, true, true, true, true, true, true, false, false],
         description: 'D — all main keys covered. Left thumb and all three left-hand fingers, plus all three right hand fingers.',
         prompt: 'Left thumb + all three left fingers + all three right fingers. Right pinky up. Blow across the embouchure hole.'
+      },
+      {
+        id: 'fl-song-2',
+        type: 'song',
+        audioUrl: null,
+        bpm: 100,
+        noteName: 'Step Up and Down',
+        description: 'A two-note song that steps from your first note to your second and back.',
+        prompt: 'Move smoothly between just two notes. Keep each pitch centred!',
       },
       {
         id: 'fl-3',
@@ -226,7 +262,7 @@ const CURRICULUM = {
         prompt: 'Same as D4 but lift right ring finger and add the Eb key with right pinky.'
       },
       {
-        id: 'fl-song-1', type: 'song',
+        id: 'fl-song-3', type: 'song',
         audioUrl: null,
         bpm: 100,
         noteName: 'Hot Cross Buns',
@@ -256,7 +292,7 @@ const CURRICULUM = {
         prompt: 'Left thumb + all three left fingers. Right pinky on the Eb key. Right index, middle, ring up.'
       },
       {
-        id: 'fl-song-2', type: 'song',
+        id: 'fl-song-4', type: 'song',
         audioUrl: null,
         bpm: 100,
         noteName: 'Merrily We Roll Along',
@@ -270,7 +306,7 @@ const CURRICULUM = {
       {
         id: 'fl-review-1',
         type: 'review',
-        reviewLessonIds: ['fl-1', 'fl-2', 'fl-3', 'fl-4', 'fl-5', 'fl-song-1', 'fl-song-2'],
+        reviewLessonIds: ['fl-song-1', 'fl-song-2', 'fl-1', 'fl-2', 'fl-3', 'fl-4', 'fl-5', 'fl-song-3', 'fl-song-4'],
         noteName: 'Review 1',
         description: 'Mix up your first five notes and songs — C, D, E, F, and G.',
         prompt: '',
@@ -309,7 +345,7 @@ const CURRICULUM = {
         prompt: 'Left index only, thumb off. Keep the Eb key down with your right pinky.'
       },
       {
-        id: 'fl-song-3', type: 'song',
+        id: 'fl-song-5', type: 'song',
         audioUrl: null,
         bpm: 100,
         noteName: 'Lightly Row',
@@ -320,7 +356,7 @@ const CURRICULUM = {
         durations: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
       },
       {
-        id: 'fl-song-4', type: 'song',
+        id: 'fl-song-6', type: 'song',
         audioUrl: null,
         bpm: 100,
         noteName: 'Flute Song',
@@ -334,7 +370,7 @@ const CURRICULUM = {
       {
         id: 'fl-review-2',
         type: 'review',
-        reviewLessonIds: ['fl-1', 'fl-2', 'fl-3', 'fl-4', 'fl-5', 'fl-6', 'fl-7', 'fl-8', 'fl-song-3', 'fl-song-4'],
+        reviewLessonIds: ['fl-1', 'fl-2', 'fl-3', 'fl-4', 'fl-5', 'fl-6', 'fl-7', 'fl-8', 'fl-song-5', 'fl-song-6'],
         noteName: 'Review 2',
         description: 'Review all flute notes and songs together — the full C4 to C5 octave.',
         prompt: '',
@@ -360,6 +396,15 @@ const CURRICULUM = {
         prompt: 'Thumb hole + left-hand rings 1-2-3. Right hand open.'
       },
       {
+        id: 'cl-song-1',
+        type: 'song',
+        audioUrl: null,
+        bpm: 100,
+        noteName: 'My First Note',
+        description: 'A short warm-up on your very first note. Relax and keep the tone steady!',
+        prompt: 'Play the note a few times, long and even. Listen for a clear, centred sound.',
+      },
+      {
         id: 'cl-2',
         noteName: 'D',
         octave: 4,
@@ -370,6 +415,15 @@ const CURRICULUM = {
         fingeringState: [true, true, true, false, false, false, false, false, false],
         description: 'D — lift left ring finger. Two left-hand rings down.',
         prompt: 'Thumb hole + left-hand rings 1 and 2. Ring finger open.'
+      },
+      {
+        id: 'cl-song-2',
+        type: 'song',
+        audioUrl: null,
+        bpm: 100,
+        noteName: 'Step Up and Down',
+        description: 'A two-note song that steps from your first note to your second and back.',
+        prompt: 'Move smoothly between just two notes. Keep each pitch centred!',
       },
       {
         id: 'cl-3',
@@ -408,7 +462,7 @@ const CURRICULUM = {
         prompt: 'Lift every finger and the thumb. The clarinet sings open on G.'
       },
       {
-        id: 'cl-song-1', type: 'song',
+        id: 'cl-song-3', type: 'song',
         audioUrl: null,
         bpm: 100,
         noteName: 'Hot Cross Buns',
@@ -416,7 +470,7 @@ const CURRICULUM = {
         prompt: 'Step through each note carefully. Feel how the rings seal with your fingertips!',
       },
       {
-        id: 'cl-song-2', type: 'song',
+        id: 'cl-song-4', type: 'song',
         audioUrl: null,
         bpm: 100,
         noteName: 'Merrily We Roll Along',
@@ -429,7 +483,7 @@ const CURRICULUM = {
       {
         id: 'cl-review-1',
         type: 'review',
-        reviewLessonIds: ['cl-1','cl-2','cl-3','cl-4','cl-5','cl-song-1','cl-song-2'],
+        reviewLessonIds: ['cl-song-1', 'cl-song-2', 'cl-1','cl-2','cl-3','cl-4','cl-5','cl-song-3','cl-song-4'],
         noteName: 'Review 1',
         description: 'Review your first five notes and songs — C through G in the chalumeau.',
         prompt: '',
@@ -471,7 +525,7 @@ const CURRICULUM = {
         prompt: 'Thumb hole closed + all fingers down + register key. Press the right little-finger F key instead of the left.'
       },
       {
-        id: 'cl-song-3', type: 'song',
+        id: 'cl-song-5', type: 'song',
         audioUrl: null,
         bpm: 100,
         noteName: 'Lightly Row',
@@ -482,7 +536,7 @@ const CURRICULUM = {
         durations: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
       },
       {
-        id: 'cl-song-4', type: 'song',
+        id: 'cl-song-6', type: 'song',
         audioUrl: null,
         bpm: 100,
         noteName: 'Clarinet Song',
@@ -495,7 +549,7 @@ const CURRICULUM = {
       {
         id: 'cl-review-2',
         type: 'review',
-        reviewLessonIds: ['cl-1','cl-2','cl-3','cl-4','cl-5','cl-6','cl-7','cl-8','cl-song-3','cl-song-4'],
+        reviewLessonIds: ['cl-1','cl-2','cl-3','cl-4','cl-5','cl-6','cl-7','cl-8','cl-song-5','cl-song-6'],
         noteName: 'Review 2',
         description: 'Review all clarinet notes and songs across the full octave.',
         prompt: '',
@@ -521,6 +575,15 @@ const CURRICULUM = {
         prompt: 'No octave key. All three left-hand and all three right-hand fingers down. Right pinky on low C key.'
       },
       {
+        id: 'as-song-1',
+        type: 'song',
+        audioUrl: null,
+        bpm: 100,
+        noteName: 'My First Note',
+        description: 'A short warm-up on your very first note. Relax and keep the tone steady!',
+        prompt: 'Play the note a few times, long and even. Listen for a clear, centred sound.',
+      },
+      {
         id: 'as-2',
         noteName: 'D',
         octave: 4,
@@ -531,6 +594,15 @@ const CURRICULUM = {
         fingeringState: [false, true, true, true, true, true, true, false, false],
         description: 'D — lift your right pinky. One step up from low C.',
         prompt: 'No octave key. Same as C but right pinky off the low C key.'
+      },
+      {
+        id: 'as-song-2',
+        type: 'song',
+        audioUrl: null,
+        bpm: 100,
+        noteName: 'Step Up and Down',
+        description: 'A two-note song that steps from your first note to your second and back.',
+        prompt: 'Move smoothly between just two notes. Keep each pitch centred!',
       },
       {
         id: 'as-3',
@@ -545,7 +617,7 @@ const CURRICULUM = {
         prompt: 'No octave key. All three left fingers down. Right index and middle down. Right ring and pinky up.'
       },
       {
-        id: 'as-song-1', type: 'song',
+        id: 'as-song-3', type: 'song',
         audioUrl: null,
         bpm: 100,
         noteName: 'Hot Cross Buns',
@@ -577,7 +649,7 @@ const CURRICULUM = {
         prompt: 'No octave key. All three left fingers down. Right hand completely open.'
       },
       {
-        id: 'as-song-2', type: 'song',
+        id: 'as-song-4', type: 'song',
         audioUrl: null,
         bpm: 100,
         noteName: 'Merrily We Roll Along',
@@ -591,7 +663,7 @@ const CURRICULUM = {
       {
         id: 'as-review-1',
         type: 'review',
-        reviewLessonIds: ['as-1', 'as-2', 'as-3', 'as-4', 'as-5', 'as-song-1', 'as-song-2'],
+        reviewLessonIds: ['as-song-1', 'as-song-2', 'as-1', 'as-2', 'as-3', 'as-4', 'as-5', 'as-song-3', 'as-song-4'],
         noteName: 'Review 1',
         description: 'Mix up your first five notes and songs — C, D, E, F, and G.',
         prompt: '',
@@ -633,7 +705,7 @@ const CURRICULUM = {
         prompt: 'Left middle finger only (left index and thumb open). No octave key.'
       },
       {
-        id: 'as-song-3', type: 'song',
+        id: 'as-song-5', type: 'song',
         audioUrl: null,
         bpm: 100,
         noteName: 'Lightly Row',
@@ -644,7 +716,7 @@ const CURRICULUM = {
         durations: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
       },
       {
-        id: 'as-song-4', type: 'song',
+        id: 'as-song-6', type: 'song',
         audioUrl: null,
         bpm: 100,
         noteName: 'Saxophone Song',
@@ -658,7 +730,7 @@ const CURRICULUM = {
       {
         id: 'as-review-2',
         type: 'review',
-        reviewLessonIds: ['as-1', 'as-2', 'as-3', 'as-4', 'as-5', 'as-6', 'as-7', 'as-8', 'as-song-3', 'as-song-4'],
+        reviewLessonIds: ['as-1', 'as-2', 'as-3', 'as-4', 'as-5', 'as-6', 'as-7', 'as-8', 'as-song-5', 'as-song-6'],
         noteName: 'Review 2',
         description: 'Review all alto sax notes and songs together — the full C4 to C5 octave.',
         prompt: '',
@@ -683,6 +755,15 @@ const CURRICULUM = {
         prompt: 'No octave key. All three left fingers + all three right fingers, plus the low C key with your right pinky. Focused, steady air through the reed.'
       },
       {
+        id: 'ob-song-1',
+        type: 'song',
+        audioUrl: null,
+        bpm: 100,
+        noteName: 'My First Note',
+        description: 'A short warm-up on your very first note. Relax and keep the tone steady!',
+        prompt: 'Play the note a few times, long and even. Listen for a clear, centred sound.',
+      },
+      {
         id: 'ob-2',
         noteName: 'D',
         octave: 4,
@@ -692,6 +773,15 @@ const CURRICULUM = {
         fingeringState: [false, true, true, true, true, true, true, false, false],
         description: 'D — all main keys covered, no octave key needed.',
         prompt: 'No octave key. All three left-hand and all three right-hand fingers down. Firm embouchure corners, focused air through the reed.'
+      },
+      {
+        id: 'ob-song-2',
+        type: 'song',
+        audioUrl: null,
+        bpm: 100,
+        noteName: 'Step Up and Down',
+        description: 'A two-note song that steps from your first note to your second and back.',
+        prompt: 'Move smoothly between just two notes. Keep each pitch centred!',
       },
       {
         id: 'ob-3',
@@ -705,7 +795,7 @@ const CURRICULUM = {
         prompt: 'No octave key. Same as D4 but lift right ring finger.'
       },
       {
-        id: 'ob-song-1', type: 'song',
+        id: 'ob-song-3', type: 'song',
         audioUrl: null,
         bpm: 100,
         noteName: 'Hot Cross Buns',
@@ -735,7 +825,7 @@ const CURRICULUM = {
         prompt: 'No octave key. All three left fingers down. Right hand open.'
       },
       {
-        id: 'ob-song-2', type: 'song',
+        id: 'ob-song-4', type: 'song',
         audioUrl: null,
         bpm: 100,
         noteName: 'Merrily We Roll Along',
@@ -749,7 +839,7 @@ const CURRICULUM = {
       {
         id: 'ob-review-1',
         type: 'review',
-        reviewLessonIds: ['ob-1', 'ob-2', 'ob-3', 'ob-4', 'ob-5', 'ob-song-1', 'ob-song-2'],
+        reviewLessonIds: ['ob-song-1', 'ob-song-2', 'ob-1', 'ob-2', 'ob-3', 'ob-4', 'ob-5', 'ob-song-3', 'ob-song-4'],
         noteName: 'Review 1',
         description: 'Mix up your first five notes and songs — C, D, E, F, and G.',
         prompt: '',
@@ -788,7 +878,7 @@ const CURRICULUM = {
         prompt: 'No octave key. Left index + right index. Thumb and other fingers open.'
       },
       {
-        id: 'ob-song-3', type: 'song',
+        id: 'ob-song-5', type: 'song',
         audioUrl: null,
         bpm: 100,
         noteName: 'Lightly Row',
@@ -799,7 +889,7 @@ const CURRICULUM = {
         durations: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
       },
       {
-        id: 'ob-song-4', type: 'song',
+        id: 'ob-song-6', type: 'song',
         audioUrl: null,
         bpm: 100,
         noteName: 'Oboe Song',
@@ -813,7 +903,7 @@ const CURRICULUM = {
       {
         id: 'ob-review-2',
         type: 'review',
-        reviewLessonIds: ['ob-1', 'ob-2', 'ob-3', 'ob-4', 'ob-5', 'ob-6', 'ob-7', 'ob-8', 'ob-song-3', 'ob-song-4'],
+        reviewLessonIds: ['ob-1', 'ob-2', 'ob-3', 'ob-4', 'ob-5', 'ob-6', 'ob-7', 'ob-8', 'ob-song-5', 'ob-song-6'],
         noteName: 'Review 2',
         description: 'Review all oboe notes and songs together — the full C4 to C5 octave.',
         prompt: '',
@@ -838,6 +928,15 @@ const CURRICULUM = {
         prompt: 'Left thumb on the whisper key. Left index, middle, and ring down. Right hand open. Slow, warm, steady air.'
       },
       {
+        id: 'bn-song-1',
+        type: 'song',
+        audioUrl: null,
+        bpm: 100,
+        noteName: 'My First Note',
+        description: 'A short warm-up on your very first note. Relax and keep the tone steady!',
+        prompt: 'Play the note a few times, long and even. Listen for a clear, centred sound.',
+      },
+      {
         id: 'bn-2',
         noteName: 'D',
         octave: 3,
@@ -847,6 +946,15 @@ const CURRICULUM = {
         fingeringState: [true, true, true, false, false, false, false, false, false],
         description: 'Low D — whisper key with the left index and middle fingers down.',
         prompt: 'Whisper key on. Left index + left middle down, left ring up. Right hand open.'
+      },
+      {
+        id: 'bn-song-2',
+        type: 'song',
+        audioUrl: null,
+        bpm: 100,
+        noteName: 'Step Up and Down',
+        description: 'A two-note song that steps from your first note to your second and back.',
+        prompt: 'Move smoothly between just two notes. Keep each pitch centred!',
       },
       {
         id: 'bn-3',
@@ -860,7 +968,7 @@ const CURRICULUM = {
         prompt: 'Whisper key on. Left index only. Left middle and ring up. Right hand open.'
       },
       {
-        id: 'bn-song-1', type: 'song',
+        id: 'bn-song-3', type: 'song',
         audioUrl: null,
         bpm: 100,
         noteName: 'Hot Cross Buns',
@@ -890,7 +998,7 @@ const CURRICULUM = {
         prompt: 'Whisper key on. Left index half-hole (cracked open), left middle + ring down, all three right fingers down.'
       },
       {
-        id: 'bn-song-2', type: 'song',
+        id: 'bn-song-4', type: 'song',
         audioUrl: null,
         bpm: 100,
         noteName: 'Merrily We Roll Along',
@@ -904,7 +1012,7 @@ const CURRICULUM = {
       {
         id: 'bn-review-1',
         type: 'review',
-        reviewLessonIds: ['bn-1', 'bn-2', 'bn-3', 'bn-4', 'bn-5', 'bn-song-1', 'bn-song-2'],
+        reviewLessonIds: ['bn-song-1', 'bn-song-2', 'bn-1', 'bn-2', 'bn-3', 'bn-4', 'bn-5', 'bn-song-3', 'bn-song-4'],
         noteName: 'Review 1',
         description: 'Mix up your first five notes and songs — C, D, E, F, and G.',
         prompt: '',
@@ -943,7 +1051,7 @@ const CURRICULUM = {
         prompt: 'Whisper key off. All three left fingers only. Right hand open.'
       },
       {
-        id: 'bn-song-3', type: 'song',
+        id: 'bn-song-5', type: 'song',
         audioUrl: null,
         bpm: 100,
         noteName: 'Lightly Row',
@@ -954,7 +1062,7 @@ const CURRICULUM = {
         durations: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
       },
       {
-        id: 'bn-song-4', type: 'song',
+        id: 'bn-song-6', type: 'song',
         audioUrl: null,
         bpm: 100,
         noteName: 'Bassoon Song',
@@ -968,7 +1076,7 @@ const CURRICULUM = {
       {
         id: 'bn-review-2',
         type: 'review',
-        reviewLessonIds: ['bn-1', 'bn-2', 'bn-3', 'bn-4', 'bn-5', 'bn-6', 'bn-7', 'bn-8', 'bn-song-3', 'bn-song-4'],
+        reviewLessonIds: ['bn-1', 'bn-2', 'bn-3', 'bn-4', 'bn-5', 'bn-6', 'bn-7', 'bn-8', 'bn-song-5', 'bn-song-6'],
         noteName: 'Review 2',
         description: 'Review all bassoon notes and songs together — the full C3 to C4 octave.',
         prompt: '',
@@ -991,6 +1099,15 @@ const CURRICULUM = {
         prompt: '1st position (slide all the way in). Buzz a firm centred pitch.'
       },
       {
+        id: 'tb-song-1',
+        type: 'song',
+        audioUrl: null,
+        bpm: 100,
+        noteName: 'My First Note',
+        description: 'A short warm-up on your very first note. Relax and keep the tone steady!',
+        prompt: 'Play the note a few times, long and even. Listen for a clear, centred sound.',
+      },
+      {
         id: 'tb-2',
         noteName: 'C',
         octave: 3,
@@ -1000,6 +1117,15 @@ const CURRICULUM = {
         fingeringState: 6,
         description: 'C — 6th position. A long reach!',
         prompt: '6th position (slide well past the bell rim). Keep the buzz steady.'
+      },
+      {
+        id: 'tb-song-2',
+        type: 'song',
+        audioUrl: null,
+        bpm: 100,
+        noteName: 'Step Up and Down',
+        description: 'A two-note song that steps from your first note to your second and back.',
+        prompt: 'Move smoothly between just two notes. Keep each pitch centred!',
       },
       {
         id: 'tb-3',
@@ -1035,7 +1161,7 @@ const CURRICULUM = {
         prompt: '1st position. F is the 3rd harmonic. Faster air than the low notes.'
       },
       {
-        id: 'tb-song-1', type: 'song',
+        id: 'tb-song-3', type: 'song',
         audioUrl: null,
         bpm: 100,
         noteName: 'Hot Cross Buns',
@@ -1043,7 +1169,7 @@ const CURRICULUM = {
         prompt: 'Step through each note carefully. Feel the slide moving between 4th, 6th, and 1st positions!',
       },
       {
-        id: 'tb-song-2', type: 'song',
+        id: 'tb-song-4', type: 'song',
         audioUrl: null,
         bpm: 100,
         noteName: 'Merrily We Roll Along',
@@ -1056,7 +1182,7 @@ const CURRICULUM = {
       {
         id: 'tb-review-1',
         type: 'review',
-        reviewLessonIds: ['tb-1','tb-2','tb-3','tb-4','tb-5','tb-song-1','tb-song-2'],
+        reviewLessonIds: ['tb-song-1', 'tb-song-2', 'tb-1','tb-2','tb-3','tb-4','tb-5','tb-song-3','tb-song-4'],
         noteName: 'Review 1',
         description: 'Review your first five notes and songs — Bb2 through F3.',
         prompt: '',
@@ -1095,7 +1221,7 @@ const CURRICULUM = {
         prompt: '1st position. Bb is the 4th partial — one octave above the first note. Faster air, firmer buzz.'
       },
       {
-        id: 'tb-song-3', type: 'song',
+        id: 'tb-song-5', type: 'song',
         audioUrl: null,
         bpm: 100,
         noteName: 'Lightly Row',
@@ -1106,7 +1232,7 @@ const CURRICULUM = {
         durations: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
       },
       {
-        id: 'tb-song-4', type: 'song',
+        id: 'tb-song-6', type: 'song',
         audioUrl: null,
         bpm: 100,
         noteName: 'Slide Serenade',
@@ -1119,7 +1245,7 @@ const CURRICULUM = {
       {
         id: 'tb-review-2',
         type: 'review',
-        reviewLessonIds: ['tb-1','tb-2','tb-3','tb-4','tb-5','tb-6','tb-7','tb-8','tb-song-3','tb-song-4'],
+        reviewLessonIds: ['tb-1','tb-2','tb-3','tb-4','tb-5','tb-6','tb-7','tb-8','tb-song-5','tb-song-6'],
         noteName: 'Review 2',
         description: 'Review all trombone notes and songs together — the full Bb2 to Bb3 octave.',
         prompt: '',
@@ -1144,6 +1270,15 @@ const CURRICULUM = {
         prompt: 'No valves. C is the 4th partial of the F horn.'
       },
       {
+        id: 'fh-song-1',
+        type: 'song',
+        audioUrl: null,
+        bpm: 100,
+        noteName: 'My First Note',
+        description: 'A short warm-up on your very first note. Relax and keep the tone steady!',
+        prompt: 'Play the note a few times, long and even. Listen for a clear, centred sound.',
+      },
+      {
         id: 'fh-2',
         noteName: 'D',
         octave: 4,
@@ -1154,6 +1289,15 @@ const CURRICULUM = {
         fingeringState: [true, false, false],
         description: 'Valve 1 — whole step above C.',
         prompt: 'Valve 1. Fifth partial with first valve down.'
+      },
+      {
+        id: 'fh-song-2',
+        type: 'song',
+        audioUrl: null,
+        bpm: 100,
+        noteName: 'Step Up and Down',
+        description: 'A two-note song that steps from your first note to your second and back.',
+        prompt: 'Move smoothly between just two notes. Keep each pitch centred!',
       },
       {
         id: 'fh-3',
@@ -1229,7 +1373,7 @@ const CURRICULUM = {
       },
       // ── Song 1 ──────────────────────────────────────────────────────────
       {
-        id: 'fh-song-1', type: 'song',
+        id: 'fh-song-3', type: 'song',
         audioUrl: null,
         bpm: 100,
         noteName: 'Hot Cross Buns',
@@ -1237,7 +1381,7 @@ const CURRICULUM = {
         prompt: 'Step through each note. The pattern repeats. Feel how the valves move!',
       },
       {
-        id: 'fh-song-2', type: 'song',
+        id: 'fh-song-4', type: 'song',
         audioUrl: null,
         bpm: 100,
         noteName: 'Merrily We Roll Along',
@@ -1251,13 +1395,13 @@ const CURRICULUM = {
       {
         id: 'fh-review-1',
         type: 'review',
-        reviewLessonIds: ['fh-1', 'fh-2', 'fh-3', 'fh-4', 'fh-5', 'fh-song-1', 'fh-song-2'],
+        reviewLessonIds: ['fh-song-1', 'fh-song-2', 'fh-1', 'fh-2', 'fh-3', 'fh-4', 'fh-5', 'fh-song-3', 'fh-song-4'],
         noteName: 'Review 1',
         description: 'Mix up your first five notes and songs — C, D, E, F, and G.',
         prompt: '',
       },
       {
-        id: 'fh-song-3', type: 'song',
+        id: 'fh-song-5', type: 'song',
         audioUrl: null,
         bpm: 100,
         noteName: 'Lightly Row',
@@ -1268,7 +1412,7 @@ const CURRICULUM = {
         durations: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
       },
       {
-        id: 'fh-song-4', type: 'song',
+        id: 'fh-song-6', type: 'song',
         audioUrl: null,
         bpm: 100,
         noteName: 'Horn Calls',
@@ -1282,7 +1426,7 @@ const CURRICULUM = {
       {
         id: 'fh-review-2',
         type: 'review',
-        reviewLessonIds: ['fh-1', 'fh-2', 'fh-3', 'fh-4', 'fh-5', 'fh-6', 'fh-7', 'fh-8', 'fh-song-3', 'fh-song-4'],
+        reviewLessonIds: ['fh-1', 'fh-2', 'fh-3', 'fh-4', 'fh-5', 'fh-6', 'fh-7', 'fh-8', 'fh-song-5', 'fh-song-6'],
         noteName: 'Review 2',
         description: 'Review all horn notes and songs together — the full C4 to C5 octave.',
         prompt: '',
@@ -1305,6 +1449,15 @@ const CURRICULUM = {
         prompt: 'No valves. Bb is the 2nd partial of the Bb bugle. Deep breath, steady air.'
       },
       {
+        id: 'eu-song-1',
+        type: 'song',
+        audioUrl: null,
+        bpm: 100,
+        noteName: 'My First Note',
+        description: 'A short warm-up on your very first note. Relax and keep the tone steady!',
+        prompt: 'Play the note a few times, long and even. Listen for a clear, centred sound.',
+      },
+      {
         id: 'eu-2',
         noteName: 'C',
         octave: 3,
@@ -1314,6 +1467,15 @@ const CURRICULUM = {
         fingeringState: [true, false, true],
         description: 'Valves 1 and 3 — a half-step above Bb.',
         prompt: 'Valves 1 and 3. Half-step above Bb.'
+      },
+      {
+        id: 'eu-song-2',
+        type: 'song',
+        audioUrl: null,
+        bpm: 100,
+        noteName: 'Step Up and Down',
+        description: 'A two-note song that steps from your first note to your second and back.',
+        prompt: 'Move smoothly between just two notes. Keep each pitch centred!',
       },
       {
         id: 'eu-3',
@@ -1382,7 +1544,7 @@ const CURRICULUM = {
         prompt: 'No valves. Bb is the 4th harmonic. Tighter embouchure, faster air.'
       },
       {
-        id: 'eu-song-1', type: 'song',
+        id: 'eu-song-3', type: 'song',
         audioUrl: null,
         bpm: 100,
         noteName: 'Hot Cross Buns',
@@ -1390,7 +1552,7 @@ const CURRICULUM = {
         prompt: 'Step through each note. Feel the valves changing between combinations!',
       },
       {
-        id: 'eu-song-2', type: 'song',
+        id: 'eu-song-4', type: 'song',
         audioUrl: null,
         bpm: 100,
         noteName: 'Merrily We Roll Along',
@@ -1404,13 +1566,13 @@ const CURRICULUM = {
       {
         id: 'eu-review-1',
         type: 'review',
-        reviewLessonIds: ['eu-1', 'eu-2', 'eu-3', 'eu-4', 'eu-5', 'eu-song-1', 'eu-song-2'],
+        reviewLessonIds: ['eu-song-1', 'eu-song-2', 'eu-1', 'eu-2', 'eu-3', 'eu-4', 'eu-5', 'eu-song-3', 'eu-song-4'],
         noteName: 'Review 1',
         description: 'Mix up your first five notes and songs — Bb2, C3, D3, Eb3, and F3.',
         prompt: '',
       },
       {
-        id: 'eu-song-3', type: 'song',
+        id: 'eu-song-5', type: 'song',
         audioUrl: null,
         bpm: 100,
         noteName: 'Lightly Row',
@@ -1421,7 +1583,7 @@ const CURRICULUM = {
         durations: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
       },
       {
-        id: 'eu-song-4', type: 'song',
+        id: 'eu-song-6', type: 'song',
         audioUrl: null,
         bpm: 100,
         noteName: 'Euphonium Air',
@@ -1435,7 +1597,7 @@ const CURRICULUM = {
       {
         id: 'eu-review-2',
         type: 'review',
-        reviewLessonIds: ['eu-1', 'eu-2', 'eu-3', 'eu-4', 'eu-5', 'eu-6', 'eu-7', 'eu-8', 'eu-song-3', 'eu-song-4'],
+        reviewLessonIds: ['eu-1', 'eu-2', 'eu-3', 'eu-4', 'eu-5', 'eu-6', 'eu-7', 'eu-8', 'eu-song-5', 'eu-song-6'],
         noteName: 'Review 2',
         description: 'Review all euphonium notes and songs together — the full Bb2 to Bb3 octave.',
         prompt: '',
@@ -1458,6 +1620,15 @@ const CURRICULUM = {
         prompt: 'No valves. Full, relaxed breath. Slow, wide air stream.'
       },
       {
+        id: 'tu-song-1',
+        type: 'song',
+        audioUrl: null,
+        bpm: 100,
+        noteName: 'My First Note',
+        description: 'A short warm-up on your very first note. Relax and keep the tone steady!',
+        prompt: 'Play the note a few times, long and even. Listen for a clear, centred sound.',
+      },
+      {
         id: 'tu-2',
         noteName: 'C',
         octave: 2,
@@ -1467,6 +1638,15 @@ const CURRICULUM = {
         fingeringState: [true, false, true],
         description: 'Valves 1 and 3 — a half-step above Bb.',
         prompt: 'Valves 1 and 3. Half-step above Bb.'
+      },
+      {
+        id: 'tu-song-2',
+        type: 'song',
+        audioUrl: null,
+        bpm: 100,
+        noteName: 'Step Up and Down',
+        description: 'A two-note song that steps from your first note to your second and back.',
+        prompt: 'Move smoothly between just two notes. Keep each pitch centred!',
       },
       {
         id: 'tu-3',
@@ -1535,7 +1715,7 @@ const CURRICULUM = {
         prompt: 'No valves. Bb is on the third line. Faster, more focused air.'
       },
       {
-        id: 'tu-song-1', type: 'song',
+        id: 'tu-song-3', type: 'song',
         audioUrl: null,
         bpm: 100,
         noteName: 'Hot Cross Buns',
@@ -1543,7 +1723,7 @@ const CURRICULUM = {
         prompt: 'Step through each note. Feel the valves changing between combinations below the staff!',
       },
       {
-        id: 'tu-song-2', type: 'song',
+        id: 'tu-song-4', type: 'song',
         audioUrl: null,
         bpm: 100,
         noteName: 'Merrily We Roll Along',
@@ -1557,13 +1737,13 @@ const CURRICULUM = {
       {
         id: 'tu-review-1',
         type: 'review',
-        reviewLessonIds: ['tu-1', 'tu-2', 'tu-3', 'tu-4', 'tu-5', 'tu-song-1', 'tu-song-2'],
+        reviewLessonIds: ['tu-song-1', 'tu-song-2', 'tu-1', 'tu-2', 'tu-3', 'tu-4', 'tu-5', 'tu-song-3', 'tu-song-4'],
         noteName: 'Review 1',
         description: 'Mix up your first five notes and songs — Bb1, C2, D2, Eb2, and F2.',
         prompt: '',
       },
       {
-        id: 'tu-song-3', type: 'song',
+        id: 'tu-song-5', type: 'song',
         audioUrl: null,
         bpm: 100,
         noteName: 'Lightly Row',
@@ -1574,7 +1754,7 @@ const CURRICULUM = {
         durations: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
       },
       {
-        id: 'tu-song-4', type: 'song',
+        id: 'tu-song-6', type: 'song',
         audioUrl: null,
         bpm: 100,
         noteName: 'Tuba Foundation',
@@ -1588,7 +1768,7 @@ const CURRICULUM = {
       {
         id: 'tu-review-2',
         type: 'review',
-        reviewLessonIds: ['tu-1', 'tu-2', 'tu-3', 'tu-4', 'tu-5', 'tu-6', 'tu-7', 'tu-8', 'tu-song-3', 'tu-song-4'],
+        reviewLessonIds: ['tu-1', 'tu-2', 'tu-3', 'tu-4', 'tu-5', 'tu-6', 'tu-7', 'tu-8', 'tu-song-5', 'tu-song-6'],
         noteName: 'Review 2',
         description: 'Review all tuba notes and songs together — the full Bb1 to Bb2 octave.',
         prompt: '',
@@ -1619,6 +1799,18 @@ const CANONICAL_SONGS = {
   'Lightly Row': {
     degrees: [5,3,3, 4,2,2, 1,2,3,4, 5,5,5, 5,3,3, 4,2,2, 1,3,5,5, 1],
     durations: [1,1,2, 1,1,2, 1,1,1,1, 1,1,2, 1,1,2, 1,1,2, 1,1,1,1, 2],
+  },
+  // Made-up warm-up for the very first note — one pitch in a simple rhythm,
+  // so a beginner has something to play the moment they learn note one.
+  'My First Note': {
+    degrees: [1,1,1,1,1,1],
+    durations: [1,1,2, 1,1,2],
+  },
+  // Made-up two-note song: steps from the first note to the second and back,
+  // giving the newest note a context a single pitch cannot.
+  'Step Up and Down': {
+    degrees: [1,2,1, 2,1,2, 1,2,1,2, 1],
+    durations: [1,1,2, 1,1,2, 1,1,1,1, 2],
   },
 };
 

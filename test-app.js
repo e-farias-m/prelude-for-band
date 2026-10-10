@@ -63,7 +63,7 @@ ${read('app.js')}
 return { handleAction, renderCompletePhase, CURRICULUM, APP, IMPORTED_SONGS_KEY,
   buildSprintQuestion, getSprintBest, setSprintBest, finishSprint, startSprint,
   renderPracticeScreen, getLearnedNotes, SPRINT_MODES,
-  buildNoteQuizQueue, buildQuizOptions, renderQuizPhase,
+  buildNoteQuizQueue, buildQuizOptions, buildReviewQuiz, renderQuizPhase,
   getMotivation, addPracticeSeconds, getTotalPracticeSeconds, getCurrentStreak,
   getTotalXp, getLevel, getAvatar, getStats, evaluateBadges, hasBadge, todayKey,
   endSession, renderStudentCard, renderBadgeShelf, renderSelectScreen, BADGES,
@@ -113,6 +113,35 @@ api.APP.instrumentId = 'flute';
   const noteHtml = api.renderCompletePhase(flute, note);
   check(noteHtml.includes('correct'),
     'note completion should still show the mastery badge');
+}
+
+// ── 1b. Review quizzes can include songs without crashing ──────────────────
+{
+  // Reviews list songs alongside notes. A song has no fingering of its own, so
+  // the review must fall back to one of the song's notes, not crash.
+  const review = flute.lessons.find(l => l.id === 'fl-review-1');
+  check(review.reviewLessonIds.includes('fl-song-1') && review.reviewLessonIds.includes('fl-song-2'),
+    'review 1 should include the two practice songs');
+
+  const songId = review.reviewLessonIds.find(id => {
+    const l = flute.lessons.find(x => x.id === id);
+    return l && l.type === 'song';
+  });
+  check(!!songId, 'review 1 should include at least one song');
+
+  const quiz = api.buildReviewQuiz(flute, songId);
+  check(quiz && quiz.prompt && Array.isArray(quiz.prompt.fingeringState),
+    'a song in a review should build a real note quiz, not crash');
+  check(!flute.lessons.some(l => l.id === quiz.prompt.id && l.type === 'song'),
+    'the review song quiz should ask about a note, not the song itself');
+
+  // The practice songs sit immediately after the first two note lessons.
+  check(flute.lessons[0].id === 'fl-1' && flute.lessons[1].type === 'song' &&
+    flute.lessons[1].noteName === 'My First Note',
+    'flute should have a practice song right after note 1');
+  check(flute.lessons[2].id === 'fl-2' && flute.lessons[3].type === 'song' &&
+    flute.lessons[3].noteName === 'Step Up and Down',
+    'flute should have a practice song right after note 2');
 }
 
 // ── 2. Deleting an imported song clears its saved progress ─────────────────
