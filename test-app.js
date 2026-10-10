@@ -63,6 +63,7 @@ ${read('app.js')}
 return { handleAction, renderCompletePhase, CURRICULUM, APP, IMPORTED_SONGS_KEY,
   buildSprintQuestion, getSprintBest, setSprintBest, finishSprint, startSprint,
   renderPracticeScreen, getLearnedNotes, SPRINT_MODES,
+  buildNoteQuizQueue, buildQuizOptions, renderQuizPhase,
   getMotivation, addPracticeSeconds, getTotalPracticeSeconds, getCurrentStreak,
   getTotalXp, getLevel, getAvatar, getStats, evaluateBadges, hasBadge, todayKey,
   endSession, renderStudentCard, renderBadgeShelf, renderSelectScreen, BADGES,
@@ -991,7 +992,77 @@ const fluteNotes = flute.lessons.filter(l => !l.type);
     if (savedTut === undefined) delete store['preludeBandTutorials']; else store['preludeBandTutorials'] = savedTut;
   }
 
-// ── 55. Floating metronome/tuner widget works from every screen ───────────
+// ── 55. A new-note quiz mixes the taught note with previously-learned notes ─
+{
+  const notes = flute.lessons.filter(l => !l.type);
+  api.APP.instrumentId = 'flute';
+  api.APP.progress = { flute: { completed: {}, xp: 0, mastery: {}, skills: {} } };
+
+  // First note: nothing else to mix in, so a single question.
+  const first = api.buildNoteQuizQueue(flute, notes[0]);
+  check(first.length === 1, 'the very first note asks a single question');
+  check(first[0].correctId === notes[0].id, 'the first question is the taught note');
+  check(first[0].quizType === 'fingering-to-note', 'the first question is fingering-to-note');
+
+  // One prior note learned: two questions, the new note guaranteed once.
+  api.APP.progress.flute.completed[notes[0].id] = { stars: 3 };
+  const two = api.buildNoteQuizQueue(flute, notes[1]);
+  check(two.length === 2, 'the second note asks two questions');
+  check(two.some(q => q.correctId === notes[1].id), 'the taught note is always asked');
+  check(new Set(two.map(q => q.correctId)).size === 2, 'questions cover distinct notes');
+
+  // More prior notes: the set is capped at three and never repeats a note.
+  [notes[0], notes[1], notes[2], notes[3]].forEach(n => {
+    api.APP.progress.flute.completed[n.id] = { stars: 3 };
+  });
+  const three = api.buildNoteQuizQueue(flute, notes[4]);
+  check(three.length === 3, 'the set is capped at three questions');
+  check(three.some(q => q.correctId === notes[4].id), 'the taught note is always asked');
+  check(new Set(three.map(q => q.correctId)).size === 3, 'no note is repeated to pad the set');
+  check(three.every(q => q.options.length === 3), 'every question offers three options');
+  check(three.every(q => q.options.some(o => o.id === q.correctId)), 'the correct note is among its options');
+  check(new Set(three.map(q => q.quizType)).size >= 2, 'the set cycles through unlocked quiz types');
+
+  // Re-quizzing an already-completed note still mixes in the other notes.
+  const redo = api.buildNoteQuizQueue(flute, notes[0]);
+  check(redo.length === 3, 're-quizzing a learned note also builds a mixed set');
+  check(redo.some(q => q.correctId === notes[0].id), 'the re-quizzed note is included');
+
+  // The quiz screen announces where you are in the set and offers choices.
+  api.APP.quiz = null;
+  const html = api.renderQuizPhase(flute, notes[2]);
+  check(html.includes('Question 1 of'), 'the quiz shows the set progress');
+  check(html.includes('Next question'), 'a non-final question offers to continue to the next');
+  check(!api.APP.quiz.answeredCorrectly, 'the first question starts unanswered');
+  api.APP.quiz = null;
+    api.APP.quizQueue = [];
+    api.APP.quizIndex = 0;
+  }
+
+// ── 56. A new-note lesson steps through its mixed quiz before playing ──────
+{
+  const notes = flute.lessons.filter(l => !l.type);
+  const prog = { completed: {}, xp: 0, mastery: {}, skills: {} };
+  [notes[0], notes[1], notes[2], notes[3]].forEach(n => { prog.completed[n.id] = { stars: 3 }; });
+  api.APP.progress = { flute: prog };
+  api.APP.instrumentId = 'flute';
+
+  api.handleAction('open-lesson', { dataset: { index: String(flute.lessons.indexOf(notes[4])) } });
+  check(api.APP.phase === 'present', 'a note lesson starts on the present screen');
+
+  api.handleAction('goto-quiz', { dataset: {} });
+  check(api.APP.phase === 'quiz' && api.APP.quizQueue.length === 3, 'the quiz opens a three-question set');
+
+  for (let i = 0; i < 3; i++) {
+    check(api.APP.quizIndex === i, `question ${i + 1} of the set is active`);
+    api.handleAction('quiz-answer', { dataset: { id: api.APP.quiz.correctId } });
+    check(api.APP.quiz.answeredCorrectly, `question ${i + 1} can be answered`);
+    api.handleAction('goto-play', { dataset: {} });
+  }
+  check(api.APP.phase === 'play', 'finishing the mixed set opens the play phase');
+}
+
+// ── 57. Floating metronome/tuner widget works from every screen ───────────
 {
   const savedInst = store['preludeBandInstrument'];
   api.APP.instrumentId = 'flute';

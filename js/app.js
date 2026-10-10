@@ -8,6 +8,9 @@ const APP = {
   lessonIndex: 0,
   phase: 'present',
   quiz: null,
+  // Mixed quiz set for note lessons: the note being taught plus prior notes.
+  quizQueue: [],
+  quizIndex: 0,
   play: { running: false, hasPlayed: false },
   progress: {},
   // Review session state
@@ -2391,7 +2394,7 @@ function buildSongQuizOptions(inst, song) {
   return buildQuizOptions(inst, noteLesson);
 }
 
-function buildQuizOptions(inst, lesson) {
+function buildQuizOptions(inst, lesson, forcedType) {
   const completedCount = getLearnedNotes(APP.instrumentId).length;
   const alreadyCompleted = !!getInstrumentProgress(APP.instrumentId).completed[lesson.id];
 
@@ -2400,9 +2403,11 @@ function buildQuizOptions(inst, lesson) {
   if (completedCount >= 2) availableTypes.push(QUIZ_TYPES.STAFF_TO_NOTE);
   if (completedCount >= 3) availableTypes.push(QUIZ_TYPES.NOTE_TO_STAFF);
 
-  const quizType = alreadyCompleted
-    ? availableTypes[Math.floor(Math.random() * availableTypes.length)]
-    : QUIZ_TYPES.FINGERING_TO_NOTE;
+  const quizType = forcedType
+    ? forcedType
+    : alreadyCompleted
+      ? availableTypes[Math.floor(Math.random() * availableTypes.length)]
+      : QUIZ_TYPES.FINGERING_TO_NOTE;
 
   // Draw distractors from learned notes for spaced repetition;
   // fall back to all lessons if not enough learned notes exist.
@@ -2423,6 +2428,30 @@ function buildQuizOptions(inst, lesson) {
     answeredCorrectly: false,
     wrongIds: [],
   };
+}
+
+// A note lesson opens with a short mixed quiz: the note being taught plus a
+// rotating selection of notes already learned. The set cycles through whichever
+// quiz types the student has unlocked, and never repeats a note to pad the
+// count (the first lesson still asks a single question).
+function buildNoteQuizQueue(inst, lesson) {
+  const learned = getLearnedNotes(APP.instrumentId);
+  const alreadyCompleted = learned.some(l => l.id === lesson.id);
+  // Distinct notes that can be asked without repeating: the prior notes, plus
+  // the new note if it has not been completed yet.
+  const available = alreadyCompleted ? learned.length : learned.length + 1;
+  const count = Math.min(3, available);
+
+  const others = shuffle(learned.filter(l => l.id !== lesson.id)).slice(0, count - 1);
+  const prompts = shuffle([lesson, ...others]);
+
+  const completedCount = learned.length;
+  const types = [QUIZ_TYPES.FINGERING_TO_NOTE];
+  if (completedCount >= 1) types.push(QUIZ_TYPES.NOTE_TO_FINGERING);
+  if (completedCount >= 2) types.push(QUIZ_TYPES.STAFF_TO_NOTE);
+  if (completedCount >= 3) types.push(QUIZ_TYPES.NOTE_TO_STAFF);
+
+  return prompts.map((note, i) => buildQuizOptions(inst, note, types[i % types.length]));
 }
 
 // A sprint question is drawn only from notes the student has completed, so it
@@ -2453,14 +2482,22 @@ function getQuizQuestionText(quizType) {
 }
 
 function renderQuizPhase(inst, lesson) {
-  if (!APP.quiz) APP.quiz = isSongLesson(lesson) ? buildSongQuizOptions(inst, lesson) : buildQuizOptions(inst, lesson);
-  const q = APP.quiz;
   const isReview = isReviewLesson(lesson);
+  if (!APP.quiz) {
+    APP.quizQueue = isSongLesson(lesson)
+      ? [buildSongQuizOptions(inst, lesson)]
+      : buildNoteQuizQueue(inst, lesson);
+    APP.quizIndex = 0;
+    APP.quiz = APP.quizQueue[0];
+  }
+  const q = APP.quiz;
 
-  // Review progress indicator
+  // Review progress indicator / mixed-set progress indicator
   let reviewProgress = '';
   if (isReview) {
     reviewProgress = `<div class="review-progress">Note ${APP.reviewIndex + 1} of ${APP.reviewTotal}</div>`;
+  } else if (APP.quizQueue.length > 1) {
+    reviewProgress = `<div class="review-progress">Question ${APP.quizIndex + 1} of ${APP.quizQueue.length}</div>`;
   }
 
   // ── PROMPT ──
@@ -2507,7 +2544,7 @@ function renderQuizPhase(inst, lesson) {
 
   const btnLabel = isReview
     ? (APP.reviewIndex >= APP.reviewTotal - 1 ? 'See summary' : 'Next note')
-    : 'Continue';
+    : (APP.quizIndex >= APP.quizQueue.length - 1 ? 'Continue' : 'Next question');
 
   return `
     <div class="lesson-body">
@@ -3239,6 +3276,8 @@ function handleAction(action, el) {
       APP.lessonIndex = idx;
       const lesson = getLesson(APP.instrumentId, idx);
       APP.play = { running: false, hasPlayed: false };
+      APP.quizQueue = [];
+      APP.quizIndex = 0;
       startSession();
 
       if (isSongLesson(lesson)) {
@@ -3567,7 +3606,14 @@ function handleAction(action, el) {
         render();
         return;
       }
-      // ── Regular lesson ───────────────────────────────────────────
+      // ── Regular note lesson: step through the mixed quiz set ──────
+      if (APP.quizIndex < APP.quizQueue.length - 1) {
+        APP.quizIndex++;
+        APP.quiz = APP.quizQueue[APP.quizIndex];
+        APP.phase = 'quiz';
+        render();
+        return;
+      }
       APP.phase = 'play';
       APP.play = { running: false, hasPlayed: false };
       render();
@@ -3597,8 +3643,7 @@ function handleAction(action, el) {
       break;
 
     case 'play-confirm': {
-      const q = APP.quiz;
-      const mistakes = q ? q.wrongIds.length : 0;
+      const mistakes = (APP.quizQueue || []).reduce((sum, item) => sum + item.wrongIds.length, 0);
       const stars = mistakes === 0 ? 3 : (mistakes <= 2 ? 2 : 1);
       const xp = 10 + (stars * 5);
       APP.lastStars = stars;
@@ -3683,6 +3728,8 @@ function handleAction(action, el) {
       APP.reviewIndex = 0;
       APP.reviewCorrect = 0;
       APP.reviewTotal = 0;
+      APP.quizQueue = [];
+      APP.quizIndex = 0;
       APP.songNoteIndex = 0;
       APP.importedSong = null;
       APP.screen = 'map';
