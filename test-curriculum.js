@@ -231,6 +231,32 @@ check(CANONICAL_SONGS['Hot Cross Buns'].degrees.length === 17,
 check(CANONICAL_SONGS['Hot Cross Buns'].degrees.join(',').includes('1,1,1,1,2,2,2,2'),
   'Hot Cross Buns "one a penny / two a penny" must be four repeated notes each');
 
+// "Merrily We Roll Along" is the three-note B A G version of Mary Had a Little
+// Lamb: it must stay inside degrees 1-3 and repeat the opening three times.
+check(CANONICAL_SONGS['Merrily We Roll Along'].degrees.length === 25,
+  'Merrily We Roll Along must be 25 notes');
+check(CANONICAL_SONGS['Merrily We Roll Along'].degrees.every(d => d >= 1 && d <= 3),
+  'Merrily We Roll Along must use only the first three notes (B A G)');
+check(CANONICAL_SONGS['Merrily We Roll Along'].degrees.join(',') ===
+  '3,2,1,2,3,3,3,2,2,2,3,3,3,3,2,1,2,3,3,3,2,2,3,2,1',
+  'Merrily We Roll Along must follow the canonical B A G melody');
+
+// "Lightly Row" is the first section of the German folk song; it steps through
+// the first five notes and must stay within degrees 1-5.
+check(CANONICAL_SONGS['Lightly Row'].degrees.length === 24,
+  'Lightly Row must be 24 notes');
+check(CANONICAL_SONGS['Lightly Row'].degrees.every(d => d >= 1 && d <= 5),
+  'Lightly Row must use only the first five notes');
+check(CANONICAL_SONGS['Lightly Row'].degrees.join(',') ===
+  '5,3,3,4,2,2,1,2,3,4,5,5,5,5,3,3,4,2,2,1,3,5,5,1',
+  'Lightly Row must follow the canonical folk melody');
+
+// Every canonical song must declare durations matching its note count.
+for (const [name, song] of Object.entries(CANONICAL_SONGS)) {
+  check(song.durations.length === song.degrees.length,
+    `Canonical "${name}" durations (${song.durations.length}) must match its ${song.degrees.length} notes`);
+}
+
 // Independent musical check: a shared song must sound like the canonical
 // major-scale shape in CONCERT pitch, not merely in written degrees. This uses
 // each lesson's own pitch plus the instrument's transposition, then compares
