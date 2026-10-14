@@ -552,40 +552,72 @@ function tapTempo(taps) {
 }
 
 // ── TUNER ──────────────────────────────────────────────────────────────────
-// Autocorrelation pitch detection over a time-domain buffer. Returns the
-// detected frequency in Hz, or -1 when the signal is too weak or out of range.
+// Pitch detection over a time-domain buffer. Returns the detected frequency in
+// Hz, or -1 when the signal is too weak or not periodic enough to call.
+//
+// Normalised square difference (McLeod) is used rather than raw
+// autocorrelation: dividing each lag by the overlapping energy keeps the
+// reading stable across quiet and loud playing, and taking the first strong
+// peak avoids the octave errors raw correlation makes on harmonic-rich tones.
 function detectPitch(buffer, sampleRate) {
-  if (!buffer || buffer.length < 2) return -1;
+  if (!buffer || buffer.length < 2 || !sampleRate) return -1;
   const size = buffer.length;
-  let rms = 0;
-  for (let i = 0; i < size; i++) rms += buffer[i] * buffer[i];
-  rms = Math.sqrt(rms / size);
-  if (rms < 0.01) return -1;
 
-  // Trim trailing silence so the correlation isn't dominated by quiet samples.
-  let end = size - 1;
-  while (end > 0 && Math.abs(buffer[end]) < 0.2) end--;
-  const n = end + 1;
-  if (n < 2) return -1;
+  let peak = 0;
+  let energy = 0;
+  for (let i = 0; i < size; i++) {
+    const v = buffer[i];
+    const a = v < 0 ? -v : v;
+    if (a > peak) peak = a;
+    energy += v * v;
+  }
+  // Gate on the signal's own level so a normal-volume mic still registers,
+  // while pure silence and the noise floor do not.
+  if (peak < 0.02 || Math.sqrt(energy / size) < 0.01) return -1;
 
-  const corr = new Array(n).fill(0);
-  for (let lag = 0; lag < n; lag++) {
+  const minLag = Math.max(2, Math.floor(sampleRate / 2000));
+  const maxLag = Math.min(size - 2, Math.ceil(sampleRate / 40));
+  if (maxLag <= minLag) return -1;
+
+  // Prefix energy turns the normalisation denominator into an O(1) lookup.
+  const prefix = new Float64Array(size + 1);
+  for (let i = 0; i < size; i++) prefix[i + 1] = prefix[i] + buffer[i] * buffer[i];
+  const total = prefix[size];
+
+  const nsdf = new Float32Array(maxLag + 1);
+  let bestVal = 0;
+  for (let lag = minLag; lag <= maxLag; lag++) {
+    const denom = prefix[size - lag] + (total - prefix[lag]);
     let sum = 0;
-    for (let i = 0; i < n - lag; i++) sum += buffer[i] * buffer[i + lag];
-    corr[lag] = sum;
+    for (let i = 0; i < size - lag; i++) sum += buffer[i] * buffer[i + lag];
+    const value = denom > 0 ? (2 * sum) / denom : 0;
+    nsdf[lag] = value;
+    if (value > bestVal) bestVal = value;
   }
+  if (bestVal < 0.5) return -1; // too aperiodic to be a played note
 
-  // Walk off the initial dip before hunting for the first strong peak.
-  let d = 0;
-  while (d < n - 1 && corr[d] > corr[d + 1]) d++;
-  let maxVal = -1;
-  let maxPos = -1;
-  for (let i = d; i < n; i++) {
-    if (corr[i] > maxVal) { maxVal = corr[i]; maxPos = i; }
+  // The lowest-lag strong peak is the fundamental; equal later peaks are its
+  // octaves, so prefer the first one within reach of the strongest.
+  const threshold = bestVal * 0.9;
+  let chosen = -1;
+  for (let lag = minLag + 1; lag < maxLag; lag++) {
+    if (nsdf[lag] >= nsdf[lag - 1] && nsdf[lag] > nsdf[lag + 1] && nsdf[lag] >= threshold) {
+      chosen = lag;
+      break;
+    }
   }
-  if (maxPos <= 0) return -1;
+  if (chosen < 0) return -1;
 
-  const freq = sampleRate / maxPos;
+  // Parabolic interpolation for sub-sample precision, so cents stay steady.
+  const y0 = nsdf[chosen - 1];
+  const y1 = nsdf[chosen];
+  const y2 = nsdf[chosen + 1];
+  const curve = y0 - 2 * y1 + y2;
+  const shift = curve !== 0 ? (y0 - y2) / (2 * curve) : 0;
+  const period = chosen + Math.max(-1, Math.min(1, shift));
+  if (period <= 0) return -1;
+
+  const freq = sampleRate / period;
   if (freq < 40 || freq > 2000) return -1;
   return freq;
 }
@@ -2474,6 +2506,18 @@ function renderSongPresentPhase(inst, lesson) {
   const fingeringSvg = Graphics.fingeringSVG(inst.fingeringType, note.fingeringState, instAccent(inst), 84);
   const staffSvg = Graphics.staffSVG({ pos: note.staffStep, accidental: note.accidental, clef: inst.clef, accentColor: instAccent(inst), width: 96 });
 
+  const melodyNotes = [];
+  let highlightIndex = -1;
+  lesson.noteIds.forEach((id, i) => {
+    const n = findLessonById(APP.instrumentId, id);
+    if (!n || typeof n.staffStep !== 'number') return;
+    if (i === APP.songNoteIndex) highlightIndex = melodyNotes.length;
+    melodyNotes.push({ pos: n.staffStep, accidental: n.accidental });
+  });
+  const melodySvg = melodyNotes.length
+    ? Graphics.melodySVG({ notes: melodyNotes, highlightIndex, clef: inst.clef, accentColor: instAccent(inst), width: 320 })
+    : '';
+
   let actionButtons;
   if (hasAudio) {
     actionButtons = `
@@ -2496,6 +2540,10 @@ function renderSongPresentPhase(inst, lesson) {
     <div class="lesson-body">
       <div class="lesson-instruction">${lesson.noteName}</div>
       <div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:16px">Note ${currentNum} of ${totalNotes}</div>
+      ${melodySvg ? `<div class="song-melody-wrap">
+        <div class="present-diagram-label">Sheet music</div>
+        <div class="song-melody-svg">${melodySvg}</div>
+      </div>` : ''}
       <div class="present-layout">
         <div class="present-diagram-wrap">
           <div class="present-diagram-label">Fingering</div>

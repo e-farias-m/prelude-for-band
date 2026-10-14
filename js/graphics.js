@@ -99,6 +99,64 @@ const Graphics = (() => {
     return svg;
   }
 
+  // ── MELODY STAFF (a whole tune on one or more systems) ──────────────────
+  // `notes` is a list of { pos, accidental }. The note at `highlightIndex` is
+  // drawn in the accent colour with a soft halo so the tune reads like sheet
+  // music with the student's current note called out; the rest stay in ink.
+  function melodySVG({ notes = [], highlightIndex = -1, clef = 'treble', accentColor = 'var(--accent-warm)', width = 320, perSystem = 6 }) {
+    if (!notes.length) return '';
+    const VB_W = 360;
+    const SYSTEM_H = 96;
+    const TOP_LINE_Y = 16;
+    const leftX = 58;
+    const lineStartX = 16;
+    const rightX = VB_W - 14;
+    const systems = [];
+    for (let i = 0; i < notes.length; i += perSystem) systems.push(notes.slice(i, i + perSystem));
+    const VB_H = systems.length * SYSTEM_H + 8;
+    const renderH = width * (VB_H / VB_W);
+
+    let svg = `<svg viewBox="0 0 ${VB_W} ${VB_H}" width="${width}" height="${renderH.toFixed(1)}" xmlns="http://www.w3.org/2000/svg">`;
+
+    systems.forEach((systemNotes, s) => {
+      const topLineY = TOP_LINE_Y + s * SYSTEM_H;
+      const y = pos => topLineY + (8 - pos) * HALF;
+
+      for (let p = 0; p <= 8; p += 2) {
+        svg += `<line x1="${lineStartX}" y1="${y(p)}" x2="${rightX}" y2="${y(p)}" stroke="${INK}" stroke-width="1.3"/>`;
+      }
+      if (clef === 'treble') {
+        svg += `<text x="${lineStartX - 12}" y="${y(0) + 8}" font-size="82" font-family="Georgia, 'Apple Symbols', serif" fill="${INK}">&#119070;</text>`;
+      } else {
+        svg += `<text x="${lineStartX - 8}" y="${y(2)}" font-size="54" font-family="Georgia, 'Apple Symbols', serif" fill="${INK}">&#119074;</text>`;
+      }
+
+      const spacing = (rightX - leftX) / systemNotes.length;
+      systemNotes.forEach((note, k) => {
+        const x = leftX + spacing * (k + 0.5);
+        const noteY = y(note.pos);
+        const lit = (s * perSystem + k) === highlightIndex;
+        const color = lit ? accentColor : INK;
+
+        if (lit) svg += `<circle cx="${x}" cy="${noteY}" r="13" fill="${accentColor}" opacity="0.18"/>`;
+        ledgerPositions(note.pos).forEach(p => {
+          svg += `<line x1="${x - 10}" y1="${y(p)}" x2="${x + 10}" y2="${y(p)}" stroke="${color}" stroke-width="1.3"/>`;
+        });
+        if (note.accidental) {
+          svg += `<text x="${x - 15}" y="${noteY + 5}" font-size="18" fill="${color}" font-family="Georgia, serif">${note.accidental}</text>`;
+        }
+        svg += `<ellipse cx="${x}" cy="${noteY}" rx="6.2" ry="4.6" fill="${color}" stroke="${OPEN}" stroke-width="1.2" transform="rotate(-18 ${x} ${noteY})"/>`;
+        const stemUp = note.pos <= 4;
+        const stemX = stemUp ? x + 6 : x - 6;
+        const stemEnd = stemUp ? noteY - 34 : noteY + 34;
+        svg += `<line x1="${stemX}" y1="${noteY}" x2="${stemX}" y2="${stemEnd}" stroke="${color}" stroke-width="1.6"/>`;
+      });
+    });
+
+    svg += `</svg>`;
+    return svg;
+  }
+
   // ── RECORDER FINGERING DIAGRAM ──────────────────────────────────────────
   function recorderFingeringSVG(fingeringState, accentColor = 'var(--accent-warm)', size = 130) {
     const [thumb, h1, h2, h3, h4, h5, h6, h7] = fingeringState;
@@ -428,5 +486,5 @@ const Graphics = (() => {
     }
   }
 
-  return { staffSVG, fingeringSVG, recorderFingeringSVG, fluteFingeringSVG, valveFingeringSVG, tromboneFingeringSVG, woodwindFingeringSVG, instrumentIconSVG, yForPos, ledgerPositions };
+  return { staffSVG, melodySVG, fingeringSVG, recorderFingeringSVG, fluteFingeringSVG, valveFingeringSVG, tromboneFingeringSVG, woodwindFingeringSVG, instrumentIconSVG, yForPos, ledgerPositions };
 })();

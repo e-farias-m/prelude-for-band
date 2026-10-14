@@ -641,6 +641,32 @@ button:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2
   gap: 8px;
 }
 
+.song-melody-wrap {
+  width: 100%;
+  background: var(--diagram-stage);
+  border: 1.5px solid var(--diagram-stage-border);
+  border-radius: var(--r-lg);
+  padding: 14px 10px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.song-melody-svg {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  overflow-x: auto;
+}
+
+.song-melody-svg svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
 .note-name-block {
   margin-bottom: 4px;
 }

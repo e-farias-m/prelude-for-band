@@ -101,6 +101,26 @@ for (const inst of Object.values(CURRICULUM)) {
 check(Graphics.instrumentIconSVG('flute', 56).includes('<ellipse'),
   'flute home icon should show an embouchure to match its diagram');
 
+// ── Melody staff draws every note, wraps, and highlights one ───────────────
+{
+  const notes = [
+    { pos: -2, accidental: null }, { pos: -1, accidental: null },
+    { pos: 0, accidental: null }, { pos: 1, accidental: '♭' },
+    { pos: 2, accidental: null }, { pos: 3, accidental: null },
+    { pos: 4, accidental: null }, { pos: 5, accidental: null },
+  ];
+  const svg = Graphics.melodySVG({ notes, highlightIndex: 3, clef: 'treble', accentColor: '#e0a020', width: 320 });
+  check(isSvg(svg), 'melody staff is valid SVG');
+  const heads = (svg.match(/<ellipse/g) || []).length;
+  check(heads === notes.length, `melody staff should draw one notehead per note (got ${heads})`);
+  const systems = (svg.match(/<text[^>]*>&#11907[04];<\/text>/g) || []).length;
+  check(systems >= 2, 'a melody longer than one system wraps onto more staves');
+  check(svg.includes('#e0a020'), 'the highlighted note uses the accent colour');
+  check(svg.includes('♭'), 'an accidental note prints its accidental');
+  check(!svg.includes('undefined') && !svg.includes('NaN'), 'melody staff contains no undefined/NaN');
+  check(Graphics.melodySVG({ notes: [], highlightIndex: 0 }) === '', 'an empty melody renders nothing');
+}
+
 if (failures.length) console.log(failures.join('\n'));
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

@@ -86,7 +86,7 @@ return { handleAction, renderCompletePhase, CURRICULUM, APP, IMPORTED_SONGS_KEY,
   getSavedInstrument, setSavedInstrument, clearSavedInstrument, renderFocusCard, renderInstrumentGrid,
   showFingeringHelp, hideFingeringHelp, FINGERING_HELP,
   renderFirstSoundScreen, renderLookupScreen, getFirstSoundSeen, markFirstSoundSeen,
-  FIRST_SOUND_CONTENT,
+  FIRST_SOUND_CONTENT, renderSongPresentPhase,
   getTutorialSeen, markTutorialSeen, buildTutorialSlides, renderTutorialScreen, renderMapScreen };
 `);
 const api = sandbox(document, localStorage, {}, navigator, FakeMediaRecorder, URL, Blob, Audio);
@@ -295,6 +295,28 @@ api.APP.instrumentId = 'flute';
   check(!brassChart.includes('lookup-legend'),
     'brass uses valve numbers, so no woodwind abbreviation legend');
   api.APP.instrumentId = 'flute';
+}
+
+// ── 1f. Song step-through shows the whole melody as sheet music ────────────
+{
+  api.APP.instrumentId = 'flute';
+  const song = flute.lessons.find(l => l.id === 'fl-song-3'); // Hot Cross Buns
+  api.APP.songNoteIndex = 0;
+  const html = api.renderSongPresentPhase(flute, song);
+
+  check(html.includes('song-melody-wrap'), 'the song screen shows a sheet-music panel');
+  const melody = (html.match(/song-melody-svg">([\s\S]*?)<\/div>/) || [])[1] || '';
+  const heads = (melody.match(/<ellipse/g) || []).length;
+  check(heads === song.noteIds.length,
+    `the whole melody is drawn (expected ${song.noteIds.length} noteheads, got ${heads})`);
+  check(html.includes('Sheet music'), 'the melody panel is labelled');
+  check((melody.match(/&#119070;/g) || []).length >= 2, 'a long melody wraps onto more than one staff');
+
+  // Advancing the song moves the highlight (accent colour) to the next note.
+  api.APP.songNoteIndex = 3;
+  const later = api.renderSongPresentPhase(flute, song);
+  check(later.includes('Note 4 of ' + song.noteIds.length), 'the step counter advances');
+  check((later.match(/opacity="0.18"/g) || []).length === 1, 'exactly one note is highlighted at a time');
 }
 
 // ── 2. Deleting an imported song clears its saved progress ─────────────────
@@ -770,17 +792,35 @@ const fluteNotes = flute.lessons.filter(l => !l.type);
 {
   const sampleRate = 44100;
   const n = 2048;
-  function sine(freq) {
+  function sine(freq, amp = 0.6) {
     const b = new Float32Array(n);
-    for (let i = 0; i < n; i++) b[i] = 0.6 * Math.sin(2 * Math.PI * freq * i / sampleRate);
+    for (let i = 0; i < n; i++) b[i] = amp * Math.sin(2 * Math.PI * freq * i / sampleRate);
+    return b;
+  }
+  function harmonic(freq, amp) {
+    const b = new Float32Array(n);
+    for (let i = 0; i < n; i++) {
+      const t = i / sampleRate;
+      b[i] = amp * (Math.sin(2 * Math.PI * freq * t) + 0.6 * Math.sin(2 * Math.PI * 2 * freq * t) +
+        0.4 * Math.sin(2 * Math.PI * 3 * freq * t)) / 2;
+    }
     return b;
   }
   const a4 = api.detectPitch(sine(440), sampleRate);
   check(Math.abs(a4 - 440) < 15, 'detects A4 near 440 Hz');
   const d4 = api.detectPitch(sine(293.66), sampleRate);
   check(Math.abs(d4 - 293.66) < 15, 'detects D4 near 293.66 Hz');
+  const quiet = api.detectPitch(sine(440, 0.1), sampleRate);
+  check(Math.abs(quiet - 440) < 15, 'detects a soft A4 a quiet mic used to drop out');
+  const low = api.detectPitch(sine(116.54, 0.15), sampleRate);
+  check(Math.abs(low - 116.54) < 6, 'detects a soft low Bb2 for low brass');
+  check(Math.abs(api.detectPitch(harmonic(220, 0.2), sampleRate) - 220) < 15, 'a harmonic-rich tone keeps its fundamental (no octave error)');
   const silence = new Float32Array(n);
   check(api.detectPitch(silence, sampleRate) === -1, 'silence yields no pitch');
+  let seed = 12345;
+  const noisy = new Float32Array(n);
+  for (let i = 0; i < n; i++) { seed = (seed * 1103515245 + 12345) % 2147483648; noisy[i] = (seed / 2147483648 * 2 - 1) * 0.08; }
+  check(api.detectPitch(noisy, sampleRate) === -1, 'noise floor yields no pitch');
 }
 
 // ── 35. Frequency maps to the nearest note and cents ──────────────────────
