@@ -54,6 +54,9 @@ const APP = {
   fingeringHelp: null,
   // Slide index while the per-instrument "how to use the app" tour is open
   tutorialIndex: 0,
+  // Note/fingering chart: which note is selected, and where to return to
+  lookupId: null,
+  lookupReturn: 'map',
   // Floating metronome/tuner widget: whether it's expanded, and which tab shows
   toolsOpen: false,
   toolTab: 'metronome',
@@ -64,6 +67,7 @@ const NAME_KEY = 'preludeBandName';
 const THEME_KEY = 'preludeBandTheme';
 const INSTRUMENT_KEY = 'preludeBandInstrument';
 const TUTORIAL_KEY = 'preludeBandTutorials';
+const FIRST_SOUND_KEY = 'preludeBandFirstSound';
 
 function getStudentName() { return localStorage.getItem(NAME_KEY) || ''; }
 function setStudentName(name) { localStorage.setItem(NAME_KEY, name); }
@@ -81,6 +85,18 @@ function markTutorialSeen(id) {
   if (!Array.isArray(seen)) seen = [];
   seen.push(id);
   localStorage.setItem(TUTORIAL_KEY, JSON.stringify(seen));
+}
+
+// Instruments where the student has opened the "make your first sound" guide.
+function getFirstSoundSeenMap() {
+  try { return JSON.parse(localStorage.getItem(FIRST_SOUND_KEY) || '{}') || {}; }
+  catch (e) { return {}; }
+}
+function getFirstSoundSeen(instrumentId) { return !!getFirstSoundSeenMap()[instrumentId]; }
+function markFirstSoundSeen(instrumentId) {
+  const seen = getFirstSoundSeenMap();
+  seen[instrumentId] = true;
+  localStorage.setItem(FIRST_SOUND_KEY, JSON.stringify(seen));
 }
 
 // Last instrument the student opened — lets the home screen focus on one
@@ -1185,6 +1201,72 @@ const FINGERING_HELP = {
   L:  { label: 'Left little finger', text: 'An auxiliary key worked by your left pinky. On some notes it doubles as a resonance key.' },
 };
 
+// "Make your first sound" guide, grouped by instrument family. A brand-new
+// player needs a sound before a first note means anything, so this runs before
+// lesson one. Keyed by each instrument's family field.
+const FIRST_SOUND_CONTENT = {
+  brass: {
+    emoji: '🎺',
+    title: 'Make your first buzz',
+    intro: 'On a brass instrument the sound starts with your lips, not the metal. Get a buzz first — the instrument just makes it louder.',
+    steps: [
+      'Shape your lips into a firm "mmm" — corners tight, middle relaxed.',
+      'Take a big breath and blow a fast, steady stream of air.',
+      'You should hear a buzzy, brassy hum from your lips.',
+      'Gently set the mouthpiece on your lips and buzz again.',
+      'Buzz through the instrument — rest the mouthpiece, never press hard.',
+    ],
+    tip: 'No buzz? Tighten the corners and speed up the air. Thin or pinched? Relax the middle of your lips.',
+  },
+  flute: {
+    emoji: '🎶',
+    title: 'Make your first sound',
+    intro: 'The flute makes sound when a thin stream of air splits across the tone hole — not by blowing into it.',
+    steps: [
+      'Relax your lips into a soft "ooo" shape.',
+      'Blow a thin, steady stream of air across the tone hole.',
+      'Aim slightly down, as if blowing across the top of a bottle.',
+      'Turn your head so the air reaches the far edge of the hole.',
+      'Listen for a clear, hollow whistle — that is your sound.',
+    ],
+    tip: 'No sound? Re-aim a little lower and use faster air. Stay relaxed — do not press or bite.',
+  },
+  'single-reed': {
+    emoji: '🎷',
+    title: 'Make your first sound',
+    intro: 'The reed vibrates to make your sound. A good reed setup and a warm, fast airstream are everything.',
+    steps: [
+      'Wet the reed, then line its tip up with the mouthpiece tip.',
+      'Rest your top teeth on the mouthpiece.',
+      'Firm your bottom lip over the bottom teeth like a cushion.',
+      'Take in the mouthpiece: about a third of it on clarinet, more on saxophone.',
+      'Blow warm, fast air — like fogging up a window — and hold a steady tone.',
+    ],
+    tip: 'Squeaks mean the reed is too far in or your lip is too tight. No sound? Use more air and loosen your jaw.',
+  },
+  'double-reed': {
+    emoji: '🎵',
+    title: 'Make your first sound',
+    intro: 'The two reeds vibrate together. Start by making the reed "crow" on its own, then play it on the instrument.',
+    steps: [
+      'Soak the reed in water so it is soft and ready.',
+      'Roll your lips slightly over your teeth to cushion the reed.',
+      'Take just the reed and blow — it should crow like a duck call.',
+      'Now place the reed on the instrument and take it a little at a time.',
+      'Blow a steady, focused airstream and hold a clear tone.',
+    ],
+    tip: 'If there is no crow, open your jaw and use more air. If it is tight and pinched, relax your lips around the reed.',
+  },
+};
+
+function renderFingeringLegend() {
+  const keys = Object.entries(FINGERING_HELP).map(([key, info]) =>
+    `<div class="lookup-legend-row"><span class="fingering-help-key">${key}</span><span class="lookup-legend-text"><strong>${info.label}</strong> — ${info.text}</span></div>`
+  ).join('');
+  return `<div class="lookup-legend">${keys}</div>`;
+}
+
+
 // Show a tap-away explainer for a fingering abbreviation (works on click and tap).
 function showFingeringHelp(key) {
   const info = FINGERING_HELP[key];
@@ -1554,6 +1636,8 @@ function renderPlanCard(instrumentId) {
 function renderMapScreen() {
   const inst = getInstrument(APP.instrumentId);
   const prog = getInstrumentProgress(APP.instrumentId);
+  const fsContent = FIRST_SOUND_CONTENT[inst.family] || FIRST_SOUND_CONTENT.brass;
+  const fsSeen = getFirstSoundSeen(APP.instrumentId);
   const allImported = JSON.parse(localStorage.getItem(IMPORTED_SONGS_KEY) || '{}');
   const instImported = (allImported[APP.instrumentId] || []).filter(s => s && s.noteIds);
   const total = inst.lessons.length + instImported.length;
@@ -1641,6 +1725,14 @@ function renderMapScreen() {
       </div>
       <div class="map-body">
         ${renderPlanCard(APP.instrumentId)}
+        <div class="first-sound-cta${fsSeen ? ' first-sound-cta-seen' : ''}" data-action="open-first-sound">
+          <div class="first-sound-cta-emoji">${fsContent.emoji}</div>
+          <div class="first-sound-cta-text">
+            <div class="first-sound-cta-title">${fsSeen ? 'Warm up your sound' : 'New here? Make your first sound'}</div>
+            <div class="first-sound-cta-sub">${fsSeen ? 'Breathing and tone reminders before you play.' : 'A quick guide to your first sound, before note one.'}</div>
+          </div>
+          <div class="first-sound-cta-arrow">›</div>
+        </div>
         <div class="practice-banner ${practiceReady ? '' : 'practice-banner-locked'}">
           <div class="practice-banner-text">
             <div class="practice-banner-title">Practice drills</div>
@@ -1656,8 +1748,120 @@ function renderMapScreen() {
           <input type="file" id="import-file-input" accept=".xml,.musicxml" style="display:none"/>
         </div>
         <div class="map-guide">
+          <button class="map-guide-link" data-action="open-lookup">🎼 Fingering chart</button>
           <button class="map-guide-link" data-action="open-tutorial">❔ How this app works</button>
         </div>
+      </div>
+    </div>`;
+}
+
+// ── RENDER: FIRST SOUND ────────────────────────────────────────────────────
+// A short, family-specific guide to making the very first sound, shown before
+// note one so a beginner is never stuck at silence. Content comes from
+// FIRST_SOUND_CONTENT, keyed by the instrument's family.
+function renderFirstSoundScreen() {
+  const inst = getInstrument(APP.instrumentId);
+  const content = FIRST_SOUND_CONTENT[inst.family] || FIRST_SOUND_CONTENT.brass;
+  const seen = getFirstSoundSeen(APP.instrumentId);
+  const firstNote = getNoteLessons(APP.instrumentId)[0];
+  const steps = content.steps.map((step, i) => `
+    <li class="first-sound-step">
+      <span class="first-sound-step-num">${i + 1}</span>
+      <span class="first-sound-step-text">${escapeHtml(step)}</span>
+    </li>`).join('');
+  const hearBtn = firstNote
+    ? `<button class="btn btn-secondary btn-wide" data-action="first-sound-hear" style="margin-top:4px">\u{1F50A} Hear a target note</button>`
+    : '';
+
+  return `
+    <div class="screen active first-sound-screen">
+      <div class="app-header">
+        <button class="header-back" data-action="close-first-sound">←</button>
+        <div class="header-title">First sound · ${inst.shortName}</div>
+      </div>
+      <div class="lesson-body">
+        <div class="first-sound-hero">${content.emoji}</div>
+        <div class="first-sound-title">${escapeHtml(content.title)}</div>
+        <div class="first-sound-intro">${escapeHtml(content.intro)}</div>
+        <ol class="first-sound-steps">${steps}</ol>
+        <div class="first-sound-tip"><strong>Tip</strong> ${escapeHtml(content.tip)}</div>
+        ${hearBtn}
+        <div class="action-bar">
+          <button class="btn btn-primary btn-wide" data-action="first-sound-done">${seen ? 'Back to my path' : 'Got it — let\u2019s play!'}</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ── RENDER: FINGERING CHART (LOOKUP) ───────────────────────────────────────
+// A quick-reference chart of every note an instrument teaches. It is a lookup
+// companion — the whole chart is available from the start, with learned notes
+// highlighted, so it works alongside a method book.
+function renderLookupScreen() {
+  const inst = getInstrument(APP.instrumentId);
+  const notes = getNoteLessons(APP.instrumentId);
+  const learnedIds = new Set(getLearnedNotes(APP.instrumentId).map(l => l.id));
+
+  if (!notes.length) {
+    return `
+      <div class="screen active lookup-screen">
+        <div class="app-header">
+          <button class="header-back" data-action="close-lookup">←</button>
+          <div class="header-title">Fingering chart · ${inst.shortName}</div>
+        </div>
+        <div class="lesson-body">
+          <div class="practice-intro">No notes to show yet.</div>
+        </div>
+      </div>`;
+  }
+
+  let selected = notes.find(l => l.id === APP.lookupId);
+  if (!selected) selected = notes[0];
+  APP.lookupId = selected.id;
+
+  const bigFingering = Graphics.fingeringSVG(inst.fingeringType, selected.fingeringState, instAccent(inst), 120);
+  const staffSvg = Graphics.staffSVG({ pos: selected.staffStep, accidental: selected.accidental, clef: inst.clef, accentColor: instAccent(inst), width: 130 });
+
+  const cards = notes.map(l => {
+    const learned = learnedIds.has(l.id);
+    const cls = 'lookup-card'
+      + (l.id === selected.id ? ' lookup-card-active' : '')
+      + (learned ? '' : ' lookup-card-locked');
+    const svg = Graphics.fingeringSVG(inst.fingeringType, l.fingeringState, learned ? instAccent(inst) : '#6b6b7d', 46);
+    return `
+      <button class="${cls}" data-action="lookup-select" data-id="${l.id}" aria-label="${escapeHtml(l.noteName)}">
+        <div class="lookup-card-svg">${svg}</div>
+        <div class="lookup-card-name">${escapeHtml(l.noteName)}</div>
+      </button>`;
+  }).join('');
+
+  const legend = inst.family === 'brass' ? '' : renderFingeringLegend();
+
+  return `
+    <div class="screen active lookup-screen">
+      <div class="app-header">
+        <button class="header-back" data-action="close-lookup">←</button>
+        <div class="header-title">Fingering chart · ${inst.shortName}</div>
+      </div>
+      <div class="lesson-body">
+        <div class="lookup-detail">
+          <div class="lookup-diagrams">
+            <div class="lookup-diagram">
+              <div class="lookup-diagram-label">Fingering</div>
+              ${bigFingering}
+            </div>
+            <div class="lookup-diagram">
+              <div class="lookup-diagram-label">On the staff</div>
+              ${staffSvg}
+            </div>
+          </div>
+          <div class="lookup-name">${escapeHtml(selected.noteName)}</div>
+          <div class="lookup-desc">${escapeHtml(selected.description || '')}</div>
+          <button class="btn btn-secondary btn-wide" data-action="lookup-hear">\u{1F50A} Hear it</button>
+        </div>
+        <div class="lookup-grid-label">${learnedIds.size} of ${notes.length} notes learned</div>
+        <div class="lookup-grid">${cards}</div>
+        ${legend}
       </div>
     </div>`;
 }
@@ -1746,6 +1950,11 @@ function renderPracticeTools() {
         <div class="tool-icon">\u{1F3A4}</div>
         <div class="tool-name">Tuner</div>
         <div class="tool-sub">Check your pitch against the floating tuner.</div>
+      </button>
+      <button class="tool-card" data-action="open-lookup">
+        <div class="tool-icon">\u{1F3BC}</div>
+        <div class="tool-name">Fingering chart</div>
+        <div class="tool-sub">Look up any note's fingering and sound.</div>
       </button>
     </div>`;
 }
@@ -2782,6 +2991,8 @@ function render() {
   else if (APP.screen === 'map') app.innerHTML = renderMapScreen();
   else if (APP.screen === 'practice') app.innerHTML = renderPracticeScreen();
   else if (APP.screen === 'ear') app.innerHTML = renderEarScreen();
+  else if (APP.screen === 'first-sound') app.innerHTML = renderFirstSoundScreen();
+  else if (APP.screen === 'lookup') app.innerHTML = renderLookupScreen();
   else if (APP.screen === 'lesson') app.innerHTML = renderLessonScreen();
   renderToolWidget();
 }
@@ -3434,6 +3645,53 @@ function handleAction(action, el) {
       APP.screen = 'tutorial';
       render();
       break;
+
+    case 'open-first-sound':
+      APP.screen = 'first-sound';
+      render();
+      break;
+
+    case 'close-first-sound':
+      APP.screen = 'map';
+      render();
+      break;
+
+    case 'first-sound-done':
+      markFirstSoundSeen(APP.instrumentId);
+      APP.screen = 'map';
+      render();
+      break;
+
+    case 'first-sound-hear': {
+      const inst = getInstrument(APP.instrumentId);
+      const note = getNoteLessons(APP.instrumentId)[0];
+      if (note) AudioEngine.playInstrumentNote(note.freq, inst.fingeringType, 1.2);
+      break;
+    }
+
+    case 'open-lookup':
+      APP.lookupReturn = APP.screen === 'lesson' ? 'map' : APP.screen;
+      APP.screen = 'lookup';
+      render();
+      break;
+
+    case 'close-lookup':
+      APP.screen = APP.lookupReturn === 'practice' ? 'practice' : 'map';
+      render();
+      break;
+
+    case 'lookup-select':
+      APP.lookupId = el.dataset.id;
+      render();
+      break;
+
+    case 'lookup-hear': {
+      const inst = getInstrument(APP.instrumentId);
+      const notes = getNoteLessons(APP.instrumentId);
+      const note = notes.find(l => l.id === APP.lookupId) || notes[0];
+      if (note) AudioEngine.playInstrumentNote(note.freq, inst.fingeringType, 1.1);
+      break;
+    }
 
     case 'tutorial-next': {
       const slides = buildTutorialSlides(getInstrument(APP.instrumentId));

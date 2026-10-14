@@ -85,6 +85,8 @@ return { handleAction, renderCompletePhase, CURRICULUM, APP, IMPORTED_SONGS_KEY,
   maybeRemindDigest, getTheme, setTheme, applyTheme, toggleTheme, instAccent, Graphics,
   getSavedInstrument, setSavedInstrument, clearSavedInstrument, renderFocusCard, renderInstrumentGrid,
   showFingeringHelp, hideFingeringHelp, FINGERING_HELP,
+  renderFirstSoundScreen, renderLookupScreen, getFirstSoundSeen, markFirstSoundSeen,
+  FIRST_SOUND_CONTENT,
   getTutorialSeen, markTutorialSeen, buildTutorialSlides, renderTutorialScreen, renderMapScreen };
 `);
 const api = sandbox(document, localStorage, {}, navigator, FakeMediaRecorder, URL, Blob, Audio);
@@ -206,6 +208,92 @@ api.APP.instrumentId = 'flute';
     liveHtml.includes('listen-detected'),
     'active listening should show the readout and hit meter');
   api.APP.listen = null;
+  api.APP.instrumentId = 'flute';
+}
+
+// ── 1d. First-sound guide ──────────────────────────────────────────────────
+{
+  // Every instrument maps to a family that has first-sound content.
+  for (const inst of Object.values(api.CURRICULUM)) {
+    const content = api.FIRST_SOUND_CONTENT[inst.family];
+    check(!!content, `${inst.id} (family ${inst.family}) must have first-sound content`);
+    if (content) {
+      check(content.steps.length >= 3 && typeof content.tip === 'string' && content.tip.length > 0,
+        `${inst.id} first-sound content needs several steps and a tip`);
+    }
+  }
+
+  api.APP.instrumentId = 'trumpet';
+  const brassHtml = api.renderFirstSoundScreen();
+  check(brassHtml.includes('Make your first buzz') && brassHtml.includes('first-sound-step'),
+    'trumpet should show the brass buzz guide');
+
+  api.APP.instrumentId = 'flute';
+  const fluteHtml = api.renderFirstSoundScreen();
+  check(fluteHtml.includes('Make your first sound') && fluteHtml.includes('first-sound-step'),
+    'flute should show its own first-sound guide');
+  check(!fluteHtml.includes('Make your first buzz') && !fluteHtml.includes('buzz'),
+    'the flute guide must not use the brass buzzing instructions');
+
+  // The map offers the guide, and opening/completing it remembers the visit.
+  check(!api.getFirstSoundSeen('flute'), 'flute first-sound starts unseen');
+  api.handleAction('open-first-sound', { dataset: {} });
+  check(api.APP.screen === 'first-sound', 'open-first-sound shows the guide');
+
+  const beforeHtml = api.renderFirstSoundScreen();
+  check(beforeHtml.includes("Got it"), 'an unseen guide invites the student to start');
+
+  api.handleAction('first-sound-done', { dataset: {} });
+  check(api.APP.screen === 'map', 'finishing the guide returns to the map');
+  check(api.getFirstSoundSeen('flute') === true, 'finishing the guide marks it seen');
+  check(api.getFirstSoundSeen('trumpet') === false, 'the visit is remembered per instrument');
+
+  const afterHtml = api.renderFirstSoundScreen();
+  check(afterHtml.includes('Back to my path'), 'a seen guide offers to return');
+
+  const mapHtml = api.renderMapScreen();
+  check(mapHtml.includes('data-action="open-first-sound"'),
+    'the map links to the first-sound guide');
+}
+
+// ── 1e. Fingering chart (note lookup) ──────────────────────────────────────
+{
+  api.APP.instrumentId = 'flute';
+  const notes = api.getNoteLessons('flute');
+  api.APP.lookupId = null;
+
+  const html = api.renderLookupScreen();
+  for (const note of notes) {
+    check(html.includes(`data-id="${note.id}"`), `chart should list ${note.noteName} (${note.id})`);
+  }
+  check(html.includes('lookup-card') && html.includes('lookup-hear'),
+    'the chart shows selectable cards and a hear button');
+  check(html.includes('lookup-legend'), 'a woodwind chart explains its fingering abbreviations');
+  check(html.includes(`data-id="${notes[0].id}"`) && html.includes('lookup-card-active'),
+    'the chart defaults to the first note');
+
+  // Selecting a note switches the big diagram and remembers the choice.
+  api.handleAction('lookup-select', { dataset: { id: notes[2].id } });
+  check(api.APP.lookupId === notes[2].id, 'tapping a card selects that note');
+  const selectedHtml = api.renderLookupScreen();
+  check(selectedHtml.includes('lookup-card-active') &&
+    selectedHtml.includes(`${notes[2].noteName}</div>`),
+    'the selected note is highlighted and shown in the detail');
+
+  // Opening from the map returns to the map; brass has no woodwind legend.
+  api.APP.screen = 'map';
+  api.handleAction('open-lookup', { dataset: {} });
+  check(api.APP.screen === 'lookup', 'open-lookup shows the chart');
+  api.handleAction('lookup-select', { dataset: { id: notes[1].id } });
+  check(api.APP.lookupId === notes[1].id, 'selecting a note updates the chart');
+  api.handleAction('close-lookup', { dataset: {} });
+  check(api.APP.screen === 'map', 'closing the chart returns to the map');
+
+  api.APP.instrumentId = 'trumpet';
+  api.APP.lookupId = null;
+  const brassChart = api.renderLookupScreen();
+  check(!brassChart.includes('lookup-legend'),
+    'brass uses valve numbers, so no woodwind abbreviation legend');
   api.APP.instrumentId = 'flute';
 }
 
