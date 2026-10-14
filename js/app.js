@@ -1183,18 +1183,20 @@ function getResolvedSongNote(instrumentId, lesson) {
 }
 
 // The accompaniment for a song is derived from each melody note's scale degree
-// (the number in the note id, 1..8), so it can never drift out of sync with
-// noteIds. Each degree maps to the primary triad it belongs to:
+// (the note's explicit `degree` field), so it can never drift out of sync with
+// noteIds. The degree is reduced to its scale-degree class (1..7) so notes below
+// the tonic or above the octave still pick the right triad:
 //   1,3,5,8 -> I [1,3,5]    4,6 -> IV [4,6,8]    2,7 -> V [5,7,2]
 function chordLessonIds(instrumentId, noteId) {
-  const dash = noteId.lastIndexOf('-');
-  if (dash < 0) return [];
-  const prefix = noteId.slice(0, dash + 1);
-  const deg = parseInt(noteId.slice(dash + 1), 10);
-  const degrees = (deg === 2 || deg === 7) ? [5, 7, 2]
-    : (deg === 4 || deg === 6) ? [4, 6, 8]
+  const note = findLessonById(instrumentId, noteId);
+  const deg = note && note.degree;
+  if (deg == null) return [];
+  const sd = ((deg - 1) % 7 + 7) % 7 + 1;
+  const degrees = (sd === 2 || sd === 7) ? [5, 7, 2]
+    : (sd === 4 || sd === 6) ? [4, 6, 8]
     : [1, 3, 5];
-  return degrees.map(d => prefix + d).filter(id => findLessonById(instrumentId, id));
+  const byDegree = (CURRICULUM[instrumentId] || {}).noteByDegree || {};
+  return degrees.map(d => byDegree[d]).filter(id => id && findLessonById(instrumentId, id));
 }
 
 function getChordFrequencies(instrumentId, lesson, index) {

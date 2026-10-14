@@ -32,6 +32,7 @@ const CURRICULUM = {
     lessons: [
       {
         id: 'tr-1',
+        degree: 1,
         noteName: 'C',
         octave: 4,
         concertNote: 'B\u266d3',
@@ -39,7 +40,7 @@ const CURRICULUM = {
         accidental: null,
         freq: 233.08,
         fingeringState: [false, false, false],
-        description: 'Your first note — no valves! Also known as concert Bb, the fundamental resonance of the trumpet.',
+        description: 'The tonic — no valves! Also known as concert Bb, the fundamental resonance of the trumpet.',
         prompt: 'No valves. C is the 4th partial of the Bb bugle. Buzz a firm middle-register pitch.'
       },
       {
@@ -53,6 +54,7 @@ const CURRICULUM = {
       },
       {
         id: 'tr-2',
+        degree: 2,
         noteName: 'D',
         octave: 4,
         concertNote: 'C4',
@@ -74,6 +76,7 @@ const CURRICULUM = {
       },
       {
         id: 'tr-3',
+        degree: 3,
         noteName: 'E',
         octave: 4,
         concertNote: 'D4',
@@ -86,6 +89,7 @@ const CURRICULUM = {
       },
       {
         id: 'tr-4',
+        degree: 4,
         noteName: 'F',
         octave: 4,
         concertNote: 'E\u266d4',
@@ -98,6 +102,7 @@ const CURRICULUM = {
       },
       {
         id: 'tr-5',
+        degree: 5,
         noteName: 'G',
         octave: 4,
         concertNote: 'F4',
@@ -105,11 +110,12 @@ const CURRICULUM = {
         accidental: null,
         freq: 349.23,
         fingeringState: [false, false, false],
-        description: 'No valves again — the 6th partial of the open tube.',
+        description: 'Your first note — no valves, the 6th partial of the open tube.',
         prompt: 'No valves. Same open fingering as C. Faster air.'
       },
       {
         id: 'tr-6',
+        degree: 6,
         noteName: 'A',
         octave: 4,
         concertNote: 'G4',
@@ -122,6 +128,7 @@ const CURRICULUM = {
       },
       {
         id: 'tr-7',
+        degree: 7,
         noteName: 'B',
         octave: 4,
         concertNote: 'A4',
@@ -134,6 +141,7 @@ const CURRICULUM = {
       },
       {
         id: 'tr-8',
+        degree: 8,
         noteName: 'C',
         octave: 5,
         concertNote: 'B\u266d4',
@@ -149,7 +157,7 @@ const CURRICULUM = {
         audioUrl: null,
         bpm: 100,
         noteName: 'Hot Cross Buns',
-        description: 'A classic English nursery rhyme using E, D, and C — your first three notes.',
+        description: 'A classic English nursery rhyme using E, D, and C — the first three notes of your scale.',
         prompt: 'Step through each note. The pattern repeats. Feel how the valves move in sequence!',
       },
       {
@@ -158,8 +166,8 @@ const CURRICULUM = {
         bpm: 100,
         noteName: 'Merrily We Roll Along',
         prerequisiteIds: ['tr-2', 'tr-3', 'tr-4', 'tr-5', 'tr-6'],
-        description: 'The tune behind "Mary Had a Little Lamb" — a short melody that walks down and back up your first three notes.',
-        prompt: 'Listen for the repeating pattern — just your first three notes, so make every one count!',
+        description: 'The tune behind "Mary Had a Little Lamb" — a short melody that walks down and back up the first three notes of your scale.',
+        prompt: 'Listen for the repeating pattern — just those three notes, so make every one count!',
         noteIds: ['tr-5', 'tr-6', 'tr-5', 'tr-4', 'tr-3', 'tr-5', 'tr-5', 'tr-5', 'tr-6', 'tr-5', 'tr-4', 'tr-4', 'tr-5', 'tr-6', 'tr-5', 'tr-4', 'tr-3', 'tr-5', 'tr-5', 'tr-5', 'tr-3', 'tr-4', 'tr-4', 'tr-2', 'tr-5', 'tr-6', 'tr-5', 'tr-4', 'tr-3'],
         durations: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
       },
@@ -214,6 +222,7 @@ const CURRICULUM = {
     lessons: [
       {
         id: 'fl-1',
+        degree: 1,
         noteName: 'C',
         octave: 4,
         staffStep: -2,
@@ -234,6 +243,7 @@ const CURRICULUM = {
       },
       {
         id: 'fl-2',
+        degree: 2,
         noteName: 'D',
         octave: 4,
         staffStep: -1,
@@ -254,6 +264,7 @@ const CURRICULUM = {
       },
       {
         id: 'fl-3',
+        degree: 3,
         noteName: 'E',
         octave: 4,
         staffStep: 0,
@@ -273,6 +284,7 @@ const CURRICULUM = {
       },
       {
         id: 'fl-4',
+        degree: 4,
         noteName: 'F',
         octave: 4,
         staffStep: 1,
@@ -284,6 +296,7 @@ const CURRICULUM = {
       },
       {
         id: 'fl-5',
+        degree: 5,
         noteName: 'G',
         octave: 4,
         staffStep: 2,
@@ -299,8 +312,8 @@ const CURRICULUM = {
         bpm: 100,
         noteName: 'Merrily We Roll Along',
         prerequisiteIds: ['fl-1', 'fl-2', 'fl-3', 'fl-4'],
-        description: 'The tune behind "Mary Had a Little Lamb" — a short melody that walks down and back up your first three notes.',
-        prompt: 'Listen for the repeating pattern — just your first three notes, so make every one count!',
+        description: 'The tune behind "Mary Had a Little Lamb" — a short melody that walks down and back up the first three notes of your scale.',
+        prompt: 'Listen for the repeating pattern — just those three notes, so make every one count!',
         noteIds: ['fl-4', 'fl-3', 'fl-2', 'fl-1', 'fl-4', 'fl-4', 'fl-4', 'fl-3', 'fl-3', 'fl-3', 'fl-4', 'fl-4', 'fl-4', 'fl-4', 'fl-3', 'fl-2', 'fl-1'],
         durations: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
       },
@@ -315,6 +328,7 @@ const CURRICULUM = {
       },
       {
         id: 'fl-6',
+        degree: 6,
         noteName: 'A',
         octave: 4,
         staffStep: 3,
@@ -326,6 +340,7 @@ const CURRICULUM = {
       },
       {
         id: 'fl-7',
+        degree: 7,
         noteName: 'B',
         octave: 4,
         staffStep: 4,
@@ -337,6 +352,7 @@ const CURRICULUM = {
       },
       {
         id: 'fl-8',
+        degree: 8,
         noteName: 'C',
         octave: 5,
         staffStep: 5,
@@ -388,6 +404,7 @@ const CURRICULUM = {
     lessons: [
       {
         id: 'cl-1',
+        degree: 1,
         noteName: 'C',
         octave: 4,
         concertNote: 'B♭3',
@@ -409,6 +426,7 @@ const CURRICULUM = {
       },
       {
         id: 'cl-2',
+        degree: 2,
         noteName: 'D',
         octave: 4,
         concertNote: 'C4',
@@ -430,6 +448,7 @@ const CURRICULUM = {
       },
       {
         id: 'cl-3',
+        degree: 3,
         noteName: 'E',
         octave: 4,
         concertNote: 'D4',
@@ -442,6 +461,7 @@ const CURRICULUM = {
       },
       {
         id: 'cl-4',
+        degree: 4,
         noteName: 'F',
         octave: 4,
         concertNote: 'E♭4',
@@ -454,6 +474,7 @@ const CURRICULUM = {
       },
       {
         id: 'cl-5',
+        degree: 5,
         noteName: 'G',
         octave: 4,
         concertNote: 'F4',
@@ -478,8 +499,8 @@ const CURRICULUM = {
         bpm: 100,
         noteName: 'Merrily We Roll Along',
         prerequisiteIds: ['cl-1', 'cl-2', 'cl-3', 'cl-4'],
-        description: 'The tune behind "Mary Had a Little Lamb" — a short melody that walks down and back up your first three notes.',
-        prompt: 'Listen for the repeating pattern — just your first three notes, so make every one count!',
+        description: 'The tune behind "Mary Had a Little Lamb" — a short melody that walks down and back up the first three notes of your scale.',
+        prompt: 'Listen for the repeating pattern — just those three notes, so make every one count!',
         noteIds: ['cl-4', 'cl-3', 'cl-2', 'cl-1', 'cl-4', 'cl-4', 'cl-4', 'cl-3', 'cl-3', 'cl-3', 'cl-4', 'cl-4', 'cl-4', 'cl-4', 'cl-3', 'cl-2', 'cl-1'],
         durations: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
       },
@@ -493,6 +514,7 @@ const CURRICULUM = {
       },
       {
         id: 'cl-6',
+        degree: 6,
         noteName: 'A',
         octave: 4,
         concertNote: 'G4',
@@ -505,6 +527,7 @@ const CURRICULUM = {
       },
       {
         id: 'cl-7',
+        degree: 7,
         noteName: 'B',
         octave: 4,
         concertNote: 'A4',
@@ -517,6 +540,7 @@ const CURRICULUM = {
       },
       {
         id: 'cl-8',
+        degree: 8,
         noteName: 'C',
         octave: 5,
         concertNote: 'B♭4',
@@ -568,6 +592,7 @@ const CURRICULUM = {
     lessons: [
       {
         id: 'as-1',
+        degree: 1,
         noteName: 'C',
         octave: 4,
         concertNote: 'E\u266d3',
@@ -589,6 +614,7 @@ const CURRICULUM = {
       },
       {
         id: 'as-2',
+        degree: 2,
         noteName: 'D',
         octave: 4,
         concertNote: 'F3',
@@ -610,6 +636,7 @@ const CURRICULUM = {
       },
       {
         id: 'as-3',
+        degree: 3,
         noteName: 'E',
         octave: 4,
         concertNote: 'G3',
@@ -630,6 +657,7 @@ const CURRICULUM = {
       },
       {
         id: 'as-4',
+        degree: 4,
         noteName: 'F',
         octave: 4,
         concertNote: 'A\u266d3',
@@ -642,6 +670,7 @@ const CURRICULUM = {
       },
       {
         id: 'as-5',
+        degree: 5,
         noteName: 'G',
         octave: 4,
         concertNote: 'B\u266d3',
@@ -658,8 +687,8 @@ const CURRICULUM = {
         bpm: 100,
         noteName: 'Merrily We Roll Along',
         prerequisiteIds: ['as-1', 'as-2', 'as-3', 'as-4'],
-        description: 'The tune behind "Mary Had a Little Lamb" — a short melody that walks down and back up your first three notes.',
-        prompt: 'Listen for the repeating pattern — just your first three notes, so make every one count!',
+        description: 'The tune behind "Mary Had a Little Lamb" — a short melody that walks down and back up the first three notes of your scale.',
+        prompt: 'Listen for the repeating pattern — just those three notes, so make every one count!',
         noteIds: ['as-4', 'as-3', 'as-2', 'as-1', 'as-4', 'as-4', 'as-4', 'as-3', 'as-3', 'as-3', 'as-4', 'as-4', 'as-4', 'as-4', 'as-3', 'as-2', 'as-1'],
         durations: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
       },
@@ -674,6 +703,7 @@ const CURRICULUM = {
       },
       {
         id: 'as-6',
+        degree: 6,
         noteName: 'A',
         octave: 4,
         concertNote: 'C4',
@@ -686,6 +716,7 @@ const CURRICULUM = {
       },
       {
         id: 'as-7',
+        degree: 7,
         noteName: 'B',
         octave: 4,
         concertNote: 'D4',
@@ -698,6 +729,7 @@ const CURRICULUM = {
       },
       {
         id: 'as-8',
+        degree: 8,
         noteName: 'C',
         octave: 5,
         concertNote: 'E\u266d4',
@@ -750,6 +782,7 @@ const CURRICULUM = {
     lessons: [
       {
         id: 'ob-1',
+        degree: 1,
         noteName: 'C',
         octave: 4,
         staffStep: -2,
@@ -770,6 +803,7 @@ const CURRICULUM = {
       },
       {
         id: 'ob-2',
+        degree: 2,
         noteName: 'D',
         octave: 4,
         staffStep: -1,
@@ -790,6 +824,7 @@ const CURRICULUM = {
       },
       {
         id: 'ob-3',
+        degree: 3,
         noteName: 'E',
         octave: 4,
         staffStep: 0,
@@ -809,6 +844,7 @@ const CURRICULUM = {
       },
       {
         id: 'ob-4',
+        degree: 4,
         noteName: 'F',
         octave: 4,
         staffStep: 1,
@@ -820,6 +856,7 @@ const CURRICULUM = {
       },
       {
         id: 'ob-5',
+        degree: 5,
         noteName: 'G',
         octave: 4,
         staffStep: 2,
@@ -835,8 +872,8 @@ const CURRICULUM = {
         bpm: 100,
         noteName: 'Merrily We Roll Along',
         prerequisiteIds: ['ob-1', 'ob-2', 'ob-3', 'ob-4'],
-        description: 'The tune behind "Mary Had a Little Lamb" — a short melody that walks down and back up your first three notes.',
-        prompt: 'Listen for the repeating pattern — just your first three notes, so make every one count!',
+        description: 'The tune behind "Mary Had a Little Lamb" — a short melody that walks down and back up the first three notes of your scale.',
+        prompt: 'Listen for the repeating pattern — just those three notes, so make every one count!',
         noteIds: ['ob-4', 'ob-3', 'ob-2', 'ob-1', 'ob-4', 'ob-4', 'ob-4', 'ob-3', 'ob-3', 'ob-3', 'ob-4', 'ob-4', 'ob-4', 'ob-4', 'ob-3', 'ob-2', 'ob-1'],
         durations: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
       },
@@ -851,6 +888,7 @@ const CURRICULUM = {
       },
       {
         id: 'ob-6',
+        degree: 6,
         noteName: 'A',
         octave: 4,
         staffStep: 3,
@@ -862,6 +900,7 @@ const CURRICULUM = {
       },
       {
         id: 'ob-7',
+        degree: 7,
         noteName: 'B',
         octave: 4,
         staffStep: 4,
@@ -873,6 +912,7 @@ const CURRICULUM = {
       },
       {
         id: 'ob-8',
+        degree: 8,
         noteName: 'C',
         octave: 5,
         staffStep: 5,
@@ -924,6 +964,7 @@ const CURRICULUM = {
     lessons: [
       {
         id: 'bn-1',
+        degree: 1,
         noteName: 'C',
         octave: 3,
         staffStep: 3,
@@ -944,6 +985,7 @@ const CURRICULUM = {
       },
       {
         id: 'bn-2',
+        degree: 2,
         noteName: 'D',
         octave: 3,
         staffStep: 4,
@@ -964,6 +1006,7 @@ const CURRICULUM = {
       },
       {
         id: 'bn-3',
+        degree: 3,
         noteName: 'E',
         octave: 3,
         staffStep: 5,
@@ -983,6 +1026,7 @@ const CURRICULUM = {
       },
       {
         id: 'bn-4',
+        degree: 4,
         noteName: 'F',
         octave: 3,
         staffStep: 6,
@@ -994,6 +1038,7 @@ const CURRICULUM = {
       },
       {
         id: 'bn-5',
+        degree: 5,
         noteName: 'G',
         octave: 3,
         staffStep: 7,
@@ -1009,8 +1054,8 @@ const CURRICULUM = {
         bpm: 100,
         noteName: 'Merrily We Roll Along',
         prerequisiteIds: ['bn-1', 'bn-2', 'bn-3', 'bn-4'],
-        description: 'The tune behind "Mary Had a Little Lamb" — a short melody that walks down and back up your first three notes.',
-        prompt: 'Listen for the repeating pattern — just your first three notes, so make every one count!',
+        description: 'The tune behind "Mary Had a Little Lamb" — a short melody that walks down and back up the first three notes of your scale.',
+        prompt: 'Listen for the repeating pattern — just those three notes, so make every one count!',
         noteIds: ['bn-4', 'bn-3', 'bn-2', 'bn-1', 'bn-4', 'bn-4', 'bn-4', 'bn-3', 'bn-3', 'bn-3', 'bn-4', 'bn-4', 'bn-4', 'bn-4', 'bn-3', 'bn-2', 'bn-1'],
         durations: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
       },
@@ -1025,6 +1070,7 @@ const CURRICULUM = {
       },
       {
         id: 'bn-6',
+        degree: 6,
         noteName: 'A',
         octave: 3,
         staffStep: 8,
@@ -1036,6 +1082,7 @@ const CURRICULUM = {
       },
       {
         id: 'bn-7',
+        degree: 7,
         noteName: 'B',
         octave: 3,
         staffStep: 9,
@@ -1047,6 +1094,7 @@ const CURRICULUM = {
       },
       {
         id: 'bn-8',
+        degree: 8,
         noteName: 'C',
         octave: 4,
         staffStep: 10,
@@ -1096,6 +1144,7 @@ const CURRICULUM = {
     lessons: [
       {
         id: 'tb-1',
+        degree: 1,
         noteName: 'B♭',
         octave: 2,
         staffStep: 2,
@@ -1116,6 +1165,7 @@ const CURRICULUM = {
       },
       {
         id: 'tb-2',
+        degree: 2,
         noteName: 'C',
         octave: 3,
         staffStep: 3,
@@ -1136,6 +1186,7 @@ const CURRICULUM = {
       },
       {
         id: 'tb-3',
+        degree: 3,
         noteName: 'D',
         octave: 3,
         staffStep: 4,
@@ -1147,6 +1198,7 @@ const CURRICULUM = {
       },
       {
         id: 'tb-4',
+        degree: 4,
         noteName: 'E♭',
         octave: 3,
         staffStep: 5,
@@ -1158,13 +1210,14 @@ const CURRICULUM = {
       },
       {
         id: 'tb-5',
+        degree: 5,
         noteName: 'F',
         octave: 3,
         staffStep: 6,
         accidental: null,
         freq: 174.61,
         fingeringState: 1,
-        description: 'F — 1st position. Third harmonic of the open horn.',
+        description: 'Your first note — F in 1st position, the third harmonic of the open horn.',
         prompt: '1st position. F is the 3rd harmonic. Faster air than the low notes.'
       },
       {
@@ -1181,8 +1234,8 @@ const CURRICULUM = {
         bpm: 100,
         noteName: 'Merrily We Roll Along',
         prerequisiteIds: ['tb-3', 'tb-4', 'tb-5', 'tb-6'],
-        description: 'The tune behind "Mary Had a Little Lamb" — a short melody that walks down and back up your first three notes.',
-        prompt: 'Listen for the repeating pattern — just your first three notes, so make every one count!',
+        description: 'The tune behind "Mary Had a Little Lamb" — a short melody that walks down and back up the first three notes of your scale.',
+        prompt: 'Listen for the repeating pattern — just those three notes, so make every one count!',
         noteIds: ['tb-6', 'tb-5', 'tb-4', 'tb-3', 'tb-5', 'tb-6', 'tb-6', 'tb-6', 'tb-5', 'tb-5', 'tb-5', 'tb-6', 'tb-6', 'tb-6', 'tb-5', 'tb-4', 'tb-4', 'tb-3', 'tb-3', 'tb-5', 'tb-6', 'tb-5', 'tb-4', 'tb-3'],
         durations: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
       },
@@ -1196,6 +1249,7 @@ const CURRICULUM = {
       },
       {
         id: 'tb-6',
+        degree: 6,
         noteName: 'G',
         octave: 3,
         staffStep: 7,
@@ -1207,6 +1261,7 @@ const CURRICULUM = {
       },
       {
         id: 'tb-7',
+        degree: 7,
         noteName: 'A',
         octave: 3,
         staffStep: 8,
@@ -1218,14 +1273,15 @@ const CURRICULUM = {
       },
       {
         id: 'tb-8',
+        degree: 8,
         noteName: 'B♭',
         octave: 3,
         staffStep: 9,
         accidental: '♭',
         freq: 233.08,
         fingeringState: 1,
-        description: 'Bb — 1st position. An octave above your first note!',
-        prompt: '1st position. Bb is the 4th partial — one octave above the first note. Faster air, firmer buzz.'
+        description: 'Bb — 1st position. An octave above your low Bb!',
+        prompt: '1st position. Bb is the 4th partial — one octave above Bb2. Faster air, firmer buzz.'
       },
       {
         id: 'tb-song-5', type: 'song',
@@ -1267,6 +1323,7 @@ const CURRICULUM = {
       // ── Note lessons ────────────────────────────────────────────────────
       {
         id: 'fh-1',
+        degree: 1,
         noteName: 'C',
         octave: 4,
         concertNote: 'F3',
@@ -1288,6 +1345,7 @@ const CURRICULUM = {
       },
       {
         id: 'fh-2',
+        degree: 2,
         noteName: 'D',
         octave: 4,
         concertNote: 'G3',
@@ -1309,6 +1367,7 @@ const CURRICULUM = {
       },
       {
         id: 'fh-3',
+        degree: 3,
         noteName: 'E',
         octave: 4,
         concertNote: 'A3',
@@ -1321,6 +1380,7 @@ const CURRICULUM = {
       },
       {
         id: 'fh-4',
+        degree: 4,
         noteName: 'F',
         octave: 4,
         concertNote: 'B\u266d3',
@@ -1333,6 +1393,7 @@ const CURRICULUM = {
       },
       {
         id: 'fh-5',
+        degree: 5,
         noteName: 'G',
         octave: 4,
         concertNote: 'C4',
@@ -1345,6 +1406,7 @@ const CURRICULUM = {
       },
       {
         id: 'fh-6',
+        degree: 6,
         noteName: 'A',
         octave: 4,
         concertNote: 'D4',
@@ -1357,6 +1419,7 @@ const CURRICULUM = {
       },
       {
         id: 'fh-7',
+        degree: 7,
         noteName: 'B',
         octave: 4,
         concertNote: 'E4',
@@ -1369,6 +1432,7 @@ const CURRICULUM = {
       },
       {
         id: 'fh-8',
+        degree: 8,
         noteName: 'C',
         octave: 5,
         concertNote: 'F4',
@@ -1385,7 +1449,7 @@ const CURRICULUM = {
         audioUrl: null,
         bpm: 100,
         noteName: 'Hot Cross Buns',
-        description: 'A classic melody using E, D, and C — your first three notes with valves.',
+        description: 'A classic melody using A, G, and F — the first three notes of your scale with valves.',
         prompt: 'Step through each note. The pattern repeats. Feel how the valves move!',
       },
       {
@@ -1394,8 +1458,8 @@ const CURRICULUM = {
         bpm: 100,
         noteName: 'Merrily We Roll Along',
         prerequisiteIds: ['fh-2', 'fh-3', 'fh-4', 'fh-5', 'fh-6'],
-        description: 'The tune behind "Mary Had a Little Lamb" — a short melody that walks down and back up your first three notes.',
-        prompt: 'Listen for the repeating pattern — just your first three notes, so make every one count!',
+        description: 'The tune behind "Mary Had a Little Lamb" — a short melody that walks down and back up the first three notes of your scale.',
+        prompt: 'Listen for the repeating pattern — just those three notes, so make every one count!',
         noteIds: ['fh-5', 'fh-6', 'fh-5', 'fh-4', 'fh-3', 'fh-5', 'fh-5', 'fh-5', 'fh-6', 'fh-5', 'fh-4', 'fh-4', 'fh-5', 'fh-6', 'fh-5', 'fh-4', 'fh-3', 'fh-5', 'fh-5', 'fh-5', 'fh-3', 'fh-4', 'fh-4', 'fh-2', 'fh-5', 'fh-6', 'fh-5', 'fh-4', 'fh-3'],
         durations: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
       },
@@ -1405,7 +1469,7 @@ const CURRICULUM = {
         type: 'review',
         reviewLessonIds: ['fh-song-1', 'fh-song-2', 'fh-1', 'fh-2', 'fh-3', 'fh-4', 'fh-5', 'fh-song-3', 'fh-song-4'],
         noteName: 'Review 1',
-        description: 'Mix up your first five notes and songs — C, D, E, F, and G.',
+        description: 'Mix up your first five notes and songs — F, G, A, Bb, and C.',
         prompt: '',
       },
       {
@@ -1425,7 +1489,7 @@ const CURRICULUM = {
         bpm: 100,
         noteName: 'Horn Calls',
         prerequisiteIds: ['fh-1', 'fh-2', 'fh-3', 'fh-4', 'fh-5', 'fh-6', 'fh-7', 'fh-8'],
-        description: 'A bright fanfare using all eight notes of your first octave — C to C.',
+        description: 'A bright fanfare using all eight notes of your first octave — F to F.',
         prompt: 'This fanfare leaps between all your notes. Keep the air strong and the valves crisp!',
         noteIds: ['fh-1', 'fh-5', 'fh-8', 'fh-5', 'fh-1', 'fh-7', 'fh-5', 'fh-4', 'fh-3', 'fh-6', 'fh-4', 'fh-5', 'fh-1', 'fh-5', 'fh-8', 'fh-1'],
         durations: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -1436,7 +1500,7 @@ const CURRICULUM = {
         type: 'review',
         reviewLessonIds: ['fh-1', 'fh-2', 'fh-3', 'fh-4', 'fh-5', 'fh-6', 'fh-7', 'fh-8', 'fh-song-5', 'fh-song-6'],
         noteName: 'Review 2',
-        description: 'Review all horn notes and songs together — the full C4 to C5 octave.',
+        description: 'Review all horn notes and songs together — the full F4 to F5 octave.',
         prompt: '',
       },
     ]
@@ -1448,6 +1512,7 @@ const CURRICULUM = {
     lessons: [
       {
         id: 'eu-1',
+        degree: 1,
         noteName: 'B\u266d',
         octave: 2,
         staffStep: 2,
@@ -1468,6 +1533,7 @@ const CURRICULUM = {
       },
       {
         id: 'eu-2',
+        degree: 2,
         noteName: 'C',
         octave: 3,
         staffStep: 3,
@@ -1488,6 +1554,7 @@ const CURRICULUM = {
       },
       {
         id: 'eu-3',
+        degree: 3,
         noteName: 'D',
         octave: 3,
         staffStep: 4,
@@ -1499,6 +1566,7 @@ const CURRICULUM = {
       },
       {
         id: 'eu-4',
+        degree: 4,
         noteName: 'E\u266d',
         octave: 3,
         staffStep: 5,
@@ -1510,17 +1578,19 @@ const CURRICULUM = {
       },
       {
         id: 'eu-5',
+        degree: 5,
         noteName: 'F',
         octave: 3,
         staffStep: 6,
         accidental: null,
         freq: 174.61,
         fingeringState: [false, false, false],
-        description: 'Open again — the 3rd harmonic.',
+        description: 'Your first note — open, the 3rd harmonic.',
         prompt: 'No valves. F is the 3rd harmonic. Faster air.'
       },
       {
         id: 'eu-6',
+        degree: 6,
         noteName: 'G',
         octave: 3,
         staffStep: 7,
@@ -1532,6 +1602,7 @@ const CURRICULUM = {
       },
       {
         id: 'eu-7',
+        degree: 7,
         noteName: 'A',
         octave: 3,
         staffStep: 8,
@@ -1543,13 +1614,14 @@ const CURRICULUM = {
       },
       {
         id: 'eu-8',
+        degree: 8,
         noteName: 'B\u266d',
         octave: 3,
         staffStep: 9,
         accidental: '\u266d',
         freq: 233.08,
         fingeringState: [false, false, false],
-        description: 'Open again — an octave above your first note!',
+        description: 'Open again — an octave above your low Bb!',
         prompt: 'No valves. Bb is the 4th harmonic. Tighter embouchure, faster air.'
       },
       {
@@ -1557,7 +1629,7 @@ const CURRICULUM = {
         audioUrl: null,
         bpm: 100,
         noteName: 'Hot Cross Buns',
-        description: 'A classic English nursery rhyme using D, C, and Bb — your first three notes.',
+        description: 'A classic English nursery rhyme using D, C, and Bb — the first three notes of your scale.',
         prompt: 'Step through each note. Feel the valves changing between combinations!',
       },
       {
@@ -1566,8 +1638,8 @@ const CURRICULUM = {
         bpm: 100,
         noteName: 'Merrily We Roll Along',
         prerequisiteIds: ['eu-3', 'eu-4', 'eu-5', 'eu-6'],
-        description: 'The tune behind "Mary Had a Little Lamb" — a short melody that walks down and back up your first three notes.',
-        prompt: 'Listen for the repeating pattern — just your first three notes, so make every one count!',
+        description: 'The tune behind "Mary Had a Little Lamb" — a short melody that walks down and back up the first three notes of your scale.',
+        prompt: 'Listen for the repeating pattern — just those three notes, so make every one count!',
         noteIds: ['eu-6', 'eu-5', 'eu-4', 'eu-3', 'eu-5', 'eu-6', 'eu-6', 'eu-6', 'eu-5', 'eu-5', 'eu-5', 'eu-6', 'eu-6', 'eu-6', 'eu-5', 'eu-4', 'eu-4', 'eu-3', 'eu-3', 'eu-5', 'eu-6', 'eu-5', 'eu-4', 'eu-3'],
         durations: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
       },
@@ -1620,13 +1692,14 @@ const CURRICULUM = {
     lessons: [
       {
         id: 'tu-1',
+        degree: 1,
         noteName: 'B\u266d',
         octave: 1,
         staffStep: -5,
         accidental: '\u266d',
         freq: 58.27,
         fingeringState: [false, false, false],
-        description: 'Open — your first tuba note. Feel the resonance.',
+        description: 'Open — the tonic tuba note. Feel the resonance.',
         prompt: 'No valves. Full, relaxed breath. Slow, wide air stream.'
       },
       {
@@ -1640,6 +1713,7 @@ const CURRICULUM = {
       },
       {
         id: 'tu-2',
+        degree: 2,
         noteName: 'C',
         octave: 2,
         staffStep: -4,
@@ -1660,6 +1734,7 @@ const CURRICULUM = {
       },
       {
         id: 'tu-3',
+        degree: 3,
         noteName: 'D',
         octave: 2,
         staffStep: -3,
@@ -1671,6 +1746,7 @@ const CURRICULUM = {
       },
       {
         id: 'tu-4',
+        degree: 4,
         noteName: 'E\u266d',
         octave: 2,
         staffStep: -2,
@@ -1682,17 +1758,19 @@ const CURRICULUM = {
       },
       {
         id: 'tu-5',
+        degree: 5,
         noteName: 'F',
         octave: 2,
         staffStep: -1,
         accidental: null,
         freq: 87.31,
         fingeringState: [false, false, false],
-        description: 'Open — the 3rd harmonic of the Bb bugle.',
+        description: 'Your first note — open, the 3rd harmonic of the Bb bugle.',
         prompt: 'No valves. F is the 3rd partial. First note on the staff.'
       },
       {
         id: 'tu-6',
+        degree: 6,
         noteName: 'G',
         octave: 2,
         staffStep: 0,
@@ -1704,6 +1782,7 @@ const CURRICULUM = {
       },
       {
         id: 'tu-7',
+        degree: 7,
         noteName: 'A',
         octave: 2,
         staffStep: 1,
@@ -1715,13 +1794,14 @@ const CURRICULUM = {
       },
       {
         id: 'tu-8',
+        degree: 8,
         noteName: 'B\u266d',
         octave: 2,
         staffStep: 2,
         accidental: '\u266d',
         freq: 116.54,
         fingeringState: [false, false, false],
-        description: 'Open — an octave above where you started!',
+        description: 'Open — an octave above your low Bb!',
         prompt: 'No valves. Bb is on the third line. Faster, more focused air.'
       },
       {
@@ -1729,7 +1809,7 @@ const CURRICULUM = {
         audioUrl: null,
         bpm: 100,
         noteName: 'Hot Cross Buns',
-        description: 'A classic English nursery rhyme using D, C, and Bb — your first three notes below the staff.',
+        description: 'A classic English nursery rhyme using D, C, and Bb — the first three notes of your scale, below the staff.',
         prompt: 'Step through each note. Feel the valves changing between combinations below the staff!',
       },
       {
@@ -1738,8 +1818,8 @@ const CURRICULUM = {
         bpm: 100,
         noteName: 'Merrily We Roll Along',
         prerequisiteIds: ['tu-3', 'tu-4', 'tu-5', 'tu-6'],
-        description: 'The tune behind "Mary Had a Little Lamb" — a short melody that walks down and back up your first three notes.',
-        prompt: 'Listen for the repeating pattern — just your first three notes, so make every one count!',
+        description: 'The tune behind "Mary Had a Little Lamb" — a short melody that walks down and back up the first three notes of your scale.',
+        prompt: 'Listen for the repeating pattern — just those three notes, so make every one count!',
         noteIds: ['tu-6', 'tu-5', 'tu-4', 'tu-3', 'tu-5', 'tu-6', 'tu-6', 'tu-6', 'tu-5', 'tu-5', 'tu-5', 'tu-6', 'tu-6', 'tu-6', 'tu-5', 'tu-4', 'tu-4', 'tu-3', 'tu-3', 'tu-5', 'tu-6', 'tu-5', 'tu-4', 'tu-3'],
         durations: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
       },
@@ -1790,9 +1870,12 @@ const CURRICULUM = {
 
 // ── Shared songs ────────────────────────────────────────────────────────────
 // The shared tunes are defined once here, as scale degrees relative to each
-// instrument's own notes (degree 1 = that instrument's first note lesson).
-// The loop below expands them into every instrument's noteIds/durations, so
-// the melodies cannot drift apart the way hand-entered note lists did.
+// instrument's own notes (degree 1 = that instrument's tonic note lesson).
+// Each note lesson carries an explicit `degree` (its scale position) that is
+// independent of its lesson order and its id suffix, so the range-growth order
+// can change without touching any song. The loop below resolves each song's
+// degrees to the matching note lessons and expands them into noteIds/durations,
+// so the melodies cannot drift apart the way hand-entered note lists did.
 const CANONICAL_SONGS = {
   'Hot Cross Buns': {
     degrees: [3,2,1, 3,2,1, 1,1,1,1, 2,2,2,2, 3,2,1],
@@ -1811,30 +1894,263 @@ const CANONICAL_SONGS = {
     durations: [1,1,2, 1,1,2, 1,1,1,1, 1,1,2, 1,1,2, 1,1,2, 1,1,1,1, 2],
   },
   // Made-up warm-up for the very first note — one pitch in a simple rhythm,
-  // so a beginner has something to play the moment they learn note one.
+  // so a beginner has something to play the moment they learn note one. The
+  // token "FIRST" resolves to whichever note each instrument teaches first
+  // (degree 1 in a scale-first order, degree 5 in standard beginner order).
   'My First Note': {
-    degrees: [1,1,1,1,1,1],
+    degrees: ['FIRST','FIRST','FIRST','FIRST','FIRST','FIRST'],
     durations: [1,1,2, 1,1,2],
   },
-  // Made-up two-note song: steps from the first note to the second and back,
-  // giving the newest note a context a single pitch cannot.
+  // Made-up two-note song: steps between the first two notes taught and back,
+  // giving the newest note a context a single pitch cannot. "FIRST"/"SECOND"
+  // resolve to the first two notes in each instrument's own teaching order.
   'Step Up and Down': {
-    degrees: [1,2,1, 2,1,2, 1,2,1,2, 1],
+    degrees: ['FIRST','SECOND','FIRST', 'SECOND','FIRST','SECOND', 'FIRST','SECOND','FIRST','SECOND', 'FIRST'],
     durations: [1,1,2, 1,1,2, 1,1,1,1, 2],
   },
+  // ── Extended-range practice songs (standard beginner progression) ────────
+  // Each is placed right after the note it introduces, so a brand-new note is
+  // heard in a tune straight away. Degrees are relative to the instrument's
+  // tonic, exactly like the songs above.
+  'Climb the Ladder':  { degrees: [1,2,3,4,5,6,5,4,3,2,1], durations: [1,1,1,1,1,2,1,1,1,1,2] },
+  'Bounce Back':       { degrees: [1,0,1,0,1],             durations: [1,1,1,1,2] },
+  'Deep Down':         { degrees: [-1,1,-1,1],             durations: [1,1,1,2] },
+  'Blue Note':         { degrees: ['0b',1,'0b',1],         durations: [1,1,1,2] },
+  'High and Low':      { degrees: ['7b',1,'7b',1],         durations: [1,1,1,2] },
+  'Octave Leap':       { degrees: [1,8,1,8,1],             durations: [1,1,1,1,2] },
+  'Sharp Turn':        { degrees: ['4#',1,'4#',1],         durations: [1,1,1,2] },
+  'Seventh Heaven':    { degrees: [1,7,1,7,1],             durations: [1,1,1,1,2] },
+  'Flat Third':        { degrees: ['3b',1,'3b',1],         durations: [1,1,1,2] },
+  'Top Note':          { degrees: [9,1,9,1],               durations: [1,1,1,2] },
 };
+
+// Scale degree -> note lesson, per instrument. Keyed by the explicit `degree`
+// field, so the canonical melodies resolve to the right pitch no matter what
+// order the notes are taught in (or what their ids are named).
+// A note's scale position is `degree` (its diatonic step from the tonic, where
+// the tonic is 1) together with an optional `alter` (semitones: -1 = flat,
+// +1 = sharp). Natural notes use the bare degree ("5"); chromatic notes add the
+// accidental ("0b" = lowered leading-tone, "4#" = raised 4th). The degree may be
+// ≤ 0 (below the tonic) or > 8 (above the first octave), so a range that dips
+// below or rises above one octave keeps every note distinct. This key is what
+// songs and chords resolve through, so the teaching order, the octave, and the
+// id suffix are all free to change.
+function degreeKey(degree, alter) {
+  if (!alter) return String(degree);
+  return `${degree}${alter < 0 ? 'b'.repeat(-alter) : '#'.repeat(alter)}`;
+}
+
+// Semitone distance of a *natural* scale degree from the tonic (degree 1),
+// valid for degrees below the tonic (0, -1, ...) and above the octave (> 8).
+// Used to check that a melody really sounds like the scale it claims.
+function scaleSemitones(degree) {
+  const step = degree - 1;
+  const octave = Math.floor(step / 7);
+  const idx = step - octave * 7;
+  return [0, 2, 4, 5, 7, 9, 11][idx] + 12 * octave;
+}
+
+// ── standard beginner teaching order (brass) ────────────────────────
+// The brass instruments teach notes in standard beginner order instead
+// of up the scale: the first note is the 5th of the key, and the range grows
+// outward from there. PROGRESSION_ORDER lists the scale degrees in teaching order.
+//
+// EXTENDED_NOTES adds the notes the scale-first order never taught, and (for the
+// horn) re-spells every note now that its written key is F. A key that already
+// exists as a degree overrides that lesson in place (same id, so the
+// instrument's tune and reviews keep pointing at it); a new key creates a fresh
+// `${prefix}-ext-*` lesson. This block is pure data: it runs *before* the degree
+// index and the canonical song builder below, so nothing downstream needs to
+// know that the order changed.
+const PROGRESSION_ORDER = [5, 4, 3, 2, 1, 6, 0, -1, '0b', '7b', 8, '4#', 7, '3b', 9];
+
+function extNote(noteName, octave, accidental, staffStep, freq, fingering, alter, description, prompt, concertNote) {
+  const note = {
+    noteName, octave, accidental, staffStep, freq,
+    fingeringState: fingering, alter: alter || 0, description, prompt,
+  };
+  if (concertNote) note.concertNote = concertNote;
+  return note;
+}
+
+const EXTENDED_NOTES = {
+  trumpet: {
+    '0':  extNote('B', 3, null, -3, 220.00, [false, true, false], 0, 'B — the leading tone, a half-step below C (valve 2).', 'Valve 2. Half-step below C.', 'A3'),
+    '-1': extNote('A', 3, null, -4, 196.00, [true, true, false], 0, 'A — a whole step below B, valves 1 and 2.', 'Valves 1 and 2.', 'G3'),
+    '0b': extNote('B\u266d', 3, '\u266d', -3, 207.65, [true, false, false], -1, 'Bb — valve 1, the bottom of the beginner range.', 'Valve 1.', 'A\u266d3'),
+    '7b': extNote('B\u266d', 4, '\u266d', 4, 415.30, [true, false, false], -1, 'Bb — valve 1 again, an octave above your low Bb.', 'Valve 1. Faster air.', 'A\u266d4'),
+    '4#': extNote('F#', 4, '#', 1, 329.63, [false, true, false], 1, 'F# — valve 2.', 'Valve 2 only.', 'E4'),
+    '3b': extNote('E\u266d', 4, '\u266d', 0, 277.18, [false, true, true], -1, 'Eb — valves 2 and 3.', 'Valves 2 and 3.', 'D\u266d4'),
+    '9':  extNote('D', 5, null, 6, 523.25, [true, false, false], 0, 'High D — valve 1, the top of the beginner range.', 'Valve 1. Firm air.', 'C5'),
+  },
+  trombone: {
+    '0':  extNote('A', 2, null, 1, 110.00, 2, 0, 'Low A — 2nd position.', '2nd position. Support the low note.'),
+    '-1': extNote('G', 2, null, 0, 98.00, 4, 0, 'Low G — 4th position.', '4th position. Stay relaxed.'),
+    '0b': extNote('A\u266d', 2, '\u266d', 1, 103.83, 3, -1, 'Ab — 3rd position, your first flat.', '3rd position.'),
+    '7b': extNote('A\u266d', 3, '\u266d', 8, 207.65, 3, -1, 'Ab above the staff — 3rd position.', '3rd position, faster air.'),
+    '4#': extNote('E', 3, null, 5, 164.81, 2, 1, 'E natural — 2nd position (or 7th).', '2nd position.'),
+    '3b': extNote('D\u266d', 3, '\u266d', 4, 138.59, 5, -1, 'Db — 5th position.', '5th position.'),
+    '9':  extNote('C', 4, null, 10, 261.63, 3, 0, 'C above the staff — 3rd position.', '3rd position.'),
+  },
+  euphonium: {
+    '0':  extNote('A', 2, null, 1, 110.00, [false, true, false], 0, 'Low A — valve 2, a half-step below Bb.', 'Valve 2.'),
+    '-1': extNote('G', 2, null, 0, 98.00, [true, true, false], 0, 'Low G — valves 1 and 2.', 'Valves 1 and 2.'),
+    '0b': extNote('A\u266d', 2, '\u266d', 1, 103.83, [true, false, false], -1, 'Ab — valve 1, your first flat.', 'Valve 1.'),
+    '7b': extNote('A\u266d', 3, '\u266d', 8, 207.65, [true, false, false], -1, 'Ab above the staff — valve 1.', 'Valve 1.'),
+    '4#': extNote('E', 3, null, 5, 164.81, [false, true, false], 1, 'E natural — valve 2.', 'Valve 2.'),
+    '3b': extNote('D\u266d', 3, '\u266d', 4, 138.59, [false, true, true], -1, 'Db — valves 2 and 3.', 'Valves 2 and 3.'),
+    '9':  extNote('C', 4, null, 10, 261.63, [true, false, true], 0, 'C above the staff — valves 1 and 3.', 'Valves 1 and 3.'),
+  },
+  tuba: {
+    '0':  extNote('A', 1, null, -6, 55.00, [false, true, false], 0, 'Low A — valve 2, a half-step below Bb.', 'Valve 2.'),
+    '-1': extNote('G', 1, null, -7, 49.00, [true, true, false], 0, 'Low G — valves 1 and 2.', 'Valves 1 and 2.'),
+    '0b': extNote('A\u266d', 1, '\u266d', -6, 51.91, [true, false, false], -1, 'Ab — valve 1, your first flat.', 'Valve 1.'),
+    '7b': extNote('A\u266d', 2, '\u266d', 1, 103.83, [true, false, false], -1, 'Ab in the staff — valve 1.', 'Valve 1.'),
+    '4#': extNote('E', 2, null, -2, 82.41, [false, true, false], 1, 'E natural — valve 2.', 'Valve 2.'),
+    '3b': extNote('D\u266d', 2, '\u266d', -3, 69.30, [false, true, true], -1, 'Db — valves 2 and 3.', 'Valves 2 and 3.'),
+    '9':  extNote('C', 3, null, 3, 130.81, [true, false, true], 0, 'C in the staff — valves 1 and 3.', 'Valves 1 and 3.'),
+  },
+  // Horn moves to written F: the tonic is now F4, every note is re-spelled,
+  // and (like every transposing instrument here) `freq` stores the concert
+  // pitch it actually sounds, so `freq` = written pitch − 7 semitones.
+  'french-horn': {
+    '1':  extNote('F', 4, null, 1, 233.08, [true, false, false], 0, 'F — your first note, valve 1.', 'Valve 1. Buzz a firm middle-register pitch.', 'B\u266d3'),
+    '2':  extNote('G', 4, null, 2, 261.63, [false, false, false], 0, 'G — open, a whole step above F.', 'No valves. 6th partial.', 'C4'),
+    '3':  extNote('A', 4, null, 3, 293.66, [true, true, false], 0, 'A — valves 1 and 2.', 'Valves 1 and 2.', 'D4'),
+    '4':  extNote('B\u266d', 4, '\u266d', 4, 311.13, [true, false, false], 0, 'Bb — valve 1, the flat of the written key.', 'Valve 1.', 'E\u266d4'),
+    '5':  extNote('C', 5, null, 5, 349.23, [false, false, false], 0, 'C — open, the 8th partial.', 'No valves. Faster air.', 'F4'),
+    '6':  extNote('D', 5, null, 6, 392.00, [false, false, false], 0, 'D — open, the 9th partial.', 'No valves. Keep the air fast.', 'G4'),
+    '7':  extNote('E', 5, null, 7, 440.00, [false, false, false], 0, 'E — open, the 10th partial.', 'No valves.', 'A4'),
+    '8':  extNote('F', 5, null, 8, 466.16, [true, false, false], 0, 'F — an octave above your first note, valve 1.', 'Valve 1. Firm embouchure.', 'B\u266d4'),
+    '0':  extNote('E', 4, null, 0, 220.00, [false, false, false], 0, 'Low E — open, the 5th partial.', 'No valves.', 'A3'),
+    '-1': extNote('D', 4, null, -1, 196.00, [true, false, false], 0, 'Low D — valve 1.', 'Valve 1.', 'G3'),
+    '0b': extNote('E\u266d', 4, '\u266d', 0, 207.65, [false, true, false], -1, 'Eb — valve 2, your first flat.', 'Valve 2.', 'A\u266d3'),
+    '7b': extNote('E\u266d', 5, '\u266d', 7, 415.30, [false, true, false], -1, 'Eb above the staff — valve 2.', 'Valve 2.', 'A\u266d4'),
+    '4#': extNote('B', 4, null, 4, 329.63, [false, true, false], 1, 'B natural — valve 2.', 'Valve 2.', 'E4'),
+    '3b': extNote('A\u266d', 4, '\u266d', 3, 277.18, [false, true, true], -1, 'Ab — valves 2 and 3.', 'Valves 2 and 3.', 'D\u266d4'),
+    '9':  extNote('G', 5, null, 9, 523.25, [false, false, false], 0, 'High G — open, the top of the beginner range.', 'No valves. Support the note.', 'C5'),
+  },
+};
+
+// Short practice songs introduced alongside each new note, so every note in the
+// progression is immediately heard in a tune. Degrees are scale degrees, and
+// songs are shared: the map below schedules them by teaching step.
+const PROGRESSION_SONG_META = {
+  'Climb the Ladder': { description: 'Steps up and down your first six notes.', prompt: 'Keep every step even.' },
+  'Bounce Back': { description: 'Bounce between your tonic and the note just below it.', prompt: 'Small, controlled moves.' },
+  'Deep Down': { description: 'Reach down to the lowest note of your range and back.', prompt: 'Relax and support the low note.' },
+  'Blue Note': { description: 'A flat sitting a whole step below your tonic.', prompt: 'Keep the flat centred and match it to the tonic.' },
+  'High and Low': { description: 'Leap between a high flat and your tonic.', prompt: 'Big, smooth moves.' },
+  'Octave Leap': { description: 'Leap a full octave from your tonic.', prompt: 'Support the top note without pinching.' },
+  'Sharp Turn': { description: 'A raised note alternating with your tonic.', prompt: 'A half-step above the 4th degree.' },
+  'Seventh Heaven': { description: 'The leading tone leaning home to the tonic.', prompt: 'Hear the pull to resolve.' },
+  'Flat Third': { description: 'A lowered third colours the tonic.', prompt: 'Match the pitch to your tonic.' },
+  'Top Note': { description: 'The highest note in your range.', prompt: 'Firm air, steady support.' },
+};
+
+const PROGRESSION_SCHEDULE = {
+  1:  { songs: ['My First Note'] },
+  2:  { songs: ['Step Up and Down'] },
+  5:  { songs: ['Hot Cross Buns', 'Merrily We Roll Along', 'Lightly Row'], reviews: ['Review 1'] },
+  6:  { songs: ['Climb the Ladder'] },
+  7:  { songs: ['Bounce Back'] },
+  8:  { songs: ['Deep Down'] },
+  9:  { songs: ['Blue Note'] },
+  10: { songs: ['High and Low'] },
+  11: { songs: ['Octave Leap'] },
+  12: { songs: ['Sharp Turn'] },
+  13: { songs: ['Seventh Heaven'] },
+  14: { songs: ['Flat Third'] },
+  15: { songs: ['Top Note'] },
+};
+
+for (const instId of Object.keys(EXTENDED_NOTES)) {
+  const inst = CURRICULUM[instId];
+  if (!inst) continue;
+  const prefix = ((inst.lessons.find(l => !l.type && /-\d+$/.test(l.id)) || {}).id || '').replace(/-\d+$/, '');
+
+  const byDegreeKey = {};
+  for (const lesson of inst.lessons) {
+    if (!lesson.type && lesson.degree != null) {
+      byDegreeKey[degreeKey(lesson.degree, lesson.alter || 0)] = lesson;
+    }
+  }
+  for (const [key, spec] of Object.entries(EXTENDED_NOTES[instId])) {
+    if (byDegreeKey[key]) {
+      Object.assign(byDegreeKey[key], spec);
+    } else {
+      const m = /^(-?\d+)([b#]*)$/.exec(key);
+      let alter = 0;
+      for (const c of m[2]) alter += c === 'b' ? -1 : 1;
+      const id = `${prefix}-ext-${key.replace(/-/g, 'neg').replace(/b/g, 'flat').replace(/#/g, 'sharp')}`;
+      byDegreeKey[key] = Object.assign({ id, degree: parseInt(m[1], 10), alter }, spec);
+    }
+  }
+
+  const songs = {};
+  const reviews = {};
+  for (const lesson of inst.lessons) {
+    if (lesson.type === 'song') songs[lesson.noteName] = lesson;
+    else if (lesson.type === 'review') reviews[lesson.noteName] = lesson;
+  }
+  for (const step of Object.values(PROGRESSION_SCHEDULE)) {
+    for (const name of step.songs || []) {
+      if (songs[name] || !CANONICAL_SONGS[name]) continue;
+      const meta = PROGRESSION_SONG_META[name] || {};
+      songs[name] = {
+        id: `${prefix}-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
+        type: 'song', audioUrl: null, bpm: 100, noteName: name,
+        description: meta.description || '', prompt: meta.prompt || '',
+      };
+    }
+  }
+
+  const lessons = [];
+  PROGRESSION_ORDER.forEach((key, i) => {
+    const step = i + 1;
+    if (byDegreeKey[key]) lessons.push(byDegreeKey[key]);
+    const sched = PROGRESSION_SCHEDULE[step];
+    if (sched) {
+      for (const name of sched.songs || []) {
+        if (songs[name]) { lessons.push(songs[name]); delete songs[name]; }
+      }
+      for (const name of sched.reviews || []) {
+        if (reviews[name]) { lessons.push(reviews[name]); delete reviews[name]; }
+      }
+    }
+  });
+  for (const song of Object.values(songs)) lessons.push(song);       // instrument tune
+  for (const review of Object.values(reviews)) lessons.push(review); // Review 2
+  inst.lessons = lessons;
+}
+
+for (const inst of Object.values(CURRICULUM)) {
+  const byDegree = {};
+  for (const lesson of inst.lessons) {
+    if (!lesson.type && lesson.degree != null) {
+      byDegree[degreeKey(lesson.degree, lesson.alter || 0)] = lesson.id;
+    }
+  }
+  inst.noteByDegree = byDegree;
+}
 
 for (const inst of Object.values(CURRICULUM)) {
   for (const lesson of inst.lessons) {
     if (lesson.type !== 'song') continue;
     const song = CANONICAL_SONGS[lesson.noteName];
     if (!song) continue;
-    const prefix = lesson.id.replace(/-song-\d+$/, '');
-    lesson.noteIds = song.degrees.map(d => `${prefix}-${d}`);
+    // "FIRST"/"SECOND" resolve to the instrument's own teaching order (note 1
+    // and note 2 taught), everything else through the scale-degree index.
+    const ordered = inst.lessons.filter(l => !l.type && l.degree != null);
+    const idFor = d => {
+      if (d === 'FIRST') return (ordered[0] || {}).id;
+      if (d === 'SECOND') return (ordered[1] || {}).id;
+      return inst.noteByDegree[String(d)];
+    };
+    const noteIds = song.degrees.map(idFor).filter(Boolean);
+    lesson.noteIds = noteIds;
     lesson.durations = song.durations.slice();
-    lesson.prerequisiteIds = [...new Set(song.degrees)]
-      .sort((a, b) => a - b)
-      .map(d => `${prefix}-${d}`);
+    lesson.prerequisiteIds = [...new Set(noteIds)];
   }
 }
 
