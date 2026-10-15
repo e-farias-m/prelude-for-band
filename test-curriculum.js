@@ -172,7 +172,7 @@ const REF = {
   trumpet: {
     'tr-1': [F, F, F], 'tr-2': [T, F, T], 'tr-3': [T, T, F], 'tr-4': [T, F, F],
     'tr-5': [F, F, F], 'tr-6': [T, T, F], 'tr-7': [F, T, F], 'tr-8': [F, F, F],
-    // standard beginner additions (chart: tunableapp.com trumpet fingering)
+    // Extended-range additions (chart: tunableapp.com trumpet fingering)
     'tr-ext-0': [F, T, F],      // B3   2
     'tr-ext-neg1': [T, T, F],   // A3   12
     'tr-ext-0flat': [T, F, F],  // Bb3  1
@@ -430,7 +430,7 @@ for (const inst of Object.values(CURRICULUM)) {
   }
 }
 
-// The standard beginner progression schedules a practice song after each new
+// The extended-range progression schedules a practice song after each new
 // note. Every scheduled name must be a real canonical song and must actually
 // appear on every instrument that follows the progression (a typo in the
 // schedule would otherwise silently drop the song).

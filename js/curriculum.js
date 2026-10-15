@@ -1896,7 +1896,7 @@ const CANONICAL_SONGS = {
   // Made-up warm-up for the very first note — one pitch in a simple rhythm,
   // so a beginner has something to play the moment they learn note one. The
   // token "FIRST" resolves to whichever note each instrument teaches first
-  // (degree 1 in a scale-first order, degree 5 in standard beginner order).
+  // (degree 1 in a scale-first order, degree 5 in the standard beginner order).
   'My First Note': {
     degrees: ['FIRST','FIRST','FIRST','FIRST','FIRST','FIRST'],
     durations: [1,1,2, 1,1,2],
@@ -1908,7 +1908,7 @@ const CANONICAL_SONGS = {
     degrees: ['FIRST','SECOND','FIRST', 'SECOND','FIRST','SECOND', 'FIRST','SECOND','FIRST','SECOND', 'FIRST'],
     durations: [1,1,2, 1,1,2, 1,1,1,1, 2],
   },
-  // ── Extended-range practice songs (standard beginner progression) ────────
+  // ── Extended-range practice songs (extended-range progression) ────────
   // Each is placed right after the note it introduces, so a brand-new note is
   // heard in a tune straight away. Degrees are relative to the instrument's
   // tonic, exactly like the songs above.
@@ -1956,8 +1956,8 @@ function scaleSemitones(degree) {
   return [0, 2, 4, 5, 7, 9, 11][idx] + 12 * octave;
 }
 
-// ── standard beginner teaching order (brass) ────────────────────────
-// The brass instruments teach notes in standard beginner order instead
+// ── Standard beginner teaching order (brass) ────────────────────────
+// The brass instruments teach notes in a standard beginner progression instead
 // of up the scale: the first note is the 5th of the key, and the range grows
 // outward from there. PROGRESSION_ORDER lists the scale degrees in teaching order.
 //

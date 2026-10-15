@@ -15,9 +15,9 @@ re-check the linked sources before relying on them.
   reviews, practice plan & sprint, and a weekly digest for parents/teachers.
 - MusicXML import/export.
 
-## Direct competitor — HL companion Interactive (HL companion, Hal Leonard)
+## Direct competitor — Hal Leonard method Interactive (HL method companion, Hal Leonard)
 
-Cloud-based companion to the *standard beginner method* method book.
+Cloud-based companion to the *Hal Leonard method* method book.
 
 - **Music Studio:** professional accompaniments, recording, tempo control,
   built-in tuner.
@@ -28,12 +28,11 @@ Cloud-based companion to the *standard beginner method* method book.
   customizable resources — included free with every method book.
 - Digital method books (Book 1 for band and strings).
 
-**Pricing:** HL companion itself is bundled free with an method book; SoundCheck/MatchMySound
-is a **student subscription ($4.99/month)**, with teacher access free alongside
-active student subscriptions.
+**Pricing:** the publisher companion itself is bundled free with a method book;
+SoundCheck/MatchMySound is a **student subscription ($4.99/month)**, with teacher
+access free alongside active student subscriptions.
 
-Sources:
-<https://matchmysound.kb.help/matchmysound-subscription-pricing>
+Sources: <https://matchmysound.kb.help/matchmysound-subscription-pricing>
 
 ## School platform — SmartMusic / MakeMusic Cloud (MakeMusic)
 
@@ -73,7 +72,7 @@ Sources: <https://www.thegeeksclub.com/platforms/practis-music-practice-software
 
 ## Positioning
 
-| Axis | HL companion / SmartMusic | Prelude for Band |
+| Axis | HL method companion / SmartMusic | Prelude for Band |
 | --- | --- | --- |
 | Price | Book/account + $4.99–$39.99 | Free, no account |
 | Offline | Cloud-first | Offline PWA |
@@ -90,7 +89,7 @@ moment before a family buys into a method book or school platform.
 1. **Rhythm / intonation scoring** — competitors score rhythm and intonation;
    ours is pitch-only.
 2. **Sight-reading** — SmartMusic's Sight Reading Builder is unmatched here.
-3. **Teacher assignments & gradebook** — owned by HL companion/SmartMusic; our digest is
+3. **Teacher assignments & gradebook** — owned by HL method companion/SmartMusic; our digest is
    a much lighter artifact.
-4. **Recorded accompaniments** — HL companion's Music Studio strength; we derive simple
+4. **Recorded accompaniments** — HL method companion's Music Studio strength; we derive simple
    chords from scale degrees.
