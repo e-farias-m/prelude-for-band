@@ -225,7 +225,7 @@ const Graphics = (() => {
   // Simplified key pads on a tube — same visual language as recorder but with
   // a distinct label and smaller "key" circles to suggest pads not holes.
   function woodwindFingeringSVG(fingeringState, accentColor = 'var(--accent-flute)', size = 130) {
-    const [thumb, h1, h2, h3, h4, h5, h6, h7, extra, extra2] = fingeringState;
+    const [thumb, h1, h2, h3, h4, h5, h6, h7, extra, extra2, sideKey, lhp2, rthumb, rp2, halfHole] = fingeringState;
     const cx = 65;
     const tubeTop = 18, tubeBottom = 215, tubeW = 30;
     const allKeys = [h1, h2, h3, h4, h5, h6, h7];
@@ -266,11 +266,48 @@ const Graphics = (() => {
       svg += labeledKey(ex2X, ex2Y, 12, extra2, accentColor, 'L');
     }
 
-    // Finger keys 1-7 down the tube — circles for key pads
+    // Top side key (sideKey) — offset left at h2's height. Clarinet A/G# throat
+    // key, worked by the left index finger.
+    if (sideKey !== undefined) {
+      const skX = cx - tubeW/2 - 22, skY = keyYs[2];
+      svg += `<line x1="${cx - tubeW/2 - 2}" y1="${skY}" x2="${skX + 11}" y2="${skY}" stroke="${INK_DIM}" stroke-width="1" stroke-dasharray="2,2"/>`;
+      svg += labeledKey(skX, skY, 11, sideKey, accentColor, 'A');
+    }
+
+    // Second left little-finger key (lhp2) — offset left, lower. Used when the
+    // standard left-pinky key is not enough (sax/oboe low B or Bb).
+    if (lhp2 !== undefined) {
+      const lpX = cx - tubeW/2 - 22, lpY = keyYs[5];
+      svg += `<line x1="${cx - tubeW/2 - 2}" y1="${lpY}" x2="${lpX + 11}" y2="${lpY}" stroke="${INK_DIM}" stroke-width="1" stroke-dasharray="2,2"/>`;
+      svg += labeledKey(lpX, lpY, 11, lhp2, accentColor, 'L2');
+    }
+
+    // Right-thumb key (rthumb) — offset right at h2's height. Bassoon right-thumb
+    // keys (low Bb, F#, G#), worked by the right thumb.
+    if (rthumb !== undefined) {
+      const rtX = cx + tubeW/2 + 22, rtY = keyYs[2];
+      svg += `<line x1="${cx + tubeW/2 + 2}" y1="${rtY}" x2="${rtX - 11}" y2="${rtY}" stroke="${INK_DIM}" stroke-width="1" stroke-dasharray="2,2"/>`;
+      svg += labeledKey(rtX, rtY, 11, rthumb, accentColor, 'RT');
+    }
+
+    // Second right little-finger key (rp2, the low E-flat key) — offset right,
+    // lower. The right pinky works two keys (a "C" key and the E-flat key), so
+    // a low E-flat stays distinct from the low C that shares the same pinky.
+    if (rp2 !== undefined) {
+      const rpX = cx + tubeW/2 + 22, rpY = keyYs[4];
+      svg += `<line x1="${cx + tubeW/2 + 2}" y1="${rpY}" x2="${rpX - 11}" y2="${rpY}" stroke="${INK_DIM}" stroke-width="1" stroke-dasharray="2,2"/>`;
+      svg += labeledKey(rpX, rpY, 11, rp2, accentColor, 'Eb');
+    }
+
+    // Finger keys 1-7 down the tube — circles for key pads. `halfHole` draws the
+    // top key as half-covered (a vent), which no filled/open pad can express.
     allKeys.forEach((pressed, i) => {
       const y = keyYs[i];
       const r = i < 3 ? 9 : 7.5;
       svg += `<circle cx="${cx}" cy="${y}" r="${r}" fill="${pressed ? accentColor : OPEN}" stroke="${accentColor}" stroke-width="2.5"/>`;
+      if (i === 0 && halfHole) {
+        svg += `<path d="M ${cx} ${y - r} A ${r} ${r} 0 0 0 ${cx} ${y + r} Z" fill="${accentColor}" stroke="${accentColor}" stroke-width="2.5" class="fingering-key" data-action="fingering-key" data-key="HALF"/>`;
+      }
     });
 
     svg += `</svg>`;
@@ -283,7 +320,7 @@ const Graphics = (() => {
   // hanging below. (The flute data never uses the generic register/little-
   // finger slots, so they are not drawn here.)
   function fluteFingeringSVG(fingeringState, accentColor = 'var(--accent-flute)', size = 130) {
-    const [thumb, h1, h2, h3, h4, h5, h6, h7] = fingeringState;
+    const [thumb, h1, h2, h3, h4, h5, h6, h7, rp2] = fingeringState;
     const tubeY = 62, tubeH = 26, tubeLeft = 16, tubeRight = 224;
     const keys = [h1, h2, h3, h4, h5, h6, h7];
     const keyXs = [86, 108, 128, 154, 176, 196, 214];
@@ -312,6 +349,14 @@ const Graphics = (() => {
       const thX = keyXs[0], thY = tubeY + tubeH + 26;
       svg += `<line x1="${thX}" y1="${tubeY + tubeH}" x2="${thX}" y2="${thY - 13}" stroke="${INK_DIM}" stroke-width="1" stroke-dasharray="2,2"/>`;
       svg += labeledKey(thX, thY, 13, thumb, accentColor, 'TH');
+    }
+
+    // Second right little-finger key (the low E-flat key) — hangs below the
+    // foot joint, so the E-flat no longer looks like the low C.
+    if (rp2 !== undefined) {
+      const rpX = keyXs[6], rpY = tubeY + tubeH + 26;
+      svg += `<line x1="${rpX}" y1="${tubeY + tubeH}" x2="${rpX}" y2="${rpY - 11}" stroke="${INK_DIM}" stroke-width="1" stroke-dasharray="2,2"/>`;
+      svg += labeledKey(rpX, rpY, 11, rp2, accentColor, 'Eb');
     }
 
     // Foot joint hint (right end)

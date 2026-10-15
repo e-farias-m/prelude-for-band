@@ -139,10 +139,10 @@ api.APP.instrumentId = 'flute';
     'the review song quiz should ask about a note, not the song itself');
 
   // The practice songs sit immediately after the first two note lessons.
-  check(flute.lessons[0].id === 'fl-1' && flute.lessons[1].type === 'song' &&
+  check(flute.lessons[0].id === 'fl-5' && flute.lessons[1].type === 'song' &&
     flute.lessons[1].noteName === 'My First Note',
     'flute should have a practice song right after note 1');
-  check(flute.lessons[2].id === 'fl-2' && flute.lessons[3].type === 'song' &&
+  check(flute.lessons[2].id === 'fl-4' && flute.lessons[3].type === 'song' &&
     flute.lessons[3].noteName === 'Step Up and Down',
     'flute should have a practice song right after note 2');
 }

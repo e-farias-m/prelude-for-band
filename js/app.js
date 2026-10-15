@@ -1233,6 +1233,11 @@ const FINGERING_HELP = {
   TH: { label: 'Thumb', text: 'Your left thumb. It covers the back hole on recorder, works the thumb key on other woodwinds, or the Bb lever on flute.' },
   R:  { label: 'Register key', text: 'The octave (speaker) key just above the thumb \u2014 press it to jump up into the higher register.' },
   L:  { label: 'Left little finger', text: 'An auxiliary key worked by your left pinky. On some notes it doubles as a resonance key.' },
+  A:  { label: 'A side key', text: 'The throat A key, worked by your left index finger \u2014 it opens the clarinet\u2019s A and G# in the upper register.' },
+  L2: { label: 'Second left little finger key', text: 'A second key in the left little-finger group. It adds the low B or Bb that the main key cannot reach alone.' },
+  RT: { label: 'Right-thumb key', text: 'A key worked by your right thumb, such as the bassoon low Bb, F#, or G#.' },
+  Eb: { label: 'E\u266d key', text: 'A second key in the right little-finger group. Your right pinky rests here for the low E-flat; the low C uses the other pinky key.' },
+  HALF: { label: 'Half-hole', text: 'Roll your left index finger so the hole is only half covered. This vent is needed for certain middle-register notes.' },
 };
 
 // "Make your first sound" guide, grouped by instrument family. A brand-new

@@ -521,7 +521,7 @@ const CURRICULUM = {
         staffStep: 3,
         accidental: null,
         freq: 392.00,
-        fingeringState: [false, true, false, false, false, false, false, false, false],
+        fingeringState: [false, false, false, false, false, false, false, false, false, undefined, true],
         description: 'A — top A side key with left index.',
         prompt: 'A key (left index side key). Thumb off. All other keys open.'
       },
@@ -1922,6 +1922,12 @@ const CANONICAL_SONGS = {
   'Seventh Heaven':    { degrees: [1,7,1,7,1],             durations: [1,1,1,1,2] },
   'Flat Third':        { degrees: ['3b',1,'3b',1],         durations: [1,1,1,2] },
   'Top Note':          { degrees: [9,1,9,1],               durations: [1,1,1,2] },
+  // The woodwinds continue a few notes past the octave, so their newest (and
+  // highest) notes get their own short arpeggios built on the tonic, 5th and
+  // octave they already know.
+  'Reach Higher':      { degrees: [1,5,8,10,8,5,1],        durations: [1,1,1,2,1,1,2] },
+  'Almost There':      { degrees: [1,5,8,11,8,5,1],        durations: [1,1,1,2,1,1,2] },
+  'Top of the Range':  { degrees: [1,5,8,12,8,5,1],        durations: [1,1,1,2,1,1,2] },
 };
 
 // Scale degree -> note lesson, per instrument. Keyed by the explicit `degree`
@@ -2030,11 +2036,63 @@ const EXTENDED_NOTES = {
     '3b': extNote('A\u266d', 4, '\u266d', 3, 277.18, [false, true, true], -1, 'Ab — valves 2 and 3.', 'Valves 2 and 3.', 'D\u266d4'),
     '9':  extNote('G', 5, null, 9, 523.25, [false, false, false], 0, 'High G — open, the top of the beginner range.', 'No valves. Support the note.', 'C5'),
   },
+
+  // ----- Woodwinds ---------------------------------------------------------
+  // Slot layout: [thumb, h1, h2, h3, h4, h5, h6, h7, extra, extra2, sideKey,
+  // lhp2, rthumb, rp2, halfHole]. `undefined` means the pad is not drawn.
+  // Clarinet follows the shared order; the register/R key lives in `extra`.
+  clarinet: {
+    '0':  extNote('B', 3, null, -3, 220.00, [true, true, true, true, false, true, false, false], 0, 'Low B — thumb hole, the left-hand rings, and the right index.', 'Thumb hole + left rings 1-2-3 + right index. Right middle and ring open.', 'A3'),
+    '-1': extNote('A', 3, null, -4, 196.00, [true, true, true, true, true, true, false, false], 0, 'Low A — the low B shape plus the right middle finger.', 'Thumb hole + left rings 1-2-3 + right index and middle.', 'G3'),
+    '0b': extNote('B\u266d', 3, '\u266d', -3, 207.65, [true, true, true, true, true, false, false, false], -1, 'Bb — like low A with the right middle finger lifted.', 'Thumb hole + left rings 1-2-3 + right index only.', 'A\u266d3'),
+    '4#': extNote('F#', 4, '#', 1, 329.63, [false, true, false, false, false, false, false, false], 1, 'F# — the left index alone, no thumb.', 'Left index ring only. Thumb hole open.', 'E4'),
+    '3b': extNote('E\u266d', 4, '\u266d', 0, 277.18, [true, true, true, false, false, false, false, true], -1, 'Eb — thumb hole, two left rings, and the right-hand side key.', 'Thumb hole + left rings 1-2 + the right-hand (Eb) side key.', 'D\u266d4'),
+    '7b': extNote('B\u266d', 4, '\u266d', 4, 415.30, [false, false, false, false, false, false, false, false, true, undefined, true], -1, 'Clarion Bb — the register key with the A side key.', 'Register key + the A (left-index) side key. No rings down.', 'A\u266d4'),
+    '9':  extNote('D', 5, null, 6, 523.25, [true, true, true, true, true, true, true, false, true], 0, 'Clarion D — every finger down with the register key.', 'Thumb hole + all left and right fingers + register key.', 'C5'),
+  },
+  'alto-saxophone': {
+    '0':  extNote('B', 3, null, -3, 146.83, [false, true, true, true, true, true, true, true, undefined, true], 0, 'Low B — all fingers down plus the left little-finger B key.', 'All main fingers down + the left pinky B key.', 'D3'),
+    '0b': extNote('B\u266d', 3, '\u266d', -3, 138.59, [false, true, true, true, true, true, true, true, undefined, undefined, undefined, true], -1, 'Low Bb — all fingers down plus the low Bb pinky key.', 'All main fingers down + the left pinky Bb key.', 'D\u266d3'),
+    '4#': extNote('F#', 4, '#', 1, 220.00, [false, true, true, true, false, true, false, false], 1, 'F# — left hand with the right middle finger.', 'Left hand 1-2-3 + right middle finger only.', 'A3'),
+    '3b': extNote('E\u266d', 4, '\u266d', 0, 185.00, [false, true, true, true, true, true, true, false, undefined, undefined, undefined, undefined, undefined, true], -1, 'Eb — all fingers down and the low Eb pinky key.', 'All main fingers down + the right pinky Eb key.', 'G\u266d3'),
+    '7b': extNote('B\u266d', 4, '\u266d', 4, 277.18, [false, true, true, false, false, false, false, true], -1, 'Bb — left index and middle plus the right-hand side Bb key.', 'Left hand 1-2 + the right-hand Bb side key.', 'D\u266d4'),
+    '9':  extNote('D', 5, null, 6, 349.23, [true, true, true, true, true, true, true, false], 0, 'High D — the octave key on the low D shape.', 'Octave key + all left and right fingers.', 'F4'),
+    '10': extNote('E', 5, null, 7, 392.00, [true, true, true, true, true, true, false, false], 0, 'High E — the top of your beginner range.', 'Octave key + all left fingers + right index and middle.', 'G4'),
+  },
+  flute: {
+    '7b': extNote('B\u266d', 4, '\u266d', 4, 466.16, [true, true, false, false, true, false, false, false, true], -1, 'Bb — thumb, left index and right index with the Eb key.', 'Thumb + left index + right index + the right-pinky Eb key.', 'B\u266d4'),
+    '4#': extNote('F#', 4, '#', 1, 369.99, [true, true, true, true, false, false, true, false, true], 1, 'F# — the left hand with the right ring finger.', 'Left hand 1-2-3 + right ring finger + the Eb key.', 'F\u266f4'),
+    '3b': extNote('E\u266d', 4, '\u266d', 0, 311.13, [true, true, true, true, true, true, true, false, true], -1, 'Eb — all fingers down with the Eb key.', 'All fingers down + the right-pinky Eb key.', 'E\u266d4'),
+    '9':  extNote('D', 5, null, 6, 587.33, [true, false, true, true, true, true, true, false, false], 0, 'High D — the thumb vent with the right hand down.', 'Thumb + right hand 1-2-3 + left middle and ring. Left index open.', 'D5'),
+    '10': extNote('E', 5, null, 7, 659.25, [true, true, true, true, true, true, false, false, true], 0, 'High E — one note below the top of your range.', 'Thumb + left 1-2-3 + right index and middle + the Eb key.', 'E5'),
+    '11': extNote('F', 5, null, 8, 698.46, [true, true, true, true, true, false, false, false, true], 0, 'High F — the second-highest note you have learned.', 'Thumb + left 1-2-3 + right index + the Eb key.', 'F5'),
+    '12': extNote('G', 5, null, 9, 783.99, [true, true, true, true, false, false, false, false, true], 0, 'High G — the top note of your range.', 'Thumb + left 1-2-3 + the Eb key. Support with fast air.', 'G5'),
+  },
+  oboe: {
+    '0':  extNote('B', 3, null, -3, 246.94, [false, true, true, true, true, true, true, true, undefined, true], 0, 'Low B — all fingers down plus the left little-finger B key.', 'All main fingers down + the left pinky B key.', 'B3'),
+    '0b': extNote('B\u266d', 3, '\u266d', -3, 233.08, [false, true, true, true, true, true, true, true, undefined, undefined, undefined, true], -1, 'Low Bb — all fingers down plus the low Bb pinky key.', 'All main fingers down + the left pinky Bb key.', 'B\u266d3'),
+    '4#': extNote('F#', 4, '#', 1, 369.99, [false, true, true, true, true, false, false, false], 1, 'F# — the left hand with the right index finger.', 'Left hand 1-2-3 + right index only.', 'F\u266f4'),
+    '3b': extNote('E\u266d', 4, '\u266d', 0, 311.13, [false, true, true, true, true, true, true, false, undefined, undefined, undefined, undefined, undefined, true], -1, 'Eb — all fingers down and the low Eb pinky key.', 'All main fingers down + the right pinky Eb key.', 'E\u266d4'),
+    '7b': extNote('B\u266d', 4, '\u266d', 4, 466.16, [false, true, true, false, true, false, false, false], -1, 'Bb — left hand 1-2 with the right index finger.', 'Left hand 1-2 + right index only. Thumb off.', 'B\u266d4'),
+    '9':  extNote('D', 5, null, 6, 587.33, [false, false, true, true, true, true, true, false, undefined, undefined, undefined, undefined, undefined, undefined, true], 0, 'High D — the half-hole vent with the right hand down.', 'Crack the left index (half-hole) + left middle and ring + all right fingers.', 'D5'),
+    '10': extNote('E', 5, null, 7, 659.25, [true, true, true, true, true, true, false, false], 0, 'High E — the octave key with the left hand and two right fingers.', 'Octave key + left 1-2-3 + right index and middle.', 'E5'),
+  },
+  bassoon: {
+    '0':  extNote('B', 2, null, 2, 123.47, [true, true, true, true, true, false, false, false], 0, 'Low B — whisper key, left hand, and the right index.', 'Whisper key + left rings 1-2-3 + right index.', 'B2'),
+    '-1': extNote('A', 2, null, 1, 110.00, [true, true, true, true, true, true, false, false], 0, 'Low A — add the right middle finger.', 'Whisper key + left rings 1-2-3 + right index and middle.', 'A2'),
+    '0b': extNote('B\u266d', 2, '\u266d', 2, 116.54, [true, true, true, true, true, true, false, false, false, undefined, undefined, undefined, true], -1, 'Low Bb — the low A shape plus the right-thumb Bb key.', 'Whisper key + left rings + right index and middle + the right-thumb Bb key.', 'B\u266d2'),
+    '4#': extNote('F#', 3, '#', 6, 185.00, [true, false, true, true, true, true, true, true, false, undefined, undefined, undefined, true, undefined, true], 1, 'F# — the half-hole with the right-thumb F# key.', 'Whisper key + cracked left index (half-hole) + left middle/ring + all right fingers + the right-thumb F# key.', 'F\u266f3'),
+    '3b': extNote('E\u266d', 3, '\u266d', 5, 155.56, [true, true, false, true, false, false, false, false], -1, 'Eb — whisper key with the left index and ring.', 'Whisper key + left index and left ring. Left middle open.', 'E\u266d3'),
+    '7b': extNote('B\u266d', 3, '\u266d', 9, 233.08, [false, true, true, true, true, true, false, false, false, undefined, undefined, undefined, true], -1, 'Bb above the staff — the right-thumb Bb key.', 'Left rings 1-2-3 + right index and middle + the right-thumb Bb key.', 'B\u266d3'),
+    '9':  extNote('D', 4, null, 11, 293.66, [false, true, true, false, false, false, false, false], 0, 'D above the staff — left hand 1-2 only, whisper key off.', 'Left rings 1-2. Whisper key off, right hand open.', 'D4'),
+  },
 };
 
 // Short practice songs introduced alongside each new note, so every note in the
-// progression is immediately heard in a tune. Degrees are scale degrees, and
-// songs are shared: the map below schedules them by teaching step.
+// progression is immediately heard in a tune. Each is keyed to the *scale
+// degree* it introduces, so it automatically lands at whatever step an
+// instrument teaches that degree — even though the woodwinds add a few notes the
+// brass never reach (and skip a couple the brass do).
 const PROGRESSION_SONG_META = {
   'Climb the Ladder': { description: 'Steps up and down your first six notes.', prompt: 'Keep every step even.' },
   'Bounce Back': { description: 'Bounce between your tonic and the note just below it.', prompt: 'Small, controlled moves.' },
@@ -2046,27 +2104,56 @@ const PROGRESSION_SONG_META = {
   'Seventh Heaven': { description: 'The leading tone leaning home to the tonic.', prompt: 'Hear the pull to resolve.' },
   'Flat Third': { description: 'A lowered third colours the tonic.', prompt: 'Match the pitch to your tonic.' },
   'Top Note': { description: 'The highest note in your range.', prompt: 'Firm air, steady support.' },
+  'Reach Higher': { description: 'An arpeggio reaching up to the note above your octave.', prompt: 'Keep the top note relaxed.' },
+  'Almost There': { description: 'An arpeggio up to the note just below the top of your range.', prompt: 'Support the high note.' },
+  'Top of the Range': { description: 'An arpeggio that touches the highest note you have learned.', prompt: 'Firm air, no pinching.' },
 };
 
+// Degree (as `degreeKey`) -> the practice song that introduces it. A song is
+// only created for an instrument that actually teaches its degree, so the extra
+// top notes live only on the woodwinds that reach them.
+const PROGRESSION_PRACTICE = {
+  '6':  'Climb the Ladder',
+  '0':  'Bounce Back',
+  '-1': 'Deep Down',
+  '0b': 'Blue Note',
+  '7b': 'High and Low',
+  '8':  'Octave Leap',
+  '4#': 'Sharp Turn',
+  '7':  'Seventh Heaven',
+  '3b': 'Flat Third',
+  '9':  'Top Note',
+  '10': 'Reach Higher',
+  '11': 'Almost There',
+  '12': 'Top of the Range',
+};
+
+// Teaching order per instrument. The brass all follow the shared PROGRESSION_ORDER; the
+// woodwinds each confirmed a slightly different sequence, so they override it.
+// Positions 1-5 are always the fifth, fourth, third, second and first degrees,
+// which is where the fixed opening songs live.
+const PROGRESSION_ORDERS = {
+  flute: [5, 4, 3, 2, 1, 6, '7b', 8, '4#', 7, '3b', 9, 10, 11, 12],
+  clarinet: PROGRESSION_ORDER,
+  bassoon: PROGRESSION_ORDER,
+  'alto-saxophone': [5, 4, 3, 2, 1, 6, 0, '0b', '7b', 8, '4#', 7, '3b', 9, 10],
+  oboe: [5, 4, 3, 2, 1, 6, 0, '0b', '7b', 8, '4#', 7, '3b', 9, 10],
+};
+
+// Fixed opening songs, scheduled by step (every order starts 5-4-3-2-1, so these
+// steps mean the same thing for every instrument).
 const PROGRESSION_SCHEDULE = {
   1:  { songs: ['My First Note'] },
   2:  { songs: ['Step Up and Down'] },
   5:  { songs: ['Hot Cross Buns', 'Merrily We Roll Along', 'Lightly Row'], reviews: ['Review 1'] },
-  6:  { songs: ['Climb the Ladder'] },
-  7:  { songs: ['Bounce Back'] },
-  8:  { songs: ['Deep Down'] },
-  9:  { songs: ['Blue Note'] },
-  10: { songs: ['High and Low'] },
-  11: { songs: ['Octave Leap'] },
-  12: { songs: ['Sharp Turn'] },
-  13: { songs: ['Seventh Heaven'] },
-  14: { songs: ['Flat Third'] },
-  15: { songs: ['Top Note'] },
 };
+
+const orderKeyOf = k => (typeof k === 'number' ? degreeKey(k, 0) : k);
 
 for (const instId of Object.keys(EXTENDED_NOTES)) {
   const inst = CURRICULUM[instId];
   if (!inst) continue;
+  const order = PROGRESSION_ORDERS[instId] || PROGRESSION_ORDER;
   const prefix = ((inst.lessons.find(l => !l.type && /-\d+$/.test(l.id)) || {}).id || '').replace(/-\d+$/, '');
 
   const byDegreeKey = {};
@@ -2093,22 +2180,26 @@ for (const instId of Object.keys(EXTENDED_NOTES)) {
     if (lesson.type === 'song') songs[lesson.noteName] = lesson;
     else if (lesson.type === 'review') reviews[lesson.noteName] = lesson;
   }
-  for (const step of Object.values(PROGRESSION_SCHEDULE)) {
-    for (const name of step.songs || []) {
-      if (songs[name] || !CANONICAL_SONGS[name]) continue;
-      const meta = PROGRESSION_SONG_META[name] || {};
-      songs[name] = {
-        id: `${prefix}-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
-        type: 'song', audioUrl: null, bpm: 100, noteName: name,
-        description: meta.description || '', prompt: meta.prompt || '',
-      };
-    }
+  // Create the fixed opening songs plus one practice song per new degree this
+  // instrument actually teaches.
+  const wanted = new Set();
+  for (const step of Object.values(PROGRESSION_SCHEDULE)) for (const name of step.songs || []) wanted.add(name);
+  for (const key of order) if (PROGRESSION_PRACTICE[orderKeyOf(key)]) wanted.add(PROGRESSION_PRACTICE[orderKeyOf(key)]);
+  for (const name of wanted) {
+    if (songs[name] || !CANONICAL_SONGS[name]) continue;
+    const meta = PROGRESSION_SONG_META[name] || {};
+    songs[name] = {
+      id: `${prefix}-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
+      type: 'song', audioUrl: null, bpm: 100, noteName: name,
+      description: meta.description || '', prompt: meta.prompt || '',
+    };
   }
 
   const lessons = [];
-  PROGRESSION_ORDER.forEach((key, i) => {
+  order.forEach((key, i) => {
     const step = i + 1;
-    if (byDegreeKey[key]) lessons.push(byDegreeKey[key]);
+    const kk = orderKeyOf(key);
+    if (byDegreeKey[kk]) lessons.push(byDegreeKey[kk]);
     const sched = PROGRESSION_SCHEDULE[step];
     if (sched) {
       for (const name of sched.songs || []) {
@@ -2118,6 +2209,8 @@ for (const instId of Object.keys(EXTENDED_NOTES)) {
         if (reviews[name]) { lessons.push(reviews[name]); delete reviews[name]; }
       }
     }
+    const practice = PROGRESSION_PRACTICE[kk];
+    if (practice && songs[practice]) { lessons.push(songs[practice]); delete songs[practice]; }
   });
   for (const song of Object.values(songs)) lessons.push(song);       // instrument tune
   for (const review of Object.values(reviews)) lessons.push(review); // Review 2

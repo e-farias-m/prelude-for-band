@@ -19,8 +19,8 @@ const fs = require('fs');
 const path = require('path');
 
 const src = fs.readFileSync(path.join(__dirname, 'js', 'curriculum.js'), 'utf8');
-const { CURRICULUM, CANONICAL_SONGS, degreeKey, scaleSemitones, PROGRESSION_SCHEDULE, EXTENDED_NOTES } =
-  new Function(src + '\nreturn { CURRICULUM, CANONICAL_SONGS, degreeKey, scaleSemitones, PROGRESSION_SCHEDULE, EXTENDED_NOTES };')();
+const { CURRICULUM, CANONICAL_SONGS, degreeKey, scaleSemitones, PROGRESSION_SCHEDULE, EXTENDED_NOTES, PROGRESSION_PRACTICE, PROGRESSION_ORDERS } =
+  new Function(src + '\nreturn { CURRICULUM, CANONICAL_SONGS, degreeKey, scaleSemitones, PROGRESSION_SCHEDULE, EXTENDED_NOTES, PROGRESSION_PRACTICE, PROGRESSION_ORDERS };')();
 
 let pass = 0;
 let fail = 0;
@@ -93,6 +93,13 @@ const REF = {
     'fl-6': [T, T, T, F, F, F, F, T, F], // A4  T 12-|--- Eb
     'fl-7': [T, T, F, F, F, F, F, T, F], // B4  T 1--|--- Eb
     'fl-8': [F, T, F, F, F, F, F, T, F], // C5  1--|--- (thumb off) Eb
+    'fl-ext-7flat': [T, T, F, F, T, F, F, F, T], // Bb4
+    'fl-ext-4sharp': [T, T, T, T, F, F, T, F, T], // F#4
+    'fl-ext-3flat': [T, T, T, T, T, T, T, F, T],  // Eb4
+    'fl-ext-9': [T, F, T, T, T, T, T, F, F],      // D5
+    'fl-ext-10': [T, T, T, T, T, T, F, F, T],     // E5
+    'fl-ext-11': [T, T, T, T, T, F, F, F, T],     // F5
+    'fl-ext-12': [T, T, T, T, F, F, F, F, T],     // G5
   },
   clarinet: {
     'cl-1': [T, T, T, T, F, F, F, F, F], // C4  T 123|---
@@ -100,9 +107,16 @@ const REF = {
     'cl-3': [T, T, F, F, F, F, F, F, F], // E4  T 1--|---
     'cl-4': [T, F, F, F, F, F, F, F, F], // F4  T ---|---
     'cl-5': [F, F, F, F, F, F, F, F, F], // G4  --- (open)
-    'cl-6': [F, T, F, F, F, F, F, F, F], // A4  A--- (left index A key)
+    'cl-6': [F, F, F, F, F, F, F, F, F, undefined, T], // A4  A--- (left index A key, sideKey)
     'cl-7': [T, T, T, T, T, T, T, F, T, T], // B4  RT 123|123 + left little-finger E key
     'cl-8': [T, T, T, T, T, T, T, T, T, F], // C5  RT 123|123 + right little-finger F key
+    'cl-ext-0': [T, T, T, T, F, T, F, F],             // B3
+    'cl-ext-neg1': [T, T, T, T, T, T, F, F],          // A3
+    'cl-ext-0flat': [T, T, T, T, T, F, F, F],         // Bb3
+    'cl-ext-4sharp': [F, T, F, F, F, F, F, F],        // F#4
+    'cl-ext-3flat': [T, T, T, F, F, F, F, T],         // Eb4
+    'cl-ext-7flat': [F, F, F, F, F, F, F, F, T, undefined, T], // Bb4
+    'cl-ext-9': [T, T, T, T, T, T, T, F, T],          // D5
   },
   'alto-saxophone': {
     'as-1': [F, T, T, T, T, T, T, T, F], // C4  123|123 C
@@ -113,6 +127,13 @@ const REF = {
     'as-6': [F, T, T, F, F, F, F, F, F], // A4  12-|---
     'as-7': [F, T, F, F, F, F, F, F, F], // B4  1--|---
     'as-8': [F, F, T, F, F, F, F, F, F], // C5  -2-|---
+    'as-ext-0': [F, T, T, T, T, T, T, T, undefined, T],
+    'as-ext-0flat': [F, T, T, T, T, T, T, T, undefined, undefined, undefined, T],
+    'as-ext-4sharp': [F, T, T, T, F, T, F, F],
+    'as-ext-3flat': [F, T, T, T, T, T, T, F, undefined, undefined, undefined, undefined, undefined, T],
+    'as-ext-7flat': [F, T, T, F, F, F, F, T],
+    'as-ext-9': [T, T, T, T, T, T, T, F],
+    'as-ext-10': [T, T, T, T, T, T, F, F],
   },
   oboe: {
     'ob-1': [F, T, T, T, T, T, T, T, F], // C4  123|123 C
@@ -123,6 +144,13 @@ const REF = {
     'ob-6': [F, T, T, F, F, F, F, F, F], // A4  12-|---
     'ob-7': [F, T, F, F, F, F, F, F, F], // B4  1--|--- (no octave key)
     'ob-8': [F, T, F, F, T, F, F, F, F], // C5  1--|1-- (no octave key)
+    'ob-ext-0': [F, T, T, T, T, T, T, T, undefined, T],
+    'ob-ext-0flat': [F, T, T, T, T, T, T, T, undefined, undefined, undefined, T],
+    'ob-ext-4sharp': [F, T, T, T, T, F, F, F],
+    'ob-ext-3flat': [F, T, T, T, T, T, T, F, undefined, undefined, undefined, undefined, undefined, T],
+    'ob-ext-7flat': [F, T, T, F, T, F, F, F],
+    'ob-ext-9': [F, F, T, T, T, T, T, F, undefined, undefined, undefined, undefined, undefined, undefined, true],
+    'ob-ext-10': [T, T, T, T, T, T, F, F],
   },
   bassoon: {
     'bn-1': [T, T, T, T, F, F, F, F, F], // C3  W 123|---
@@ -133,6 +161,13 @@ const REF = {
     'bn-6': [F, T, T, T, T, T, F, F, F], // A3  123|12-
     'bn-7': [F, T, T, T, T, F, F, F, F], // B3  123|1--
     'bn-8': [F, T, T, T, F, F, F, F, F], // C4  123|---
+    'bn-ext-0': [T, T, T, T, T, F, F, F],
+    'bn-ext-neg1': [T, T, T, T, T, T, F, F],
+    'bn-ext-0flat': [T, T, T, T, T, T, F, F, F, undefined, undefined, undefined, T],
+    'bn-ext-4sharp': [T, F, T, T, T, T, T, T, F, undefined, undefined, undefined, T, undefined, true],
+    'bn-ext-3flat': [T, T, F, T, F, F, F, F],
+    'bn-ext-7flat': [F, T, T, T, T, T, F, F, F, undefined, undefined, undefined, T],
+    'bn-ext-9': [F, T, T, F, F, F, F, F],
   },
   trumpet: {
     'tr-1': [F, F, F], 'tr-2': [T, F, T], 'tr-3': [T, T, F], 'tr-4': [T, F, F],
