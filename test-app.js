@@ -654,11 +654,15 @@ const fluteNotes = flute.lessons.filter(l => !l.type);
   prog.skills[weakId] = { correct: 0, wrong: 10, lastSeen: now - 30 * 86400000 };
   fluteNotes.slice(1).forEach(n => { prog.skills[n.id] = { correct: 8, wrong: 0, lastSeen: now }; });
   const pool = api.getLearnedNotes('flute');
+  const trials = 200;
   let weakPicked = 0;
-  for (let i = 0; i < 200; i++) {
+  for (let i = 0; i < trials; i++) {
     if (api.pickWeightedNote('flute', pool).id === weakId) weakPicked++;
   }
-  check(weakPicked > 80, 'a weak note is chosen far more often than strong ones');
+  // Compare against an even split across the pool rather than a fixed count, so
+  // the assertion stays valid as instruments gain more notes.
+  const fairShare = trials / pool.length;
+  check(weakPicked > fairShare * 2, 'a weak note is chosen far more often than strong ones');
   check(api.pickWeightedNote('flute', pool.slice(0, 1)).id === weakId, 'picking from a single-note pool is safe');
 }
 
