@@ -98,7 +98,7 @@ const CURRICULUM = {
         freq: 311.13,
         fingeringState: [true, false, false],
         description: 'Press valve 1 with your index finger.',
-        prompt: 'Valve 1. Relax the embouchure slightly — this is a half-step lower than E.'
+        prompt: 'Valve 1. Relax the embouchure slightly — this is a whole step lower than G.'
       },
       {
         id: 'tr-5',
@@ -111,7 +111,7 @@ const CURRICULUM = {
         freq: 349.23,
         fingeringState: [false, false, false],
         description: 'Your first note — no valves, the 6th partial of the open tube.',
-        prompt: 'No valves. Same open fingering as C. Faster air.'
+        prompt: 'No valves. Faster, more focused air for the 6th partial.'
       },
       {
         id: 'tr-6',
@@ -271,8 +271,8 @@ const CURRICULUM = {
         accidental: null,
         freq: 329.63,
         fingeringState: [true, true, true, true, true, true, false, true, false],
-        description: 'E — lift your right ring finger and press the Eb key with your pinky.',
-        prompt: 'Same as D4 but lift right ring finger and add the Eb key with right pinky.'
+        description: 'E — a half-step below F. Add your right middle finger.',
+        prompt: 'Same as F but add your right middle finger.'
       },
       {
         id: 'fl-song-3', type: 'song',
@@ -622,8 +622,8 @@ const CURRICULUM = {
         accidental: null,
         freq: 174.61,
         fingeringState: [false, true, true, true, true, true, true, false, false],
-        description: 'D — lift your right pinky. One step up from low C.',
-        prompt: 'No octave key. Same as C but right pinky off the low C key.'
+        description: 'D — a whole step below E. Add your right ring finger.',
+        prompt: 'No octave key. Same as E but add your right ring finger.'
       },
       {
         id: 'as-song-2',
@@ -831,8 +831,8 @@ const CURRICULUM = {
         accidental: null,
         freq: 329.63,
         fingeringState: [false, true, true, true, true, true, false, false, false],
-        description: 'E — lift your right ring finger.',
-        prompt: 'No octave key. Same as D4 but lift right ring finger.'
+        description: 'E — a half-step below F. Left hand down, right index and middle fingers.',
+        prompt: 'No octave key. All three left fingers + right index + right middle.'
       },
       {
         id: 'ob-song-3', type: 'song',
@@ -1540,8 +1540,8 @@ const CURRICULUM = {
         accidental: null,
         freq: 130.81,
         fingeringState: [true, false, true],
-        description: 'Valves 1 and 3 — a half-step above Bb.',
-        prompt: 'Valves 1 and 3. Half-step above Bb.'
+        description: 'Valves 1 and 3 — a whole step below D.',
+        prompt: 'Valves 1 and 3. Whole step below D.'
       },
       {
         id: 'eu-song-2',
@@ -1573,8 +1573,8 @@ const CURRICULUM = {
         accidental: '\u266d',
         freq: 155.56,
         fingeringState: [true, false, false],
-        description: 'Valve 1 alone — a whole step above D.',
-        prompt: 'Valve 1 only (index finger). Eb is the 4th note of the Bb major scale.'
+        description: 'Valve 1 alone — a whole step below F.',
+        prompt: 'Valve 1 only (index finger).'
       },
       {
         id: 'eu-5',
@@ -1720,8 +1720,8 @@ const CURRICULUM = {
         accidental: null,
         freq: 65.41,
         fingeringState: [true, false, true],
-        description: 'Valves 1 and 3 — a half-step above Bb.',
-        prompt: 'Valves 1 and 3. Half-step above Bb.'
+        description: 'Valves 1 and 3 — a whole step below D.',
+        prompt: 'Valves 1 and 3. Whole step below D.'
       },
       {
         id: 'tu-song-2',
@@ -1754,7 +1754,7 @@ const CURRICULUM = {
         freq: 77.78,
         fingeringState: [true, false, false],
         description: 'Valve 1 alone — Eb sits just below the staff.',
-        prompt: 'Valve 1 only (index finger). Half-step above C.'
+        prompt: 'Valve 1 only (index finger). Whole step below F.'
       },
       {
         id: 'tu-5',
@@ -2021,7 +2021,7 @@ const EXTENDED_NOTES = {
   // pitch it actually sounds, so `freq` = written pitch − 7 semitones.
   'french-horn': {
     '1':  extNote('F', 4, null, 1, 233.08, [true, false, false], 0, 'F — your first note, valve 1.', 'Valve 1. Buzz a firm middle-register pitch.', 'B\u266d3'),
-    '2':  extNote('G', 4, null, 2, 261.63, [false, false, false], 0, 'G — open, a whole step above F.', 'No valves. 6th partial.', 'C4'),
+    '2':  extNote('G', 4, null, 2, 261.63, [false, false, false], 0, 'G — open, a whole step below A.', 'No valves. 6th partial.', 'C4'),
     '3':  extNote('A', 4, null, 3, 293.66, [true, true, false], 0, 'A — valves 1 and 2.', 'Valves 1 and 2.', 'D4'),
     '4':  extNote('B\u266d', 4, '\u266d', 4, 311.13, [true, false, false], 0, 'Bb — valve 1, the flat of the written key.', 'Valve 1.', 'E\u266d4'),
     '5':  extNote('C', 5, null, 5, 349.23, [false, false, false], 0, 'C — open, the 8th partial.', 'No valves. Faster air.', 'F4'),
