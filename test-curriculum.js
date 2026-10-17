@@ -12,6 +12,12 @@
 //             sax octave / bassoon whisper key)
 //     h1..h3 = left hand, h4..h6 = right hand, h7 = right pinky (Eb / low keys)
 //     extra  = register / octave key drawn as "R"
+// Flute slot layout (graphics.js fluteFingeringSVG):
+//   [thumb, h1, h2, h3, h4, h5, h6, h7, rp2]
+//     h1..h3 = left hand, h4..h6 = right hand, h7 = little-finger C key (low C)
+//     rp2    = right-pinky Eb key, drawn as the labelled "Eb" button hanging
+//              below the foot joint. Notes whose right pinky rests on Eb must
+//              set rp2 (not h7) so the diagram lights the labelled Eb key.
 // Brass valve layout: [v1, v2, v3]
 // Trombone: single slide position (1..7)
 
@@ -87,12 +93,12 @@ const REF = {
   flute: {
     'fl-1': [T, T, T, T, T, T, T, T, F], // C4  T 123|123 C
     'fl-2': [T, T, T, T, T, T, T, F, F], // D4  T 123|123
-    'fl-3': [T, T, T, T, T, T, F, T, F], // E4  T 123|12- Eb
-    'fl-4': [T, T, T, T, T, F, F, T, F], // F4  T 123|1-- Eb
-    'fl-5': [T, T, T, T, F, F, F, T, F], // G4  T 123|--- Eb
-    'fl-6': [T, T, T, F, F, F, F, T, F], // A4  T 12-|--- Eb
-    'fl-7': [T, T, F, F, F, F, F, T, F], // B4  T 1--|--- Eb
-    'fl-8': [F, T, F, F, F, F, F, T, F], // C5  1--|--- (thumb off) Eb
+    'fl-3': [T, T, T, T, T, T, F, F, T], // E4  T 123|12- Eb
+    'fl-4': [T, T, T, T, T, F, F, F, T], // F4  T 123|1-- Eb
+    'fl-5': [T, T, T, T, F, F, F, F, T], // G4  T 123|--- Eb
+    'fl-6': [T, T, T, F, F, F, F, F, T], // A4  T 12-|--- Eb
+    'fl-7': [T, T, F, F, F, F, F, F, T], // B4  T 1--|--- Eb
+    'fl-8': [F, T, F, F, F, F, F, F, T], // C5  1--|--- (thumb off) Eb
     'fl-ext-7flat': [T, T, F, F, T, F, F, F, T], // Bb4
     'fl-ext-4sharp': [T, T, T, T, F, F, T, F, T], // F#4
     'fl-ext-3flat': [T, T, T, T, T, T, T, F, T],  // Eb4

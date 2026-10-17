@@ -270,7 +270,7 @@ const CURRICULUM = {
         staffStep: 0,
         accidental: null,
         freq: 329.63,
-        fingeringState: [true, true, true, true, true, true, false, true, false],
+        fingeringState: [true, true, true, true, true, true, false, false, true],
         description: 'E — a half-step below F. Add your right middle finger.',
         prompt: 'Same as F but add your right middle finger.'
       },
@@ -290,7 +290,7 @@ const CURRICULUM = {
         staffStep: 1,
         accidental: null,
         freq: 349.23,
-        fingeringState: [true, true, true, true, true, false, false, true, false],
+        fingeringState: [true, true, true, true, true, false, false, false, true],
         description: 'F — left hand down, right index finger, and the Eb key.',
         prompt: 'Left thumb + all three left fingers + right index. Add the Eb key with your right pinky.'
       },
@@ -302,7 +302,7 @@ const CURRICULUM = {
         staffStep: 2,
         accidental: null,
         freq: 392.00,
-        fingeringState: [true, true, true, true, false, false, false, true, false],
+        fingeringState: [true, true, true, true, false, false, false, false, true],
         description: 'G — left hand only plus the Eb key with your right pinky.',
         prompt: 'Left thumb + all three left fingers. Right pinky on the Eb key. Right index, middle, ring up.'
       },
@@ -334,7 +334,7 @@ const CURRICULUM = {
         staffStep: 3,
         accidental: null,
         freq: 440.00,
-        fingeringState: [true, true, true, false, false, false, false, true, false],
+        fingeringState: [true, true, true, false, false, false, false, false, true],
         description: 'A — lift your left ring finger. Just thumb and first two left fingers plus Eb key.',
         prompt: 'Left thumb + left index + left middle. Left ring up. Right pinky on Eb key.'
       },
@@ -346,7 +346,7 @@ const CURRICULUM = {
         staffStep: 4,
         accidental: null,
         freq: 493.88,
-        fingeringState: [true, true, false, false, false, false, false, true, false],
+        fingeringState: [true, true, false, false, false, false, false, false, true],
         description: 'B — left thumb and left index, plus the Eb key.',
         prompt: 'Left thumb + left index only. Add the Eb key with your right pinky.'
       },
@@ -358,7 +358,7 @@ const CURRICULUM = {
         staffStep: 5,
         accidental: null,
         freq: 523.25,
-        fingeringState: [false, true, false, false, false, false, false, true, false],
+        fingeringState: [false, true, false, false, false, false, false, false, true],
         description: 'C — left index finger only (thumb off), plus the Eb key. Your first note in the second octave.',
         prompt: 'Left index only, thumb off. Keep the Eb key down with your right pinky.'
       },
