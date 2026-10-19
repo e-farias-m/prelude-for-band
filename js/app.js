@@ -25,7 +25,7 @@ const APP = {
   importedSongs: null,
   // Audio playback state
   audioPlaybackTimeouts: [],
-  audioPlaybackInterval: null,
+  playSequenceTimeouts: [],
   audioPlaybackAudio: null,
   // Whether the current lesson was already complete before this attempt
   completedBefore: false,
@@ -194,6 +194,9 @@ function getInstrumentProgress(instrumentId) {
   if (!APP.progress[instrumentId].mastery) {
     APP.progress[instrumentId].mastery = {};
   }
+  if (!APP.progress[instrumentId].sprints) {
+    APP.progress[instrumentId].sprints = {};
+  }
   return APP.progress[instrumentId];
 }
 
@@ -211,8 +214,7 @@ function addNoteMastery(instrumentId, noteId, amount = 1) {
 // Personal best for a sprint mode is stored per instrument.
 function getSprintBest(instrumentId, mode) {
   const prog = getInstrumentProgress(instrumentId);
-  if (!prog.sprints) prog.sprints = {};
-  return prog.sprints[mode] || 0;
+  return (prog.sprints && prog.sprints[mode]) || 0;
 }
 
 // Saves a new best if `score` beats it. Returns true when a record was set.
@@ -2115,7 +2117,7 @@ function renderMetronomePanel() {
 }
 
 function renderTunerPanel() {
-  const noteLessons = getNoteLessons(APP.instrumentId);
+  const noteLessons = APP.instrumentId ? getNoteLessons(APP.instrumentId) : [];
   const t = APP.tuner;
   const listening = !!(t && t.running);
   const detected = t && t.freq > 0 ? freqToNoteInfo(t.freq, noteLessons) : null;
@@ -2464,7 +2466,7 @@ function renderPresentPhase(inst, lesson) {
   const fingeringSvg = Graphics.fingeringSVG(inst.fingeringType, lesson.fingeringState, instAccent(inst), 84);
   const staffSvg = Graphics.staffSVG({ pos: lesson.staffStep, accidental: lesson.accidental, clef: inst.clef, accentColor: instAccent(inst), width: 96 });
   const transposeNote = inst.isTransposing && lesson.concertNote
-    ? `<div class="note-description">Sounds as concert ${lesson.concertNote} (${ inst.transposeSemitones === -9 ? 'E\u266d' : inst.transposeSemitones === -7 ? 'F' : inst.transposeSemitones === -2 ? 'B\u266d' : 'B\u266d' } instrument).</div>` : '';
+    ? `<div class="note-description">Sounds as concert ${lesson.concertNote} (${ ({'-9':'E\u266d','-7':'F','-2':'B\u266d'})[inst.transposeSemitones] || 'B\u266d' } instrument).</div>` : '';
 
   const mastery = getNoteMastery(APP.instrumentId, lesson.id);
   const masteryLevel = getMasteryLevel(mastery);
@@ -2604,6 +2606,10 @@ function renderSongAudioPlayerContent(inst, lesson) {
     </div>`;
 }
 
+function stopPlaySequence() {
+  APP.playSequenceTimeouts.forEach(clearTimeout);
+  APP.playSequenceTimeouts = [];
+}
 function stopAudioPlayback() {
   APP.audioPlaybackTimeouts.forEach(clearTimeout);
   APP.audioPlaybackTimeouts = [];
@@ -3066,24 +3072,26 @@ function runPlaySequence(inst, lesson) {
 
   status.textContent = 'Get ready...';
   [1, 2, 3, 4].forEach((n, i) => {
-    setTimeout(() => {
+    const t = setTimeout(() => {
       clearActive();
       const cell = document.querySelector(`.beat-cell[data-beat="${n}"]`);
       if (cell) cell.classList.add('active');
       AudioEngine.playClick(n === 1);
       status.textContent = `${n}...`;
     }, i * beatMs);
+    APP.playSequenceTimeouts.push(t);
   });
 
-  setTimeout(() => {
+  const t2 = setTimeout(() => {
     clearActive();
     const playCell = document.querySelector('.beat-cell[data-beat="play"]');
     if (playCell) playCell.classList.add('active');
     AudioEngine.playInstrumentNote(lesson.freq, inst.fingeringType, 1.3);
     status.textContent = 'Play now!';
   }, 4 * beatMs);
+  APP.playSequenceTimeouts.push(t2);
 
-  setTimeout(() => {
+  const t3 = setTimeout(() => {
     clearActive();
     status.textContent = 'Nice. Tap Start to try again, or confirm below.';
     btn.disabled = false;
@@ -3092,6 +3100,7 @@ function runPlaySequence(inst, lesson) {
     const confirmBtn = document.querySelector('[data-action="play-confirm"]');
     if (confirmBtn) confirmBtn.disabled = false;
   }, 4 * beatMs + 1500);
+  APP.playSequenceTimeouts.push(t3);
 }
 
 // ── SONG SEQUENCE ──────────────────────────────────────────────────────
@@ -3106,12 +3115,13 @@ function runSongSequence(inst, lesson) {
     const start = beat;
     beat += durations[i];
     const seconds = durations[i] * msPerBeat / 1000;
-    setTimeout(() => {
+    const tn = setTimeout(() => {
       if (chordFreqs.length > 0) {
         AudioEngine.playChord(chordFreqs, inst.fingeringType, seconds);
       }
-      AudioEngine.playInstrumentNote(note.freq, inst.fingeringType, seconds);
+      if (note) AudioEngine.playInstrumentNote(note.freq, inst.fingeringType, seconds);
     }, start * msPerBeat);
+    APP.playSequenceTimeouts.push(tn);
   });
 }
 
@@ -3256,7 +3266,7 @@ function updateTunerReadout() {
   const centsEl = document.getElementById('tuner-cents');
   const needleEl = document.getElementById('tuner-needle');
   if (!noteEl || !centsEl || !needleEl) return;
-  const detected = t.freq > 0 ? freqToNoteInfo(t.freq, getNoteLessons(APP.instrumentId)) : null;
+  const detected = t.freq > 0 ? freqToNoteInfo(t.freq, APP.instrumentId ? getNoteLessons(APP.instrumentId) : []) : null;
   if (!detected) {
     noteEl.textContent = '—';
     centsEl.textContent = 'Listening…';
@@ -3519,7 +3529,8 @@ function matchNoteToLesson(instrumentId, noteName, octave) {
   });
   return lesson ? lesson.id : null;
 }
-function importSongFromMusicXML(xmlString) {
+function importSongFromMusicXML(xmlString, instrumentId) {
+  const instId = instrumentId || APP.instrumentId;
   const doc = new DOMParser().parseFromString(xmlString, 'text/xml');
   const parseError = doc.querySelector('parsererror');
   if (parseError) throw new Error('Invalid XML: ' + parseError.textContent);
@@ -3544,7 +3555,7 @@ function importSongFromMusicXML(xmlString) {
       if (a === -1) nn += 'b';
       else if (a === 1) nn += '#';
     }
-    const lessonId = matchNoteToLesson(APP.instrumentId, nn, oct);
+    const lessonId = matchNoteToLesson(instId, nn, oct);
     if (!lessonId) return;
     const durEl = noteEl.querySelector('duration');
     const beats = durEl ? (parseFloat(durEl.textContent) || divisions) / divisions : 1;
@@ -3563,8 +3574,8 @@ function importSongFromMusicXML(xmlString) {
   const importedId = 'imported-' + Date.now();
   const song = { id: importedId, type: 'song', noteName: title, prerequisiteIds: [], noteIds, durations, prompt: '', description: 'Imported from MusicXML.' };
   const existing = JSON.parse(localStorage.getItem(IMPORTED_SONGS_KEY) || '{}');
-  if (!existing[APP.instrumentId]) existing[APP.instrumentId] = [];
-  existing[APP.instrumentId].push(song);
+  if (!existing[instId]) existing[instId] = [];
+  existing[instId].push(song);
   localStorage.setItem(IMPORTED_SONGS_KEY, JSON.stringify(existing));
   return song;
 }
@@ -3782,6 +3793,9 @@ function handleAction(action, el) {
       break;
 
     case 'go-select':
+      stopAudioPlayback();
+      stopEarPlayback();
+      stopPlaySequence();
       endSession();
       cleanupRecording();
       clearInterval(APP.sprintTimer);
@@ -4027,6 +4041,7 @@ function handleAction(action, el) {
 
     case 'back-to-present': {
       stopAudioPlayback();
+      stopPlaySequence();
       APP.songNoteIndex = 0;
       APP.phase = 'present';
       render();
@@ -4035,6 +4050,7 @@ function handleAction(action, el) {
 
     case 'exit-lesson':
       stopAudioPlayback();
+      stopPlaySequence();
       stopListen();
       endSession();
       cleanupRecording();
@@ -4310,10 +4326,11 @@ document.addEventListener('change', (e) => {
   }
   if (input.id !== 'import-file-input' || !input.files || !input.files[0]) return;
   const file = input.files[0];
+  const capturedInstrumentId = APP.instrumentId;
   const reader = new FileReader();
   reader.onload = () => {
     try {
-      const song = importSongFromMusicXML(reader.result);
+      const song = importSongFromMusicXML(reader.result, capturedInstrumentId);
       showToast('Imported "' + song.noteName + '"');
       render();
     } catch (err) {
