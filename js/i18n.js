@@ -11,16 +11,16 @@ function detectDefaultLang() {
     if (saved === 'pt' || saved === 'en') return saved;
   } catch (e) {}
   try {
-    const nav = (navigator && (navigator.language || navigator.userLanguage)) || 'en';
+    const nav = (typeof navigator !== 'undefined' && (navigator.language || navigator.userLanguage)) || 'en';
     if (/^pt/i.test(nav)) return 'pt';
   } catch (e) {}
   return 'en';
 }
 
-let LANG = detectDefaultLang();
+var LANG = detectDefaultLang();
 
 // Translation tables. 'en' is identity (source strings). 'pt' holds PT-BR.
-const TRANSLATIONS = { en: {}, pt: {} };
+var TRANSLATIONS = { en: {}, pt: {} };
 
 function t(str) {
   if (typeof str !== 'string') return str;
