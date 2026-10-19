@@ -1,3 +1,11 @@
+// i18n fallbacks for environments that load app.js without i18n.js (e.g. tests)
+if (typeof t !== 'function') { var t = function(s){ return s; }; }
+if (typeof initLang !== 'function') { var initLang = function(){}; }
+if (typeof getLang !== 'function') { var getLang = function(){ return 'en'; }; }
+if (typeof setLang !== 'function') { var setLang = function(){}; }
+if (typeof TRANSLATIONS === 'undefined') { var TRANSLATIONS = { en:{}, pt:{} }; }
+if (typeof LANG === 'undefined') { var LANG = 'en'; }
+
 // app.js
 // Application state machine and rendering for Prelude for Band.
 // Single delegated click listener drives all interaction via data-action.
@@ -712,10 +720,10 @@ function getInstrumentReport(instrumentId) {
   learned.forEach(l => { mastery[getMasteryLevel(getNoteMastery(instrumentId, l.id))]++; });
   const weak = getWeakestNotes(instrumentId, 3)
     .filter(w => w.attempts > 0)
-    .map(w => ({ name: w.lesson.noteName, accuracy: Math.round((w.accuracy || 0) * 100) }));
+    .map(w => ({ name: t(w.lesson.noteName), accuracy: Math.round((w.accuracy || 0) * 100) }));
   return {
     id: instrumentId,
-    name: inst.name,
+    name: t(inst.name),
     shortName: inst.shortName,
     xp: prog.xp || 0,
     notesLearned: learned.length,
@@ -1462,7 +1470,7 @@ function renderFocusCard(inst) {
       <div class="focus-card" data-action="select-instrument" data-id="${inst.id}" style="color:${instAccent(inst)}">
         <div class="focus-icon">${Graphics.instrumentIconSVG(inst.id, 64)}</div>
         <div class="focus-info">
-          <div class="focus-name">${inst.name}</div>
+          <div class="focus-name">${escapeHtml(t(inst.name))}</div>
           <div class="focus-progress">${progress}</div>
         </div>
         <div class="focus-go">Continue \u2192</div>
@@ -1490,14 +1498,14 @@ function renderSelectScreen() {
   let sub;
   let instrumentArea;
   if (picking) {
-    headline = 'First notes, first wins.';
-    sub = 'Pick an instrument to start your very first lessons — fingerings, notes, and your first sounds.';
+    headline = t('First notes, first wins.');
+    sub = t('Pick an instrument to start your very first lessons — fingerings, notes, and your first sounds.');
     instrumentArea = `
       ${savedInst ? `<button class="picker-back" data-action="cancel-instrument-pick">\u2190 Back to ${savedInst.shortName}</button>` : ''}
       ${renderInstrumentGrid()}`;
   } else {
     headline = studentName ? `Ready, ${escapeHtml(studentName)}?` : 'Ready to play?';
-    sub = `You're set up on ${savedInst.shortName}. Pick up where you left off.`;
+    sub = t(`You're set up on ${savedInst.shortName}. Pick up where you left off.`);
     instrumentArea = renderFocusCard(savedInst);
   }
 
@@ -1516,6 +1524,7 @@ function renderSelectScreen() {
         <div class="select-sub">${sub}</div>
       </div>
       <div class="select-hero-settings">
+        <button class="theme-toggle" data-action="toggle-language" title="Language">${getLang() === 'pt' ? 'PT' : 'EN'}</button>
         <button class="theme-toggle" data-action="toggle-theme" title="Switch to ${getTheme() === 'light' ? 'dark' : 'light'} theme">${getTheme() === 'light' ? '\u{1F319}' : '\u2600\uFE0F'}</button>
         <button class="theme-toggle settings-gear" data-action="open-settings" title="Settings">\u{2699}\u{FE0F}</button>
       </div>
@@ -1571,7 +1580,7 @@ function buildTutorialSlides(inst) {
   return [
     {
       icon: '🎉',
-      title: `You're set up on ${inst.name}`,
+      title: `You're set up on ${t(inst.name)}`,
       body: `Welcome! This is a one-minute tour of how the app works. You can skip it and replay it any time from your lesson map.`,
       visual: instrumentArt,
     },
@@ -1643,10 +1652,10 @@ function renderPlanCard(instrumentId) {
     let label = 'Practice';
     if (it.type === 'note') {
       const n = findLessonById(instrumentId, it.targetId);
-      label = 'Review ' + (n ? n.noteName : 'note');
+      label = 'Review ' + (n ? t(n.noteName) : 'note');
     } else if (it.type === 'song') {
       const s = findLessonById(instrumentId, it.targetId);
-      label = 'Play ' + (s ? s.noteName : 'song');
+      label = 'Play ' + (s ? t(s.noteName) : 'song');
     } else if (it.type === 'sprint') {
       label = (it.mode === SPRINT_MODES.FINGER ? 'Finger gym' : 'Sight-reading') + ' sprint';
     }
@@ -1701,7 +1710,7 @@ function renderMapScreen() {
     let stateCls = 'locked';
     let inner = `<span class="map-node-lock">🔒</span>`;
     let masteryHtml = '';
-    let label = lesson.noteName;
+    let label = t(lesson.noteName);
 
     if (isReview && unlocked && completed) {
       stateCls = 'review-done';
@@ -1714,14 +1723,14 @@ function renderMapScreen() {
       const stars = prog.completed[lesson.id].stars;
       const mastery = getNoteMastery(APP.instrumentId, lesson.id);
       const masteryLevel = getMasteryLevel(mastery);
-      inner = `<span class="map-node-note">${lesson.noteName}</span><span class="map-node-star">${'★'.repeat(stars)}${'☆'.repeat(3 - stars)}</span>`;
+      inner = `<span class="map-node-note">${escapeHtml(t(lesson.noteName))}</span><span class="map-node-star">${'★'.repeat(stars)}${'☆'.repeat(3 - stars)}</span>`;
       masteryHtml = `<div class="map-node-mastery mastery-${masteryLevel}">${getMasteryLabel(masteryLevel)}</div>`;
     } else if (unlocked && !completed) {
       stateCls = 'current';
-      inner = `<span class="map-node-note">${lesson.noteName}</span>`;
+      inner = `<span class="map-node-note">${escapeHtml(t(lesson.noteName))}</span>`;
     } else if (unlocked) {
       stateCls = 'available';
-      inner = `<span class="map-node-note">${lesson.noteName}</span>`;
+      inner = `<span class="map-node-note">${escapeHtml(t(lesson.noteName))}</span>`;
     }
 
     const connector = i === 0 ? '' : `<div class="map-connector ${prog.completed[inst.lessons[i-1].id] ? 'done' : ''}"></div>`;
@@ -1741,8 +1750,8 @@ function renderMapScreen() {
     const stateCls = completed ? 'done' : 'current';
     const stars = completed ? prog.completed[s.id].stars : 0;
     const inner = completed
-      ? `<span class="map-node-note">${escapeHtml(s.noteName)}</span><span class="map-node-star">${'★'.repeat(stars)}${'☆'.repeat(3 - stars)}</span>`
-      : `<span class="map-node-note">${escapeHtml(s.noteName)}</span>`;
+      ? `<span class="map-node-note">${escapeHtml(t(s.noteName))}</span><span class="map-node-star">${'★'.repeat(stars)}${'☆'.repeat(3 - stars)}</span>`
+      : `<span class="map-node-note">${escapeHtml(t(s.noteName))}</span>`;
     const prevId = i === 0 ? inst.lessons[inst.lessons.length - 1]?.id : instImported[i - 1]?.id;
     const prevDone = prevId ? !!prog.completed[prevId] : false;
     const connector = inst.lessons.length > 0 || i > 0 ? `<div class="map-connector ${prevDone ? 'done' : ''}"></div>` : '';
@@ -1750,7 +1759,7 @@ function renderMapScreen() {
       <div class="map-node-wrap">
         ${connector}
         <div class="map-node ${stateCls}" data-action="open-imported-song" data-imported-index="${i}">${inner}</div>
-        <div class="map-node-label">${escapeHtml(s.noteName)}</div>
+        <div class="map-node-label">${escapeHtml(t(s.noteName))}</div>
         <button class="btn-icon" data-action="delete-imported-song" data-imported-index="${i}" title="Delete imported song" style="background:none;border:none;cursor:pointer;font-size:12px;color:var(--text-danger);margin-top:2px">✕ Delete</button>
       </div>`;
   }).join('');
@@ -1871,9 +1880,9 @@ function renderLookupScreen() {
       + (learned ? '' : ' lookup-card-locked');
     const svg = Graphics.fingeringSVG(inst.fingeringType, l.fingeringState, learned ? instAccent(inst) : '#6b6b7d', 46);
     return `
-      <button class="${cls}" data-action="lookup-select" data-id="${l.id}" aria-label="${escapeHtml(l.noteName)}">
+      <button class="${cls}" data-action="lookup-select" data-id="${l.id}" aria-label="${escapeHtml(t(l.noteName))}">
         <div class="lookup-card-svg">${svg}</div>
-        <div class="lookup-card-name">${escapeHtml(l.noteName)}</div>
+        <div class="lookup-card-name">${escapeHtml(t(l.noteName))}</div>
       </button>`;
   }).join('');
 
@@ -1897,7 +1906,7 @@ function renderLookupScreen() {
               ${staffSvg}
             </div>
           </div>
-          <div class="lookup-name">${escapeHtml(selected.noteName)}</div>
+          <div class="lookup-name">${escapeHtml(t(selected.noteName))}</div>
           <div class="lookup-desc">${escapeHtml(selected.description || '')}</div>
           <button class="btn btn-secondary btn-wide" data-action="lookup-hear">\u{1F50A} Hear it</button>
         </div>
@@ -1924,7 +1933,7 @@ function renderWeakSpots(instrumentId) {
     const pct = Math.round((w.accuracy || 0) * 100);
     return `
       <div class="weak-row">
-        <div class="weak-name">${escapeHtml(w.lesson.noteName)}</div>
+        <div class="weak-name">${escapeHtml(t(w.lesson.noteName))}</div>
         <div class="weak-bar"><div class="weak-bar-fill" style="width:${pct}%"></div></div>
         <div class="weak-pct">${pct}%</div>
       </div>`;
@@ -2027,7 +2036,7 @@ function renderEarScreen() {
     let label = String(i + 1);
     if (picked) {
       const n = findLessonById(APP.instrumentId, picked);
-      label = n ? n.noteName : '?';
+      label = n ? t(n.noteName) : '?';
       if (e.graded) cls += e.graded[i] ? ' ear-slot-ok' : ' ear-slot-bad';
       else cls += ' ear-slot-filled';
     } else {
@@ -2038,7 +2047,7 @@ function renderEarScreen() {
 
   const palette = learned.map(l => {
     const disabled = e && e.finished ? 'disabled' : '';
-    return `<button class="ear-key" data-action="ear-pick" data-id="${l.id}" ${disabled}>${escapeHtml(l.noteName)}</button>`;
+    return `<button class="ear-key" data-action="ear-pick" data-id="${l.id}" ${disabled}>${escapeHtml(t(l.noteName))}</button>`;
   }).join('');
 
   const correct = e && e.graded ? earScore(e.graded) : 0;
@@ -2349,7 +2358,7 @@ function renderSprintView(inst) {
   const q = s.question;
   const promptHtml = q.mode === SPRINT_MODES.SIGHT
     ? `<div class="quiz-prompt-svg">${Graphics.staffSVG({ pos: q.prompt.staffStep, accidental: q.prompt.accidental, clef: inst.clef, accentColor: instAccent(inst), width: 100 })}</div>`
-    : `<div class="quiz-prompt-note">${q.prompt.noteName}</div>`;
+    : `<div class="quiz-prompt-note">${escapeHtml(t(q.prompt.noteName))}</div>`;
 
   const optionsHtml = q.options.map(opt => {
     let cls = 'quiz-option';
@@ -2357,7 +2366,7 @@ function renderSprintView(inst) {
     let content;
     if (q.mode === SPRINT_MODES.SIGHT) {
       cls += ' text-only';
-      content = `<div class="quiz-option-note">${opt.noteName}</div>`;
+      content = `<div class="quiz-option-note">${escapeHtml(t(opt.noteName))}</div>`;
     } else {
       content = `<div class="quiz-option-svg">${Graphics.fingeringSVG(inst.fingeringType, opt.fingeringState, instAccent(inst), 72)}</div>`;
     }
@@ -2487,12 +2496,12 @@ function renderPresentPhase(inst, lesson) {
         </div>
       </div>
       <div class="note-name-block">
-        <span class="note-name-big">${lesson.noteName}</span>
+        <span class="note-name-big">${escapeHtml(t(lesson.noteName))}</span>
       </div>
-      <div class="note-description">${lesson.description}</div>
+      <div class="note-description">${escapeHtml(t(lesson.description))}</div>
       ${transposeNote}
       <div class="gap-md"></div>
-      <div class="note-prompt">${lesson.prompt}</div>
+      <div class="note-prompt">${escapeHtml(t(lesson.prompt))}</div>
       <div class="gap-lg"></div>
       <button class="btn-hear" data-action="hear-note"><span class="hear-icon">🔊</span> Hear it</button>
     </div>
@@ -2545,7 +2554,7 @@ function renderSongPresentPhase(inst, lesson) {
 
   return `
     <div class="lesson-body">
-      <div class="lesson-instruction">${lesson.noteName}</div>
+      <div class="lesson-instruction">${escapeHtml(t(lesson.noteName))}</div>
       <div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:16px">Note ${currentNum} of ${totalNotes}</div>
       ${melodySvg ? `<div class="song-melody-wrap">
         <div class="present-diagram-label">Sheet music</div>
@@ -2564,9 +2573,9 @@ function renderSongPresentPhase(inst, lesson) {
       <div class="note-name-block">
         <span class="note-name-big">${note.noteName}</span>
       </div>
-      <div class="note-description">${lesson.description}</div>
+      <div class="note-description">${escapeHtml(t(lesson.description))}</div>
       <div class="gap-md"></div>
-      <div class="note-prompt">${lesson.prompt}</div>
+      <div class="note-prompt">${escapeHtml(t(lesson.prompt))}</div>
       ${actionButtons}
     </div>
     <div class="action-bar">
@@ -2577,7 +2586,7 @@ function renderSongPresentPhase(inst, lesson) {
 function renderSongAudioPlayerContent(inst, lesson) {
   return `
     <div class="lesson-body" id="song-audio-body">
-      <div class="lesson-instruction">${lesson.noteName}</div>
+      <div class="lesson-instruction">${escapeHtml(t(lesson.noteName))}</div>
       <div class="song-audio-status" id="song-audio-status">Tap play, then follow along with the recording.</div>
       <div class="beat-grid" id="song-audio-beats" style="justify-content:center;margin-bottom:20px">
         ${[1,2,3,4].map(n => `<div class="beat-cell count-in" data-beat="${n}"><span class="beat-num">${n}</span></div>`).join('')}
@@ -2837,11 +2846,11 @@ function renderQuizPhase(inst, lesson) {
   if (q.quizType === QUIZ_TYPES.FINGERING_TO_NOTE) {
     promptHtml = `<div class="quiz-prompt-svg">${Graphics.fingeringSVG(inst.fingeringType, q.prompt.fingeringState, instAccent(inst), 100)}</div>`;
   } else if (q.quizType === QUIZ_TYPES.NOTE_TO_FINGERING) {
-    promptHtml = `<div class="quiz-prompt-note">${q.prompt.noteName}</div>`;
+    promptHtml = `<div class="quiz-prompt-note">${escapeHtml(t(q.prompt.noteName))}</div>`;
   } else if (q.quizType === QUIZ_TYPES.STAFF_TO_NOTE) {
     promptHtml = `<div class="quiz-prompt-svg">${Graphics.staffSVG({ pos: q.prompt.staffStep, accidental: q.prompt.accidental, clef: inst.clef, accentColor: instAccent(inst), width: 100 })}</div>`;
   } else if (q.quizType === QUIZ_TYPES.NOTE_TO_STAFF) {
-    promptHtml = `<div class="quiz-prompt-note">${q.prompt.noteName}</div>`;
+    promptHtml = `<div class="quiz-prompt-note">${escapeHtml(t(q.prompt.noteName))}</div>`;
   }
 
   // ── OPTIONS ──
@@ -2857,12 +2866,12 @@ function renderQuizPhase(inst, lesson) {
     let content = '';
     if (q.quizType === QUIZ_TYPES.FINGERING_TO_NOTE) {
       cls += ' text-only';
-      content = `<div class="quiz-option-note">${opt.noteName}</div>`;
+      content = `<div class="quiz-option-note">${escapeHtml(t(opt.noteName))}</div>`;
     } else if (q.quizType === QUIZ_TYPES.NOTE_TO_FINGERING) {
       content = `<div class="quiz-option-svg">${Graphics.fingeringSVG(inst.fingeringType, opt.fingeringState, instAccent(inst), 72)}</div>`;
     } else if (q.quizType === QUIZ_TYPES.STAFF_TO_NOTE) {
       cls += ' text-only';
-      content = `<div class="quiz-option-note">${opt.noteName}</div>`;
+      content = `<div class="quiz-option-note">${escapeHtml(t(opt.noteName))}</div>`;
     } else if (q.quizType === QUIZ_TYPES.NOTE_TO_STAFF) {
       content = `<div class="quiz-option-svg">${Graphics.staffSVG({ pos: opt.staffStep, accidental: opt.accidental, clef: inst.clef, accentColor: instAccent(inst), width: 72 })}</div>`;
     }
@@ -2901,7 +2910,7 @@ function renderListenPanel(lesson) {
       <div class="listen-panel">
         <div class="listen-intro">
           <div class="listen-intro-title">\u{1F3A7} Listen &amp; match</div>
-          <div class="listen-intro-sub">Turn on your microphone and the app hears whether ${lesson.noteName} is right \u2014 green means you nailed it.</div>
+          <div class="listen-intro-sub">Turn on your microphone and the app hears whether ${escapeHtml(t(lesson.noteName))} is right \u2014 green means you nailed it.</div>
         </div>
         <button class="btn btn-secondary btn-wide" data-action="listen-toggle">Start listening</button>
       </div>`;
@@ -2910,7 +2919,7 @@ function renderListenPanel(lesson) {
   const status = l.done ? '\u{1F389} You found it! Keep it going.' : (LISTEN_MESSAGES[l.state] || LISTEN_MESSAGES.listening);
   return `
     <div class="listen-card listen-${l.done ? 'done' : l.state}" id="listen-card">
-      <div class="listen-target">Listening for <strong>${lesson.noteName}</strong></div>
+      <div class="listen-target">Listening for <strong>${escapeHtml(t(lesson.noteName))}</strong></div>
       <div class="listen-status" id="listen-status">${status}</div>
       <div class="listen-detected">
         <span class="listen-detected-note" id="listen-detected">\u2014</span>
@@ -2962,7 +2971,7 @@ function renderPlayPhase(inst, lesson) {
       <div class="play-layout">
         <div class="play-diagram-large">
           ${fingeringSvg}
-          <span class="play-note-label">${lesson.noteName}</span>
+          <span class="play-note-label">${escapeHtml(t(lesson.noteName))}</span>
         </div>
         <div class="beat-grid">${cells}${playCell}</div>
         <div class="play-status" id="play-status">Tap Start, then play along on the count.</div>
@@ -3592,6 +3601,9 @@ function handleAction(action, el) {
       render();
       break;
 
+    case 'toggle-language':
+      setLang(getLang() === 'pt' ? 'en' : 'pt');
+      break;
     case 'toggle-theme':
       toggleTheme();
       render();
@@ -3689,7 +3701,7 @@ function handleAction(action, el) {
     case 'select-instrument': {
       const id = el.dataset.id;
       const inst = getInstrument(id);
-      if (!inst.available) { showToast(`${inst.name} is coming soon!`); return; }
+      if (!inst.available) { showToast(`${t(inst.name)} is coming soon!`); return; }
       APP.instrumentId = id;
       setSavedInstrument(id);
       APP.pickingInstrument = false;
@@ -4343,6 +4355,7 @@ document.addEventListener('change', (e) => {
 
 // ── INIT ───────────────────────────────────────────────────────────────
 applyTheme(getTheme());
+initLang();
 loadProgress();
 loadMotivation();
 if (!getStudentName()) showNamePrompt();
