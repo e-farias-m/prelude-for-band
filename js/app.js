@@ -538,7 +538,8 @@ function metronomeClickOpts(metro, isSub = false) {
 // Advances one beat, wrapping at the bar line. Returns the beat that just fired
 // plus whether it lands on the downbeat (which gets the accented click).
 function advanceMetronome(metro) {
-  metro.beat = (metro.beat + 1) % metro.beatsPerBar;
+  const bpb = Math.max(1, metro.beatsPerBar || 4);
+  metro.beat = (metro.beat + 1) % bpb;
   return { beat: metro.beat, accent: metro.beat === 0 };
 }
 
@@ -2439,9 +2440,6 @@ function renderLessonScreen() {
   const isSong = isSongLesson(lesson);
 
   let body = '';
-  if (isReview && APP.phase === 'present') {
-    APP.phase = 'quiz';
-  }
   if (isSong && APP.phase === 'present') {
     APP.songNoteIndex = APP.songNoteIndex || 0;
     body = renderSongPresentPhase(inst, lesson);
@@ -3191,7 +3189,7 @@ function startMetronome() {
   AudioEngine.unlock();
   m.beat = -1;
   m.subTick = 0;
-  m.countInLeft = m.countIn ? m.beatsPerBar : 0;
+  m.countInLeft = m.countIn ? Math.max(0, m.beatsPerBar || 4) : 0;
   m.running = true;
   m.taps = [];
   startMetronomeTicker();
@@ -4043,7 +4041,8 @@ function handleAction(action, el) {
       stopAudioPlayback();
       stopPlaySequence();
       APP.songNoteIndex = 0;
-      APP.phase = 'present';
+      const _bl = getLesson(APP.instrumentId, APP.lessonIndex);
+      APP.phase = isReviewLesson(_bl) ? 'quiz' : 'present';
       render();
       break;
     }
