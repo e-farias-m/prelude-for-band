@@ -59,6 +59,7 @@ const Audio = class { constructor(src) { this.src = src; Audio.last = this; } pl
 const sandbox = new Function('document', 'localStorage', 'window', 'navigator', 'MediaRecorder', 'URL', 'Blob', 'Audio', `
 ${read('curriculum.js')}
 ${read('graphics.js')}
+${read('i18n.js')}
 ${read('app.js')}
 return { handleAction, renderCompletePhase, CURRICULUM, APP, IMPORTED_SONGS_KEY,
   buildSprintQuestion, getSprintBest, setSprintBest, finishSprint, startSprint,

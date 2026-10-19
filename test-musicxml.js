@@ -37,6 +37,7 @@ const localStorage = {
 const sandbox = new Function('document', 'localStorage', 'window', `
 ${read('curriculum.js')}
 ${read('graphics.js')}
+${read('i18n.js')}
 ${read('app.js')}
 return { exportSongMusicXML, CURRICULUM, APP };
 `);
