@@ -2362,7 +2362,7 @@ function renderSprintView(inst) {
 
   const optionsHtml = q.options.map(opt => {
     let cls = 'quiz-option';
-    if (opt.id === q.wrongId) cls += ' selected-wrong';
+    if (opt.id === q.wrongId && !sprintOptionIsCorrect(s, opt)) cls += ' selected-wrong';
     let content;
     if (q.mode === SPRINT_MODES.SIGHT) {
       cls += ' text-only';
@@ -2735,6 +2735,33 @@ function buildReviewQuiz(inst, id) {
   return isSongLesson(lesson) ? buildSongQuizOptions(inst, lesson) : buildQuizOptions(inst, lesson);
 }
 
+// Brass instruments (and some woodwind octaves) legitimately play several
+// notes on one fingering or slide position — trombone 1st position is both F
+// and B♭, for example. Any option that shows the same fingering as the
+// prompt therefore counts as a correct answer, not just the note the quiz
+// happened to draw as its prompt.
+function sameFingering(a, b) {
+  return !!a && !!b && JSON.stringify(a) === JSON.stringify(b);
+}
+
+// Finger-gym sprints share the fingering ambiguity: the prompt is a note name
+// and every option that shows the prompt's fingering is a valid tap.
+function sprintOptionIsCorrect(s, opt) {
+  if (opt.id === s.question.correctId) return true;
+  if (s.mode === SPRINT_MODES.FINGER) {
+    return sameFingering(opt.fingeringState, s.question.prompt.fingeringState);
+  }
+  return false;
+}
+
+function quizOptionIsCorrect(q, opt) {
+  if (opt.id === q.correctId) return true;
+  if (q.quizType === QUIZ_TYPES.FINGERING_TO_NOTE || q.quizType === QUIZ_TYPES.NOTE_TO_FINGERING) {
+    return sameFingering(opt.fingeringState, q.prompt.fingeringState);
+  }
+  return false;
+}
+
 function buildQuizOptions(inst, lesson, forcedType) {
   const completedCount = getLearnedNotes(APP.instrumentId).length;
   const alreadyCompleted = !!getInstrumentProgress(APP.instrumentId).completed[lesson.id];
@@ -2756,9 +2783,14 @@ function buildQuizOptions(inst, lesson, forcedType) {
   // Songs and review sessions have no fingering/notation of their own, so they
   // can never be distractors — only real note lessons may appear as options.
   const noteLessons = inst.lessons.filter(l => !isReviewLesson(l) && !isSongLesson(l));
-  const pool = learned.length >= 2
-    ? learned
-    : noteLessons.filter(l => l.id !== lesson.id);
+  // A note that shares the prompt's fingering is a valid answer, never a
+  // distractor — filter those out and only fall back to them if the pool of
+  // genuinely different fingerings runs dry.
+  const differsFromPrompt = l => !sameFingering(l.fingeringState, lesson.fingeringState);
+  let pool = learned.filter(differsFromPrompt);
+  if (pool.length < 2) pool = noteLessons.filter(l => l.id !== lesson.id && differsFromPrompt(l));
+  if (pool.length < 2) pool = learned.filter(l => l.id !== lesson.id);
+  if (pool.length < 2) pool = noteLessons.filter(l => l.id !== lesson.id);
   const distractors = shuffle(pool).slice(0, 2);
 
   return {
@@ -2856,8 +2888,9 @@ function renderQuizPhase(inst, lesson) {
   // ── OPTIONS ──
   const optionsHtml = q.options.map(opt => {
     const isWrongTapped = q.wrongIds.includes(opt.id);
-    const isCorrectShown = q.answeredCorrectly && opt.id === q.correctId;
-    const isDimmed = (q.answeredCorrectly && opt.id !== q.correctId) || (isWrongTapped && !isCorrectShown);
+    const optIsCorrect = quizOptionIsCorrect(q, opt);
+    const isCorrectShown = q.answeredCorrectly && optIsCorrect;
+    const isDimmed = (q.answeredCorrectly && !optIsCorrect) || (isWrongTapped && !isCorrectShown);
     let cls = 'quiz-option';
     if (isCorrectShown) cls += ' selected-correct';
     if (isWrongTapped) cls += ' selected-wrong';
@@ -3994,7 +4027,8 @@ function handleAction(action, el) {
       const s = APP.sprint;
       if (!s || s.finished) return;
       const id = el.dataset.id;
-      if (id === s.question.correctId) {
+      const opt = s.question.options.find(o => o.id === id);
+      if (opt && sprintOptionIsCorrect(s, opt)) {
         recordSkill(APP.instrumentId, s.question.correctId, true);
         s.score++;
         s.question = buildSprintQuestion(APP.instrumentId, s.mode);
@@ -4102,7 +4136,8 @@ function handleAction(action, el) {
       const tappedId = el.dataset.id;
       const q = APP.quiz;
       if (q.answeredCorrectly || q.wrongIds.includes(tappedId)) return;
-      if (tappedId === q.correctId) {
+      const tappedOpt = q.options.find(o => o.id === tappedId);
+      if (tappedOpt && quizOptionIsCorrect(q, tappedOpt)) {
         q.answeredCorrectly = true;
         addNoteMastery(APP.instrumentId, q.correctId);
         recordSkill(APP.instrumentId, q.correctId, true);
