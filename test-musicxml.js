@@ -27,7 +27,7 @@ const document = {
   createElement() { return makeEl(); },
   body: makeEl(),
 };
-const store = { preludeBandName: 'Test' };
+const store = { preludioBandName: 'Test' };
 const localStorage = {
   getItem(k) { return k in store ? store[k] : null; },
   setItem(k, v) { store[k] = String(v); },

@@ -2,7 +2,7 @@
 // Loaded before app.js. Exposes globals: LANG, TRANSLATIONS, t, setLang,
 // getLang, initLang, applyI18nToDOM.
 
-const LANG_STORAGE_KEY = 'preludeBandLang';
+const LANG_STORAGE_KEY = 'preludioBandLang';
 
 // Default language: browser locale (pt* -> 'pt', else 'en').
 function detectDefaultLang() {

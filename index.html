@@ -18,7 +18,18 @@
     // Apply the saved theme before first paint to avoid a flash of the wrong palette.
     (function () {
       var theme = 'light';
-      try { theme = localStorage.getItem('preludeBandTheme') || 'light'; } catch (e) {}
+      try {
+        // One-time migration: preludeBand* -> preludioBand* (project rename).
+        ['FirstSound','ImportedSongs','Instrument','Lang','Motivation','Name','Progress','Theme','Tutorials'].forEach(function(k) {
+          var ok = 'preludeBand' + k, nk = 'preludioBand' + k;
+          var v = localStorage.getItem(ok);
+          if (v !== null) {
+            if (localStorage.getItem(nk) === null) localStorage.setItem(nk, v);
+            localStorage.removeItem(ok);
+          }
+        });
+      } catch (e) {}
+      try { theme = localStorage.getItem('preludioBandTheme') || 'light'; } catch (e) {}
       document.documentElement.setAttribute('data-theme', theme);
       var meta = document.querySelector('meta[name="theme-color"]');
       if (meta) meta.setAttribute('content', theme === 'light' ? '#F5F4FB' : '#0E0D1C');

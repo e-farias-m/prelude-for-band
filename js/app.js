@@ -70,12 +70,12 @@ const APP = {
   toolTab: 'metronome',
 };
 
-const STORAGE_KEY = 'preludeBandProgress';
-const NAME_KEY = 'preludeBandName';
-const THEME_KEY = 'preludeBandTheme';
-const INSTRUMENT_KEY = 'preludeBandInstrument';
-const TUTORIAL_KEY = 'preludeBandTutorials';
-const FIRST_SOUND_KEY = 'preludeBandFirstSound';
+const STORAGE_KEY = 'preludioBandProgress';
+const NAME_KEY = 'preludioBandName';
+const THEME_KEY = 'preludioBandTheme';
+const INSTRUMENT_KEY = 'preludioBandInstrument';
+const TUTORIAL_KEY = 'preludioBandTutorials';
+const FIRST_SOUND_KEY = 'preludioBandFirstSound';
 
 function getStudentName() { return localStorage.getItem(NAME_KEY) || ''; }
 function setStudentName(name) { localStorage.setItem(NAME_KEY, name); }
@@ -910,7 +910,7 @@ function formatDigestText(digest) {
 }
 
 // ── MOTIVATION: STREAKS, MINUTES, BADGES ────────────────────────────────────
-const MOTIVATION_KEY = 'preludeBandMotivation';
+const MOTIVATION_KEY = 'preludioBandMotivation';
 const MAX_SESSION_SECONDS = 30 * 60; // ignore implausible idle stretches
 
 const BADGES = [
@@ -1229,7 +1229,7 @@ function getNoteDurations(lesson) {
   return lesson.noteIds.map(() => 1);
 }
 
-const IMPORTED_SONGS_KEY = 'preludeBandImportedSongs';
+const IMPORTED_SONGS_KEY = 'preludioBandImportedSongs';
 
 function showToast(msg) {
   const t = document.getElementById('toast');

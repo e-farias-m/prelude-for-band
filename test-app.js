@@ -35,7 +35,7 @@ const document = {
   createElement() { return makeEl(); },
   body: makeEl(),
 };
-const store = { preludeBandName: 'Test' };
+const store = { preludioBandName: 'Test' };
 const localStorage = {
   getItem(k) { return k in store ? store[k] : null; },
   setItem(k, v) { store[k] = String(v); },
@@ -332,7 +332,7 @@ api.APP.instrumentId = 'flute';
   check(left.length === 0, 'deleted song should be removed from the imported list');
   check(!api.APP.progress.flute.completed[song.id],
     'deleted song progress should be cleared from memory');
-  const saved = JSON.parse(store['preludeBandProgress'] || '{}');
+  const saved = JSON.parse(store['preludioBandProgress'] || '{}');
   check(!saved.flute || !saved.flute.completed || !saved.flute.completed[song.id],
     'deleted song progress should not be persisted to localStorage');
 }
@@ -1030,11 +1030,11 @@ const fluteNotes = flute.lessons.filter(l => !l.type);
 
 // ── 50. Theme preference defaults to light and toggles ───────────────────
 {
-  const saved = store['preludeBandTheme'];
-  delete store['preludeBandTheme'];
+  const saved = store['preludioBandTheme'];
+  delete store['preludioBandTheme'];
   check(api.getTheme() === 'light', 'theme defaults to light');
   api.setTheme('dark');
-  check(store['preludeBandTheme'] === 'dark', 'setTheme persists the choice');
+  check(store['preludioBandTheme'] === 'dark', 'setTheme persists the choice');
   check(api.getTheme() === 'dark', 'getTheme reads the saved choice');
   api.toggleTheme();
   check(api.getTheme() === 'light', 'toggleTheme flips dark back to light');
@@ -1063,7 +1063,7 @@ const fluteNotes = flute.lessons.filter(l => !l.type);
   check(api.renderSelectScreen().includes('data-action="toggle-theme"'),
     'the home screen exposes a theme toggle');
 
-  if (saved === undefined) delete store['preludeBandTheme']; else store['preludeBandTheme'] = saved;
+  if (saved === undefined) delete store['preludioBandTheme']; else store['preludioBandTheme'] = saved;
 }
 
 (async () => {
@@ -1110,10 +1110,10 @@ const fluteNotes = flute.lessons.filter(l => !l.type);
 
   // ── 50. The home screen focuses on a single instrument once chosen ──────
   {
-    const saved = store['preludeBandInstrument'];
-    const savedTutorials = store['preludeBandTutorials'];
-    delete store['preludeBandInstrument'];
-    store['preludeBandTutorials'] = JSON.stringify(['flute']);
+    const saved = store['preludioBandInstrument'];
+    const savedTutorials = store['preludioBandTutorials'];
+    delete store['preludioBandInstrument'];
+    store['preludioBandTutorials'] = JSON.stringify(['flute']);
     api.APP.pickingInstrument = false;
 
     const picker = api.renderSelectScreen();
@@ -1132,14 +1132,14 @@ const fluteNotes = flute.lessons.filter(l => !l.type);
     check(!home.includes('instrument-grid'), 'the full instrument grid is hidden in the focused view');
     check(home.includes('data-action="switch-instrument"'), 'the focused view offers a switch control');
 
-    if (saved === undefined) delete store['preludeBandInstrument']; else store['preludeBandInstrument'] = saved;
-    if (savedTutorials === undefined) delete store['preludeBandTutorials']; else store['preludeBandTutorials'] = savedTutorials;
+    if (saved === undefined) delete store['preludioBandInstrument']; else store['preludioBandInstrument'] = saved;
+    if (savedTutorials === undefined) delete store['preludioBandTutorials']; else store['preludioBandTutorials'] = savedTutorials;
   }
 
   // ── 51. Switching instruments reveals the picker with a way back ────────
   {
-    const saved = store['preludeBandInstrument'];
-    store['preludeBandInstrument'] = 'trumpet';
+    const saved = store['preludioBandInstrument'];
+    store['preludioBandInstrument'] = 'trumpet';
     api.APP.pickingInstrument = false;
 
     api.handleAction('switch-instrument', { dataset: {} });
@@ -1152,7 +1152,7 @@ const fluteNotes = flute.lessons.filter(l => !l.type);
     check(api.APP.pickingInstrument === false, 'cancelling returns to the focused view');
     check(api.renderSelectScreen().includes('focus-card'), 'the focused view is restored after cancel');
 
-    if (saved === undefined) delete store['preludeBandInstrument']; else store['preludeBandInstrument'] = saved;
+    if (saved === undefined) delete store['preludioBandInstrument']; else store['preludioBandInstrument'] = saved;
   }
 
   // ── 52. Fingering-chart abbreviations open an explainer ─────────────────
@@ -1172,10 +1172,10 @@ const fluteNotes = flute.lessons.filter(l => !l.type);
 
   // ── 53. The app tour opens the first time an instrument is chosen ───────
   {
-    const savedInst = store['preludeBandInstrument'];
-    const savedTut = store['preludeBandTutorials'];
-    delete store['preludeBandInstrument'];
-    delete store['preludeBandTutorials'];
+    const savedInst = store['preludioBandInstrument'];
+    const savedTut = store['preludioBandTutorials'];
+    delete store['preludioBandInstrument'];
+    delete store['preludioBandTutorials'];
     api.APP.pickingInstrument = false;
 
     const slides = api.buildTutorialSlides(api.CURRICULUM.flute);
@@ -1191,15 +1191,15 @@ const fluteNotes = flute.lessons.filter(l => !l.type);
     check(api.APP.screen === 'map', 'finishing the tour drops into the lesson map');
     check(api.getTutorialSeen('flute') === true, 'finishing the tour records it as seen');
 
-    if (savedInst === undefined) delete store['preludeBandInstrument']; else store['preludeBandInstrument'] = savedInst;
-    if (savedTut === undefined) delete store['preludeBandTutorials']; else store['preludeBandTutorials'] = savedTut;
+    if (savedInst === undefined) delete store['preludioBandInstrument']; else store['preludioBandInstrument'] = savedInst;
+    if (savedTut === undefined) delete store['preludioBandTutorials']; else store['preludioBandTutorials'] = savedTut;
   }
 
   // ── 54. A seen instrument skips the tour, which can be replayed ─────────
   {
-    const savedInst = store['preludeBandInstrument'];
-    const savedTut = store['preludeBandTutorials'];
-    store['preludeBandTutorials'] = JSON.stringify(['trumpet']);
+    const savedInst = store['preludioBandInstrument'];
+    const savedTut = store['preludioBandTutorials'];
+    store['preludioBandTutorials'] = JSON.stringify(['trumpet']);
 
     api.handleAction('select-instrument', { dataset: { id: 'trumpet' } });
     check(api.APP.screen === 'map', 'a seen instrument skips straight to the map');
@@ -1215,8 +1215,8 @@ const fluteNotes = flute.lessons.filter(l => !l.type);
     api.handleAction('tutorial-finish', { dataset: {} });
     check(api.APP.screen === 'map', 'finishing a replay returns to the map');
 
-    if (savedInst === undefined) delete store['preludeBandInstrument']; else store['preludeBandInstrument'] = savedInst;
-    if (savedTut === undefined) delete store['preludeBandTutorials']; else store['preludeBandTutorials'] = savedTut;
+    if (savedInst === undefined) delete store['preludioBandInstrument']; else store['preludioBandInstrument'] = savedInst;
+    if (savedTut === undefined) delete store['preludioBandTutorials']; else store['preludioBandTutorials'] = savedTut;
   }
 
 // ── 55. A new-note quiz mixes the taught note with previously-learned notes ─
@@ -1291,9 +1291,9 @@ const fluteNotes = flute.lessons.filter(l => !l.type);
 
 // ── 57. Floating metronome/tuner widget works from every screen ───────────
 {
-  const savedInst = store['preludeBandInstrument'];
+  const savedInst = store['preludioBandInstrument'];
   api.APP.instrumentId = 'flute';
-  store['preludeBandInstrument'] = 'flute';
+  store['preludioBandInstrument'] = 'flute';
 
   api.APP.screen = 'map';
   check(api.APP.toolsOpen === false, 'the widget starts collapsed');
@@ -1308,7 +1308,7 @@ const fluteNotes = flute.lessons.filter(l => !l.type);
   api.handleAction('close-tools', { dataset: {} });
   check(api.APP.toolsOpen === false, 'closing collapses the widget');
 
-  if (savedInst === undefined) delete store['preludeBandInstrument']; else store['preludeBandInstrument'] = savedInst;
+  if (savedInst === undefined) delete store['preludioBandInstrument']; else store['preludioBandInstrument'] = savedInst;
 }
 
   if (failures.length) console.log(failures.join('\n'));
