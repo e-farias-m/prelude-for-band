@@ -1,4 +1,4 @@
-// i18n.js — Brazilian Portuguese translation layer for Prelude for Band.
+// i18n.js — Brazilian Portuguese translation layer for Preludio Band.
 // Loaded before app.js. Exposes globals: LANG, TRANSLATIONS, t, setLang,
 // getLang, initLang, applyI18nToDOM.
 

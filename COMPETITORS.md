@@ -1,10 +1,10 @@
 # Competitors
 
-Landscape review for **Prelude for Band** — a free, offline-first beginner band
+Landscape review for **Preludio Band** — a free, offline-first beginner band
 app. Research current as of **October 2026**; prices and features change, so
 re-check the linked sources before relying on them.
 
-## Prelude for Band (us)
+## Preludio Band (us)
 
 - Free, no account, no telemetry. Installable offline PWA (service-worker cache).
 - Per-instrument curriculum that starts on each instrument's first note and
@@ -72,7 +72,7 @@ Sources: <https://www.thegeeksclub.com/platforms/practis-music-practice-software
 
 ## Positioning
 
-| Axis | HL method companion / SmartMusic | Prelude for Band |
+| Axis | HL method companion / SmartMusic | Preludio Band |
 | --- | --- | --- |
 | Price | Book/account + $4.99–$39.99 | Free, no account |
 | Offline | Cloud-first | Offline PWA |

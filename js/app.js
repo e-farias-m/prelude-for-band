@@ -7,7 +7,7 @@ if (typeof TRANSLATIONS === 'undefined') { var TRANSLATIONS = { en:{}, pt:{} }; 
 if (typeof LANG === 'undefined') { var LANG = 'en'; }
 
 // app.js
-// Application state machine and rendering for Prelude for Band.
+// Application state machine and rendering for Preludio Band.
 // Single delegated click listener drives all interaction via data-action.
 
 const APP = {
@@ -1373,7 +1373,7 @@ function showNamePrompt() {
   overlay.innerHTML = `
     <div class="name-modal">
       <div class="name-modal-icon">🎵</div>
-      <div class="name-modal-title">Welcome to Prelude for Band!</div>
+      <div class="name-modal-title">Welcome to Preludio Band!</div>
       <div class="name-modal-sub">What's your name?</div>
       <input type="text" class="name-input" placeholder="Your name..." maxlength="50" autocomplete="off" />
       <button class="btn btn-primary btn-wide name-submit">Start practicing</button>
@@ -1518,7 +1518,7 @@ function renderSelectScreen() {
             <line x1="15" y1="22" x2="15" y2="5" stroke="#FF8C42" stroke-width="2.4"/>
             <path d="M15 5 Q24 6 24 14" stroke="#FF8C42" stroke-width="2.4" fill="none"/>
           </svg>
-          <span class="wordmark-text">Prelude <span>for Band</span></span>
+          <span class="wordmark-text">Preludio <span>Band</span></span>
         </div>
         <div class="select-headline">${headline}</div>
         <div class="select-sub">${sub}</div>
