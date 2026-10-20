@@ -2524,11 +2524,12 @@ function renderSongPresentPhase(inst, lesson) {
 
   const melodyNotes = [];
   let highlightIndex = -1;
+  const songDurations = getNoteDurations(lesson);
   lesson.noteIds.forEach((id, i) => {
     const n = findLessonById(APP.instrumentId, id);
     if (!n || typeof n.staffStep !== 'number') return;
     if (i === APP.songNoteIndex) highlightIndex = melodyNotes.length;
-    melodyNotes.push({ pos: n.staffStep, accidental: n.accidental });
+    melodyNotes.push({ pos: n.staffStep, accidental: n.accidental, duration: songDurations[i] });
   });
   const melodySvg = melodyNotes.length
     ? Graphics.melodySVG({ notes: melodyNotes, highlightIndex, clef: inst.clef, accentColor: instAccent(inst), width: 320 })

@@ -121,6 +121,63 @@ check(Graphics.instrumentIconSVG('flute', 56).includes('<ellipse'),
   check(Graphics.melodySVG({ notes: [], highlightIndex: 0 }) === '', 'an empty melody renders nothing');
 }
 
+// ── Melody staff engraves note values (quarter / half / whole) ─────────────
+{
+  const heads = svg => (svg.match(/<ellipse/g) || []).length;
+  const headAt = (svg, i) => (svg.match(/<ellipse[^>]*>/g) || [])[i];
+  const stems = svg => (svg.match(/<line x1="[^"]*" y1="[^"]*" x2="[^"]*" y2="[^"]*" stroke="var\(--dg-ink\)" stroke-width="1.6"\/>/g) || []).length;
+  const notes = [
+    { pos: 0, accidental: null, duration: 1 },
+    { pos: 2, accidental: null, duration: 2 },
+    { pos: 4, accidental: null, duration: 4 },
+  ];
+  const svg = Graphics.melodySVG({ notes, accentColor: '#e0a020' });
+  check(heads(svg) === 3, 'three-notes of mixed values draw three heads');
+  check((headAt(svg, 0) || '').includes('fill="var(--dg-ink)"'), 'a quarter note is a filled notehead');
+  check(!(headAt(svg, 1) || '').includes('fill="var(--dg-ink)"') && (headAt(svg, 1) || '').includes('fill="none"'), 'a half note is a hollow notehead');
+  check(!(headAt(svg, 2) || '').includes('fill="var(--dg-ink)"') && (headAt(svg, 2) || '').includes('fill="none"'), 'a whole note is a hollow notehead');
+  // quarter + half are stemmed, whole is not.
+  check(stems(svg) === 2, `quarter and half notes carry stems, whole does not (got ${stems(svg)})`);
+  check(Graphics.melodySVG({ notes: [{ pos: 0 }] }).includes('fill="var(--dg-ink)"'), 'a note without a duration defaults to a filled quarter note');
+}
+
+// ── Melody staff shows 4/4 and places bar lines on the beats ───────────────
+{
+  // Vertical bar lines span the full staff (y1 !== y2, x1 === x2); staff lines
+  // are horizontal. Count the vertical ones (interior + the closing line).
+  const barLines = svg => {
+    const lines = svg.match(/<line x1="([\d.]+)" y1="([\d.]+)" x2="([\d.]+)" y2="([\d.]+)" stroke="var\(--dg-ink\)" stroke-width="1.3"\/>/g) || [];
+    return lines.filter(l => {
+      const m = l.match(/x1="([\d.]+)" y1="([\d.]+)" x2="([\d.]+)" y2="([\d.]+)"/);
+      return m[1] === m[3] && m[2] !== m[4];
+    }).length;
+  };
+  const q = n => Array.from({ length: n }, () => ({ pos: 2, accidental: null, duration: 1 }));
+  const sig = Graphics.melodySVG({ notes: q(8), accentColor: '#e0a020' });
+  check(sig.includes('>4</text>'), 'the 4/4 time signature is drawn');
+  const sigTexts = (sig.match(/>4<\/text>/g) || []).length;
+  check(sigTexts === 2, `the time signature shows two 4s (got ${sigTexts})`);
+  // 8 quarters = 2 bars of 4/4: one interior bar line + one closing line.
+  check(barLines(sig) === 2, `8 quarter notes in 4/4 draw 2 bar lines (got ${barLines(sig)})`);
+  // 4 quarters = a single bar: no interior bar line, just the closing line.
+  check(barLines(Graphics.melodySVG({ notes: q(4), accentColor: '#e0a020' })) === 1,
+    'a one-bar tune draws only the closing bar line');
+  // 3 quarters is a pickup (anacrusis): the pickup fills no apparent bar, so
+  // it draws just the closing line, with no interior bar line cutting it.
+  check(barLines(Graphics.melodySVG({ notes: q(3), accentColor: '#e0a020' })) === 1,
+    'an incomplete pickup bar draws only the closing bar line');
+  // 5 beats (a 1-beat pickup + a full bar): exactly one interior bar line.
+  check(barLines(Graphics.melodySVG({ notes: q(5), accentColor: '#e0a020' })) === 2,
+    'a 1-beat pickup plus a full bar draws one interior bar line');
+  // A half note must never be split by a bar line: [1,1,1,2] is a 1-beat
+  // pickup (bar 1) then a full bar whose last two beats hold the half note,
+  // so the bar line lands on the note's end, not through it: one interior
+  // bar line (after the pickup) plus the closing line.
+  const half = [{ pos: 2, duration: 1 }, { pos: 2, duration: 1 }, { pos: 2, duration: 1 }, { pos: 2, duration: 2 }];
+  check(barLines(Graphics.melodySVG({ notes: half, accentColor: '#e0a020' })) === 2,
+    'a half note is never split by a bar line');
+}
+
 if (failures.length) console.log(failures.join('\n'));
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
