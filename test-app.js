@@ -88,6 +88,7 @@ return { handleAction, renderCompletePhase, CURRICULUM, APP, IMPORTED_SONGS_KEY,
   showFingeringHelp, hideFingeringHelp, FINGERING_HELP,
   renderFirstSoundScreen, renderLookupScreen, getFirstSoundSeen, markFirstSoundSeen,
   FIRST_SOUND_CONTENT, renderSongPresentPhase,
+  clampSpeed, msPerBeatAt, renderSongSpeedControl, songSpeedLabelText,
   getTutorialSeen, markTutorialSeen, buildTutorialSlides, renderTutorialScreen, renderMapScreen };
 `);
 const api = sandbox(document, localStorage, {}, navigator, FakeMediaRecorder, URL, Blob, Audio);
@@ -1309,6 +1310,47 @@ const fluteNotes = flute.lessons.filter(l => !l.type);
   check(api.APP.toolsOpen === false, 'closing collapses the widget');
 
   if (savedInst === undefined) delete store['preludioBandInstrument']; else store['preludioBandInstrument'] = savedInst;
+}
+
+// ── Practice speed ─────────────────────────────────────────────────────────
+// One multiplier (50%–150%, 10% steps) drives every count-in and song, so the
+// count-in always runs at the tempo the song will play.
+{
+  check(api.clampSpeed(1) === 1, 'speed 100% is unchanged');
+  check(api.clampSpeed(0.1) === 0.5, 'speed is clamped up to the 50% floor');
+  check(api.clampSpeed(9) === 1.5, 'speed is clamped down to the 150% ceiling');
+  check(api.clampSpeed(0.74) === 0.7, 'speed snaps to the nearest 10% step');
+  check(api.clampSpeed('nonsense') === 1, 'an unparseable speed falls back to 100%');
+
+  check(Math.round(api.msPerBeatAt(100, 1)) === 600, '100 BPM at 100% is 600 ms/beat');
+  check(Math.round(api.msPerBeatAt(100, 0.5)) === 1200, '100 BPM at 50% is 1200 ms/beat');
+  check(Math.round(api.msPerBeatAt(80, 1.5)) === 500, '80 BPM at 150% is 500 ms/beat');
+
+  check(api.songSpeedLabelText(1) === '100% (100 BPM)', 'the speed label shows percent and BPM');
+  const ctl = api.renderSongSpeedControl();
+  check(ctl.includes('data-action="song-speed-up"'), 'the speed control has a faster button');
+  check(ctl.includes('data-action="song-speed-down"'), 'the speed control has a slower button');
+  check(ctl.includes('song-speed-label'), 'the speed control shows a label');
+
+  const prevSpeed = api.APP.songSpeed;
+  api.APP.songSpeed = 1;
+  api.APP.instrumentId = 'flute';
+  api.APP.songNoteIndex = 0;
+  const song = flute.lessons.find(l => l.type === 'song');
+  const html = api.renderSongPresentPhase(flute, song);
+  check(html.includes('song-playback-controls'), 'the song phase groups playback controls');
+  check(html.includes('data-action="song-speed-up"'), 'the song phase offers the speed control');
+  api.APP.songSpeed = prevSpeed;
+
+  api.APP.songSpeed = 1;
+  api.handleAction('song-speed-up', { dataset: {} });
+  check(Math.abs(api.APP.songSpeed - 1.1) < 1e-9, 'the faster action raises the speed by one step');
+  for (let i = 0; i < 20; i++) api.handleAction('song-speed-up', { dataset: {} });
+  check(api.APP.songSpeed === 1.5, 'the faster action stops at the 150% ceiling');
+  for (let i = 0; i < 20; i++) api.handleAction('song-speed-down', { dataset: {} });
+  check(api.APP.songSpeed === 0.5, 'the slower action stops at the 50% floor');
+  api.APP.songSpeed = 1;
+  delete store['preludioBandSongSpeed'];
 }
 
   if (failures.length) console.log(failures.join('\n'));

@@ -667,6 +667,54 @@ button:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2
   height: auto;
 }
 
+/* Practice-speed control: one tempo that drives both the count-in and the
+   song. Sits beside the play button in the song present phase. */
+.song-playback-controls {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.song-playback-controls .btn {
+  flex: 1;
+  min-width: 100px;
+}
+
+.song-speed-control {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.btn-speed {
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.btn-speed:disabled { opacity: 0.35; cursor: default; }
+.btn-speed:hover:not(:disabled) { border-color: var(--accent-warm); background: var(--bg-elevated); }
+
+.song-speed-label {
+  min-width: 84px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
 .note-name-block {
   margin-bottom: 4px;
 }

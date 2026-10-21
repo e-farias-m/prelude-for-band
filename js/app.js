@@ -28,6 +28,9 @@ const APP = {
   reviewTotal: 0,
   // Song session state
   songNoteIndex: 0,
+  // Overwritten with the persisted value once the speed helpers below are
+  // defined; this literal is evaluated before them.
+  songSpeed: 1,
   importedSong: null,
   // Imported song list
   importedSongs: null,
@@ -76,6 +79,35 @@ const THEME_KEY = 'preludioBandTheme';
 const INSTRUMENT_KEY = 'preludioBandInstrument';
 const TUTORIAL_KEY = 'preludioBandTutorials';
 const FIRST_SOUND_KEY = 'preludioBandFirstSound';
+
+// Practice speed: a single multiplier applied to every count-in and song, so
+// the count-in always runs at the same tempo the song will. 100% = the song's
+// own written tempo. Range 50%–150%, 10% steps, persisted across sessions.
+const SONG_SPEED_KEY = 'preludioBandSongSpeed';
+const SPEED_MIN = 0.5;
+const SPEED_MAX = 1.5;
+const SPEED_STEP = 0.1;
+function clampSpeed(v) {
+  const n = Math.round((Number(v) || 1) / SPEED_STEP) * SPEED_STEP;
+  return Math.max(SPEED_MIN, Math.min(SPEED_MAX, Number(n.toFixed(2))));
+}
+function getSavedSpeed() {
+  try { return clampSpeed(localStorage.getItem(SONG_SPEED_KEY)); }
+  catch (e) { return 1; }
+}
+function setSavedSpeed(v) {
+  // localStorage may be unavailable (private mode); the in-memory APP value
+  // still drives playback, so a failure here is harmless.
+  try { localStorage.setItem(SONG_SPEED_KEY, String(v)); } catch (e) {}
+}
+// Milliseconds per beat at the current practice speed, given the song's own
+// written tempo (baseBpm). The single source of truth for count-in and song.
+function msPerBeatAt(baseBpm, speed) {
+  const bpm = (Number(baseBpm) || 100) * (speed || 1);
+  return 60000 / bpm;
+}
+// APP is defined above these helpers, so the persisted speed is loaded here.
+APP.songSpeed = getSavedSpeed();
 
 function getStudentName() { return localStorage.getItem(NAME_KEY) || ''; }
 function setStudentName(name) { localStorage.setItem(NAME_KEY, name); }
@@ -2510,6 +2542,28 @@ function renderPresentPhase(inst, lesson) {
     </div>`;
 }
 
+// The practice-speed readout shared by the +/- buttons. Shows the percentage
+// and the resulting song tempo so the student can see both.
+function songSpeedLabelText(speed) {
+  return Math.round(speed * 100) + '% (' + Math.round(100 * speed) + ' BPM)';
+}
+function renderSongSpeedControl(disabled) {
+  return `
+    <div class="song-speed-control">
+      <button class="btn-speed" data-action="song-speed-down" aria-label="Slower" ${disabled || APP.songSpeed <= SPEED_MIN ? 'disabled' : ''}>−</button>
+      <span class="song-speed-label">${songSpeedLabelText(APP.songSpeed)}</span>
+      <button class="btn-speed" data-action="song-speed-up" aria-label="Faster" ${disabled || APP.songSpeed >= SPEED_MAX ? 'disabled' : ''}>+</button>
+    </div>`;
+}
+// Update only the label text in place (used while playback is running, so we
+// don't tear down the live audio with a full re-render).
+function updateSongSpeedLabels() {
+  const text = songSpeedLabelText(APP.songSpeed);
+  document.querySelectorAll('.song-speed-label').forEach(lbl => { lbl.textContent = text; });
+  document.querySelectorAll('[data-action="song-speed-down"]').forEach(b => { b.disabled = APP.songSpeed <= SPEED_MIN; });
+  document.querySelectorAll('[data-action="song-speed-up"]').forEach(b => { b.disabled = APP.songSpeed >= SPEED_MAX; });
+}
+
 function renderSongPresentPhase(inst, lesson) {
   const totalNotes = lesson.noteIds.length;
   APP.songNoteIndex = Math.min(Math.max(APP.songNoteIndex, 0), totalNotes - 1);
@@ -2550,7 +2604,10 @@ function renderSongPresentPhase(inst, lesson) {
         <button class="btn-hear" data-action="hear-note"><span class="hear-icon">🔊</span> Play note</button>
         <button class="btn btn-secondary" data-action="song-next" ${isLast ? 'disabled' : ''}>Next ›</button>
       </div>
-      <button class="btn btn-secondary" data-action="play-melody" style="margin-top:8px;width:100%">▶ Play whole melody</button>`;
+      <div class="song-playback-controls">
+        <button class="btn btn-secondary" data-action="play-melody">▶ Play whole melody</button>
+        ${renderSongSpeedControl()}
+      </div>`;
   }
 
   return `
@@ -2679,6 +2736,13 @@ function startSongAudioPlayback(inst, lesson) {
   function startNotes() {
     statusEl.textContent = 'Playing\u2026';
     playBtn.textContent = 'Playing\u2026';
+
+    // Match the recording to the count-in tempo. Pitch is preserved so the
+    // tune slows down rather than dropping in key.
+    audio.playbackRate = APP.songSpeed;
+    if ('preservesPitch' in audio) audio.preservesPitch = true;
+    if ('mozPreservesPitch' in audio) audio.mozPreservesPitch = true;
+    if ('webkitPreservesPitch' in audio) audio.webkitPreservesPitch = true;
 
     audio.play().catch(() => {
       statusEl.textContent = 'Audio failed to load.';
@@ -3106,7 +3170,7 @@ function runPlaySequence(inst, lesson) {
   if (!btn || btn.disabled) return;
   btn.disabled = true;
   btn.textContent = '...';
-  const beatMs = 750; // 80 BPM count-in
+  const beatMs = msPerBeatAt(80, APP.songSpeed); // 80 BPM base, scaled by practice speed
   const cells = document.querySelectorAll('.beat-cell');
 
   function clearActive() { cells.forEach(c => c.classList.remove('active')); }
@@ -3148,7 +3212,7 @@ function runPlaySequence(inst, lesson) {
 function runSongSequence(inst, lesson) {
   const noteIds = lesson.noteIds;
   const durations = getNoteDurations(lesson);
-  const msPerBeat = 480;
+  const msPerBeat = msPerBeatAt(lesson.bpm || 100, APP.songSpeed);
   let beat = 0;
   noteIds.forEach((id, i) => {
     const note = findLessonById(APP.instrumentId, id);
@@ -4011,6 +4075,15 @@ function handleAction(action, el) {
       if (!m) break;
       m.countIn = !m.countIn;
       renderToolWidget();
+      break;
+    }
+
+    case 'song-speed-down':
+    case 'song-speed-up': {
+      const delta = action === 'song-speed-up' ? SPEED_STEP : -SPEED_STEP;
+      APP.songSpeed = clampSpeed(APP.songSpeed + delta);
+      setSavedSpeed(APP.songSpeed);
+      render();
       break;
     }
 
